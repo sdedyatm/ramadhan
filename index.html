@@ -2,21 +2,59 @@
 <html lang="id">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="Aplikasi Device HMSI">
-  <meta name="theme-color" content="#050505">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <!-- ===================== PWA META TAGS ===================== -->
+  <meta name="application-name" content="Device HMSI" />
+  <meta name="description" content="Aplikasi resmi CV Amelia Trans Mandiri - Device HMSI. Akses Alquran, Tausyiah, dan Sholawat." />
+  <meta name="theme-color" content="#24c9c9" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- Apple PWA Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Device HMSI" />
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167x167.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192x192.png" />
+
+  <!-- Microsoft Tile -->
+  <meta name="msapplication-TileColor" content="#050505" />
+  <meta name="msapplication-TileImage" content="icons/icon-192x192.png" />
+
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Device HMSI - Official App" />
+  <meta property="og:description" content="Aplikasi resmi CV Amelia Trans Mandiri" />
+  <meta property="og:image" content="icons/icon-512x512.png" />
+
+  <!-- Manifest - WAJIB untuk PWA -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-192x192.png" />
+  <link rel="shortcut icon" href="icons/icon-192x192.png" />
+
   <title>Device HMSI - Official App</title>
 
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
 
   <style>
     :root {
       --primary-glow: #24c9c9;
       --bg-dark: #050505;
       --accent-gold: #fbbf24;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
     }
 
     body,
@@ -30,13 +68,13 @@
       overflow: hidden;
     }
 
-    /* --- NAVIGATION --- */
+    /* ============ NAVBAR ============ */
     .navbar-container {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      padding: 20px 10px;
+      padding: 16px 12px;
       z-index: 100;
       pointer-events: none;
       background: linear-gradient(to bottom, rgba(5, 5, 5, 1) 0%, rgba(5, 5, 5, 0) 100%);
@@ -46,6 +84,7 @@
       pointer-events: auto;
     }
 
+    /* ============ 3D BUTTONS ============ */
     .open-page-btn {
       perspective: 500px;
       cursor: pointer;
@@ -79,6 +118,7 @@
       font-size: 10px;
       font-weight: bold;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .btn-front {
@@ -93,27 +133,42 @@
       transform: rotateX(-90deg) translateZ(19px);
     }
 
-    /* Khusus Tombol Instal */
+    /* Install Button Style */
     .btn-install-front {
-      border-color: var(--accent-gold);
-      color: var(--accent-gold);
+      border-color: var(--accent-gold) !important;
+      color: var(--accent-gold) !important;
     }
 
     .btn-install-bottom {
-      background: var(--accent-gold);
-      color: #000;
+      background: var(--accent-gold) !important;
+      color: #000 !important;
       transform: rotateX(-90deg) translateZ(19px);
     }
 
-    /* --- VIEWPORT --- */
-    .app-view {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      z-index: 1;
+    /* ============ INSTALL CONTAINER ============ */
+    #install-container {
+      display: none;
+      /* Hidden until beforeinstallprompt fires */
+      animation: fadeInDown 0.5s ease-out;
     }
 
-    /* Landing Screen with Scroll */
+    #install-container.visible {
+      display: block;
+    }
+
+    /* ============ LOADER BAR ============ */
+    .loader-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-glow), #a78bfa);
+      width: 0;
+      z-index: 200;
+      transition: width 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* ============ LANDING SCREEN ============ */
     #landing-screen {
       position: absolute;
       inset: 0;
@@ -124,8 +179,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: opacity 0.5s ease, visibility 0.5s;
-      padding-bottom: 60px;
+      padding-bottom: 80px;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
     }
 
     #landing-screen::-webkit-scrollbar {
@@ -134,10 +189,16 @@
 
     #landing-screen::-webkit-scrollbar-thumb {
       background: var(--primary-glow);
+      border-radius: 2px;
+    }
+
+    #landing-screen.hidden-screen {
+      opacity: 0;
+      visibility: hidden;
     }
 
     .welcome-img {
-      margin-top: 130px;
+      margin-top: 120px;
       width: 90vw;
       max-width: 420px;
       height: auto;
@@ -152,10 +213,10 @@
       padding: 0 25px;
       max-width: 480px;
       text-align: center;
-      animation: fadeInUp 0.8s ease-out;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
     }
 
-    /* Iframe Display */
+    /* ============ IFRAME ============ */
     #main-frame {
       position: absolute;
       inset: 0;
@@ -166,18 +227,44 @@
       transition: opacity 0.6s ease;
     }
 
-    /* --- UI UTILS --- */
-    .loader-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 3px;
-      background: var(--primary-glow);
-      width: 0;
-      z-index: 200;
-      transition: width 0.3s ease;
+    #main-frame.visible {
+      opacity: 1;
     }
 
+    /* ============ TOAST NOTIFICATION ============ */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(36, 201, 201, 0.15);
+      border: 1px solid var(--primary-glow);
+      color: var(--primary-glow);
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 12px;
+      z-index: 300;
+      backdrop-filter: blur(10px);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ============ PWA STATUS BADGE ============ */
+    #pwa-status {
+      position: fixed;
+      bottom: 8px;
+      right: 10px;
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.2);
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    /* ============ ANIMATIONS ============ */
     @keyframes fadeInDown {
       from {
         opacity: 0;
@@ -206,123 +293,306 @@
 
 <body>
 
+  <!-- Loader Bar -->
   <div class="loader-bar" id="loader-bar"></div>
 
+  <!-- ===================== NAVBAR ===================== -->
   <header class="navbar-container">
-    <nav class="flex flex-wrap justify-center gap-4">
-      <div class="open-page-btn" data-url="https://script.google.com/macros/s/AKfycbyPGjbGPzM_T6RxrG4FvKogMA1btoKMtgFXo_kpVDomY39D0InB3n7htYx_Nx7p5QXW/exec">
+    <nav class="flex flex-wrap justify-center gap-3" role="navigation" aria-label="Menu utama">
+
+      <!-- Alquran -->
+      <div class="open-page-btn" data-url="https://script.google.com/macros/s/AKfycbyPGjbGPzM_T6RxrG4FvKogMA1btoKMtgFXo_kpVDomY39D0InB3n7htYx_Nx7p5QXW/exec" role="button" aria-label="Buka Alquran" tabindex="0">
         <div class="btn-inner">
           <div class="btn-front">Alquran</div>
           <div class="btn-bottom">BUKA</div>
         </div>
       </div>
-      <div class="open-page-btn" data-url="https://script.google.com/macros/s/AKfycbwund0gPq9RHMugPQcVPcRG-xUaBZ6-m95-CQCfF_qKjF4f_nzcGFcfw_Omji_CBLhw/exec">
+
+      <!-- Tausyiah -->
+      <div class="open-page-btn" data-url="https://script.google.com/macros/s/AKfycbwund0gPq9RHMugPQcVPcRG-xUaBZ6-m95-CQCfF_qKjF4f_nzcGFcfw_Omji_CBLhw/exec" role="button" aria-label="Buka Tausyiah" tabindex="0">
         <div class="btn-inner">
           <div class="btn-front">Tausyiah</div>
           <div class="btn-bottom">BUKA</div>
         </div>
       </div>
-      <div class="open-page-btn" data-url="https://script.google.com/macros/s/AKfycbwTmLdlKnUOINitKwTUUWwTzMOai4-Uk2ZqvZMV86_O98DgNXT8tFih4HFoKXCoJJDrow/exec">
+
+      <!-- Sholawat -->
+      <div class="open-page-btn" data-url="https://script.google.com/macros/s/AKfycbwTmLdlKnUOINitKwTUUWwTzMOai4-Uk2ZqvZMV86_O98DgNXT8tFih4HFoKXCoJJDrow/exec" role="button" aria-label="Buka Sholawat" tabindex="0">
         <div class="btn-inner">
           <div class="btn-front">Sholawat</div>
           <div class="btn-bottom">BUKA</div>
         </div>
       </div>
+
+      <!-- INSTALL BUTTON — Tersembunyi, muncul otomatis saat PWA installable -->
+      <div id="install-container">
+        <div class="open-page-btn" id="install-button" role="button" aria-label="Install aplikasi" tabindex="0">
+          <div class="btn-inner">
+            <div class="btn-front btn-install-front">Install</div>
+            <div class="btn-bottom btn-install-bottom">⬇ APP</div>
+          </div>
+        </div>
+      </div>
+
     </nav>
   </header>
 
-  <main class="app-view">
-    <section id="landing-screen">
-      <img src="https://i.pinimg.com/736x/04/8a/ee/048aee7f51293031376ea318a00ddd3f.jpg" alt="Welcome" class="welcome-img">
-      <center>
-        <div class="welcome-text">
-          <h1 class="text-cyan-400 text-2xl font-bold tracking-[0.2em] mb-4 uppercase">Ramadhan 1447 H</h1>
-          <div class="space-y-4 text-gray-400 text-sm leading-relaxed">
-            <p>CV AMELIA TRANS MANDIRI ( Device HMSI )<br>mengucapkan Selamat Menunaikan <br>Ibadah Puasa Ramadhan 1447 H.</p>
-            <p>Mohon maaf lahir dan batin kalau ada salah kata atau manuver yang kurang berkenan. Tetap fokus di jalur iman, jaga jarak aman dari maksiat.!!".</p>
-      </center>
-      </div>
+  <!-- ===================== MAIN APP ===================== -->
+  <main class="app-view" style="position:relative;width:100%;height:100vh;z-index:1;">
+
+    <!-- Landing Screen -->
+    <section id="landing-screen" aria-label="Halaman sambutan">
+      <img src="https://i.pinimg.com/736x/04/8a/ee/048aee7f51293031376ea318a00ddd3f.jpg" alt="Selamat datang di Device HMSI" class="welcome-img" loading="eager" />
+      <div class="welcome-text">
+        <h1 class="text-cyan-400 text-2xl font-bold tracking-[0.2em] mb-4 uppercase">
+          Ramadhan 1447 H
+        </h1>
+        <div class="space-y-4 text-gray-400 text-sm leading-relaxed">
+          <p>
+            CV AMELIA TRANS MANDIRI ( Device HMSI )<br />
+            mengucapkan Selamat Menunaikan<br />
+            Ibadah Puasa Ramadhan 1447 H.
+          </p>
+          <p>
+            Mohon maaf lahir dan batin kalau ada salah kata atau manuver
+            yang kurang berkenan. Tetap fokus di jalur iman, jaga jarak
+            aman dari maksiat!!
+          </p>
+          <p class="text-cyan-800 text-xs mt-6">
+            Pilih menu di atas untuk memulai ☝️
+          </p>
+        </div>
       </div>
     </section>
 
-    <iframe id="main-frame" src="about:blank"></iframe>
+    <!-- Main Content iframe -->
+    <iframe id="main-frame" src="about:blank" title="Konten Utama" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy">
+    </iframe>
+
   </main>
 
+  <!-- Toast Notification -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <!-- PWA Status Badge (debug) -->
+  <div id="pwa-status">SW: checking...</div>
+
+  <!-- ===================== SCRIPTS ===================== -->
   <script>
     "use strict";
     const App = {
       deferredPrompt: null,
-      init() {
-        this.iframe = document.getElementById('main-frame');
-        this.landing = document.getElementById('landing-screen');
-        this.loader = document.getElementById('loader-bar');
-        this.buttons = document.querySelectorAll('.open-page-btn[data-url]');
-        this.installContainer = document.getElementById('install-container');
-        this.installBtn = document.getElementById('install-button');
-        this.bindEvents();
-        this.handlePWA();
+      currentUrl: null,
+      // ── DOM References ──────────────────────────────
+      get iframe() {
+        return document.getElementById('main-frame');
       },
-      bindEvents() {
-        // Navigasi Menu
-        this.buttons.forEach(btn => {
+      get landing() {
+        return document.getElementById('landing-screen');
+      },
+      get loader() {
+        return document.getElementById('loader-bar');
+      },
+      get installContainer() {
+        return document.getElementById('install-container');
+      },
+      get installBtn() {
+        return document.getElementById('install-button');
+      },
+      get toast() {
+        return document.getElementById('toast');
+      },
+      get pwaStatus() {
+        return document.getElementById('pwa-status');
+      },
+      // ── Inisialisasi ─────────────────────────────────
+      init() {
+        console.log('[HMSI PWA] 🚀 App initializing...');
+        this.bindNavButtons();
+        this.bindInstallButton();
+        this.bindKeyboard();
+        this.registerServiceWorker();
+        this.listenInstallPrompt();
+        this.detectStandaloneMode();
+        console.log('[HMSI PWA] ✅ App ready.');
+      },
+      // ── Navigation Buttons ────────────────────────────
+      bindNavButtons() {
+        const buttons = document.querySelectorAll('.open-page-btn[data-url]');
+        buttons.forEach(btn => {
           btn.addEventListener('click', () => {
             const url = btn.getAttribute('data-url');
-            this.buttons.forEach(b => b.classList.remove('active'));
+            // Toggle active state
+            buttons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             this.switchContent(url);
           });
         });
-        // Klik Instal
+        console.log(`[HMSI PWA] 🔗 Bound ${buttons.length} nav buttons.`);
+      },
+      // ── Keyboard Accessibility ────────────────────────
+      bindKeyboard() {
+        document.querySelectorAll('.open-page-btn').forEach(btn => {
+          btn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              btn.click();
+            }
+          });
+        });
+      },
+      // ── Content Switcher ──────────────────────────────
+      switchContent(url) {
+        if (!url) return;
+        if (this.currentUrl === url) {
+          console.log('[HMSI PWA] ℹ️ Same URL, skipping reload.');
+          return;
+        }
+        console.log('[HMSI PWA] 🔄 Loading:', url);
+        this.currentUrl = url;
+        // Show loader
+        this.loader.style.width = '40%';
+        this.loader.style.opacity = '1';
+        // Reset iframe
+        this.iframe.style.opacity = '0';
+        this.iframe.src = url;
+        this.iframe.onload = () => {
+          console.log('[HMSI PWA] ✅ Content loaded.');
+          this.loader.style.width = '100%';
+          // Hide landing, show iframe
+          this.landing.classList.add('hidden-screen');
+          setTimeout(() => {
+            this.iframe.classList.add('visible');
+          }, 300);
+          // Fade out loader bar
+          setTimeout(() => {
+            this.loader.style.width = '0';
+            this.loader.style.opacity = '0';
+          }, 400);
+        };
+        this.iframe.onerror = () => {
+          console.error('[HMSI PWA] ❌ Failed to load content.');
+          this.showToast('Gagal memuat konten. Periksa koneksi internet.');
+          this.loader.style.width = '0';
+        };
+      },
+      // ── Install Button ────────────────────────────────
+      bindInstallButton() {
         this.installBtn.addEventListener('click', async () => {
-          if (this.deferredPrompt) {
+          console.log('[HMSI PWA] 📲 Install button clicked.');
+          if (!this.deferredPrompt) {
+            console.warn('[HMSI PWA] ⚠️ No deferred prompt available. Mungkin sudah terinstall?');
+            this.showToast('App mungkin sudah terinstall di perangkat ini.');
+            return;
+          }
+          try {
             this.deferredPrompt.prompt();
             const {
               outcome
             } = await this.deferredPrompt.userChoice;
+            console.log(`[HMSI PWA] 📊 User choice: ${outcome}`);
             if (outcome === 'accepted') {
-              this.installContainer.style.display = 'none';
+              console.log('[HMSI PWA] ✅ User accepted installation.');
+              this.showToast('Terima kasih! App sedang diinstall... 🎉');
+              this.hideInstallButton();
+            } else {
+              console.log('[HMSI PWA] ❌ User dismissed installation.');
+              this.showToast('Install dibatalkan.');
             }
+          } catch (err) {
+            console.error('[HMSI PWA] ❌ Install error:', err);
+          } finally {
             this.deferredPrompt = null;
           }
         });
       },
-      handlePWA() {
-        // Register SW
-        if ('serviceWorker' in navigator) {
-          window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js')
-              .catch(err => console.error("SW Register Failed", err));
-          });
-        }
-        // Listen for Install Prompt
+      // ── PWA Install Prompt Listener ───────────────────
+      listenInstallPrompt() {
+        // Event ini hanya muncul jika semua kriteria PWA terpenuhi
         window.addEventListener('beforeinstallprompt', (e) => {
-          e.preventDefault();
+          e.preventDefault(); // Cegah prompt otomatis browser
           this.deferredPrompt = e;
-          this.installContainer.style.display = 'block';
+          console.log('[HMSI PWA] 🟢 beforeinstallprompt fired! Install available.');
+          this.showInstallButton();
+          this.showToast('App bisa diinstall! Tap tombol Install 📲');
         });
-        // Hide after installed
+        // Setelah berhasil terinstall
         window.addEventListener('appinstalled', () => {
-          this.installContainer.style.display = 'none';
+          console.log('[HMSI PWA] 🎉 App successfully installed!');
           this.deferredPrompt = null;
+          this.hideInstallButton();
+          this.showToast('App berhasil diinstall! ✅');
         });
       },
-      async switchContent(url) {
-        if (!url || this.iframe.src === url) return;
-        this.loader.style.width = '30%';
-        this.iframe.src = url;
-        this.iframe.onload = () => {
-          this.loader.style.width = '100%';
-          this.landing.style.opacity = '0';
-          setTimeout(() => {
-            this.landing.style.visibility = 'hidden';
-            this.iframe.style.opacity = '1';
-          }, 500);
-          setTimeout(() => this.loader.style.width = '0', 300);
-        };
+      showInstallButton() {
+        this.installContainer.classList.add('visible');
+        console.log('[HMSI PWA] 👆 Install button shown.');
+      },
+      hideInstallButton() {
+        this.installContainer.classList.remove('visible');
+      },
+      // ── Service Worker Registration ───────────────────
+      registerServiceWorker() {
+        if (!('serviceWorker' in navigator)) {
+          console.warn('[HMSI PWA] ⚠️ Service Worker not supported.');
+          this.pwaStatus.textContent = 'SW: not supported';
+          return;
+        }
+        // Untuk GitHub Pages: gunakan scope sesuai repo path
+        // Jika di root domain, scope = '/'
+        // Jika di subfolder, misalnya: scope = '/nama-repo/'
+        const swPath = './sw.js'; // Gunakan relative path agar kompatibel dengan subfolder
+        const swScope = './';
+        window.addEventListener('load', async () => {
+          try {
+            const reg = await navigator.serviceWorker.register(swPath, {
+              scope: swScope
+            });
+            console.log('[HMSI PWA] ✅ SW registered. Scope:', reg.scope);
+            this.pwaStatus.textContent = `SW: active (${reg.scope})`;
+            // Cek update
+            reg.addEventListener('updatefound', () => {
+              console.log('[HMSI PWA] 🔄 SW update found, installing...');
+              const newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('[HMSI PWA] 🆕 New SW installed, reload for update.');
+                  this.showToast('Update tersedia! Refresh untuk memperbarui. 🔄');
+                }
+              });
+            });
+          } catch (err) {
+            console.error('[HMSI PWA] ❌ SW registration failed:', err);
+            this.pwaStatus.textContent = `SW: failed (${err.message})`;
+          }
+        });
+      },
+      // ── Standalone Mode Detection ─────────────────────
+      detectStandaloneMode() {
+        const isStandalone =
+          window.matchMedia('(display-mode: standalone)').matches ||
+          window.navigator.standalone === true ||
+          document.referrer.includes('android-app://');
+        if (isStandalone) {
+          console.log('[HMSI PWA] 📱 Running in STANDALONE mode (installed as PWA).');
+          this.pwaStatus.textContent = 'PWA: standalone ✅';
+          document.body.classList.add('pwa-standalone');
+        } else {
+          console.log('[HMSI PWA] 🌐 Running in browser mode.');
+        }
+      },
+      // ── Toast Notification ────────────────────────────
+      showToast(msg, duration = 3500) {
+        const t = this.toast;
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), duration);
       }
     };
+    // ── Bootstrap ──────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => App.init());
   </script>
+
 </body>
 
 </html>
