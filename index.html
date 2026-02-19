@@ -4,14 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="Aplikasi Device HMSI - Ramadhan 1447 H">
+  <meta name="description" content="Aplikasi Device HMSI">
   <meta name="theme-color" content="#050505">
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Device HMSI">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-
   <title>Device HMSI - Official App</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -29,14 +23,14 @@
     html {
       margin: 0;
       padding: 0;
-      background: var(--bg-dark);
+      background-color: var(--bg-dark);
       font-family: 'Open Sans', sans-serif;
       height: 100vh;
       width: 100vw;
       overflow: hidden;
     }
 
-    /* Layout */
+    /* --- NAVIGATION --- */
     .navbar-container {
       position: fixed;
       top: 0;
@@ -44,33 +38,27 @@
       right: 0;
       padding: 20px 10px;
       z-index: 100;
-      background: linear-gradient(to bottom, #050505 0%, transparent 100%);
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(5, 5, 5, 1) 0%, rgba(5, 5, 5, 0) 100%);
     }
 
-    .loader-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 3px;
-      background: var(--primary-glow);
-      width: 0;
-      z-index: 200;
-      transition: width 0.3s;
+    nav {
+      pointer-events: auto;
     }
 
-    /* Button 3D Effect */
     .open-page-btn {
       perspective: 500px;
       cursor: pointer;
-      width: 90px;
+      width: 85px;
       height: 38px;
+      position: relative;
     }
 
     .btn-inner {
       position: relative;
       width: 100%;
       height: 100%;
-      transition: transform 0.4s;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       transform-style: preserve-3d;
     }
 
@@ -87,13 +75,15 @@
       align-items: center;
       justify-content: center;
       border: 1px solid var(--primary-glow);
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 10px;
       font-weight: bold;
+      text-transform: uppercase;
     }
 
     .btn-front {
       background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
       color: var(--primary-glow);
     }
 
@@ -103,21 +93,69 @@
       transform: rotateX(-90deg) translateZ(19px);
     }
 
-    /* Install Banner */
-    #install-banner {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      right: 20px;
-      background: #111;
-      border: 1px solid var(--accent-gold);
-      padding: 15px;
-      border-radius: 15px;
-      display: none;
-      z-index: 999;
-      animation: fadeInUp 0.5s ease;
+    /* Khusus Tombol Instal */
+    .btn-install-front {
+      border-color: var(--accent-gold);
+      color: var(--accent-gold);
     }
 
+    .btn-install-bottom {
+      background: var(--accent-gold);
+      color: #000;
+      transform: rotateX(-90deg) translateZ(19px);
+    }
+
+    /* --- VIEWPORT --- */
+    .app-view {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      z-index: 1;
+    }
+
+    /* Landing Screen with Scroll */
+    #landing-screen {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-dark);
+      z-index: 10;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: opacity 0.5s ease, visibility 0.5s;
+      padding-bottom: 60px;
+    }
+
+    #landing-screen::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    #landing-screen::-webkit-scrollbar-thumb {
+      background: var(--primary-glow);
+    }
+
+    .welcome-img {
+      margin-top: 130px;
+      width: 90vw;
+      max-width: 420px;
+      height: auto;
+      border-radius: 24px;
+      border: 2px solid var(--primary-glow);
+      box-shadow: 0 15px 45px rgba(36, 201, 201, 0.2);
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .welcome-text {
+      margin-top: 35px;
+      padding: 0 25px;
+      max-width: 480px;
+      text-align: center;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    /* Iframe Display */
     #main-frame {
       position: absolute;
       inset: 0;
@@ -125,20 +163,31 @@
       height: 100%;
       border: none;
       opacity: 0;
-      transition: opacity 0.5s;
+      transition: opacity 0.6s ease;
     }
 
-    #landing-screen {
-      position: absolute;
-      inset: 0;
-      background: var(--bg-dark);
-      z-index: 10;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: opacity 0.5s;
-      padding-top: 100px;
+    /* --- UI UTILS --- */
+    .loader-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--primary-glow);
+      width: 0;
+      z-index: 200;
+      transition: width 0.3s ease;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes fadeInUp {
@@ -159,119 +208,120 @@
 
   <div class="loader-bar" id="loader-bar"></div>
 
-  <div id="install-banner" class="flex items-center justify-between shadow-2xl">
-    <div class="text-white text-sm">Install Aplikasi HMSI di Layar Utama?</div>
-    <button id="btn-install-action" class="bg-[#fbbf24] text-black px-4 py-1 rounded-full text-xs font-bold uppercase">Install</button>
-  </div>
-
   <header class="navbar-container">
-    <nav class="flex justify-center gap-3">
+    <nav class="flex flex-wrap justify-center gap-4">
       <div class="open-page-btn" data-url="https://script.google.com/macros/s/AKfycbyPGjbGPzM_T6RxrG4FvKogMA1btoKMtgFXo_kpVDomY39D0InB3n7htYx_Nx7p5QXW/exec">
         <div class="btn-inner">
-          <div class="btn-front">ALQURAN</div>
+          <div class="btn-front">Alquran</div>
           <div class="btn-bottom">BUKA</div>
         </div>
       </div>
       <div class="open-page-btn" data-url="https://script.google.com/macros/s/AKfycbwund0gPq9RHMugPQcVPcRG-xUaBZ6-m95-CQCfF_qKjF4f_nzcGFcfw_Omji_CBLhw/exec">
         <div class="btn-inner">
-          <div class="btn-front">TAUSYIAH</div>
+          <div class="btn-front">Tausyiah</div>
           <div class="btn-bottom">BUKA</div>
         </div>
       </div>
       <div class="open-page-btn" data-url="https://script.google.com/macros/s/AKfycbwTmLdlKnUOINitKwTUUWwTzMOai4-Uk2ZqvZMV86_O98DgNXT8tFih4HFoKXCoJJDrow/exec">
         <div class="btn-inner">
-          <div class="btn-front">SHOLAWAT</div>
+          <div class="btn-front">Sholawat</div>
           <div class="btn-bottom">BUKA</div>
         </div>
       </div>
     </nav>
   </header>
 
-  <main class="relative h-screen">
+  <main class="app-view">
     <section id="landing-screen">
-      <img src="https://i.pinimg.com/736x/04/8a/ee/048aee7f51293031376ea318a00ddd3f.jpg" alt="Welcome" class="w-80 rounded-3xl border-2 border-[#24c9c9] mb-8 shadow-lg shadow-cyan-900/20">
-      <div class="text-center px-6 max-w-md">
-        <h1 class="text-cyan-400 text-2xl font-bold tracking-widest mb-4">RAMADHAN 1447 H</h1>
-        <p class="text-gray-400 text-sm leading-relaxed mb-4">CV AMELIA TRANS MANDIRI (Device HMSI)</p>
-        <p class="text-gray-500 text-xs italic">"Tetap fokus di jalur iman, jaga jarak aman dari maksiat."</p>
+      <img src="https://i.pinimg.com/736x/04/8a/ee/048aee7f51293031376ea318a00ddd3f.jpg" alt="Welcome" class="welcome-img">
+      <center>
+        <div class="welcome-text">
+          <h1 class="text-cyan-400 text-2xl font-bold tracking-[0.2em] mb-4 uppercase">Ramadhan 1447 H</h1>
+          <div class="space-y-4 text-gray-400 text-sm leading-relaxed">
+            <p>CV AMELIA TRANS MANDIRI ( Device HMSI )<br>mengucapkan Selamat Menunaikan <br>Ibadah Puasa Ramadhan 1447 H.</p>
+            <p>Mohon maaf lahir dan batin kalau ada salah kata atau manuver yang kurang berkenan. Tetap fokus di jalur iman, jaga jarak aman dari maksiat.!!".</p>
+      </center>
+      </div>
       </div>
     </section>
+
     <iframe id="main-frame" src="about:blank"></iframe>
   </main>
 
   <script>
+    "use strict";
     const App = {
       deferredPrompt: null,
       init() {
-        this.dom();
-        this.bindEvents();
-        this.registerSW();
-        this.listenInstall();
-      },
-      dom() {
         this.iframe = document.getElementById('main-frame');
         this.landing = document.getElementById('landing-screen');
         this.loader = document.getElementById('loader-bar');
-        this.btns = document.querySelectorAll('.open-page-btn');
-        this.banner = document.getElementById('install-banner');
-        this.installBtn = document.getElementById('btn-install-action');
+        this.buttons = document.querySelectorAll('.open-page-btn[data-url]');
+        this.installContainer = document.getElementById('install-container');
+        this.installBtn = document.getElementById('install-button');
+        this.bindEvents();
+        this.handlePWA();
       },
       bindEvents() {
-        this.btns.forEach(btn => {
+        // Navigasi Menu
+        this.buttons.forEach(btn => {
           btn.addEventListener('click', () => {
-            this.btns.forEach(b => b.classList.remove('active'));
+            const url = btn.getAttribute('data-url');
+            this.buttons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            this.loadPage(btn.dataset.url);
+            this.switchContent(url);
           });
         });
+        // Klik Instal
         this.installBtn.addEventListener('click', async () => {
-          if (!this.deferredPrompt) return;
-          this.deferredPrompt.prompt();
-          const {
-            outcome
-          } = await this.deferredPrompt.userChoice;
-          console.log(`User response: ${outcome}`);
-          this.banner.style.display = 'none';
+          if (this.deferredPrompt) {
+            this.deferredPrompt.prompt();
+            const {
+              outcome
+            } = await this.deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+              this.installContainer.style.display = 'none';
+            }
+            this.deferredPrompt = null;
+          }
+        });
+      },
+      handlePWA() {
+        // Register SW
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+              .catch(err => console.error("SW Register Failed", err));
+          });
+        }
+        // Listen for Install Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          this.deferredPrompt = e;
+          this.installContainer.style.display = 'block';
+        });
+        // Hide after installed
+        window.addEventListener('appinstalled', () => {
+          this.installContainer.style.display = 'none';
           this.deferredPrompt = null;
         });
       },
-      async loadPage(url) {
-        if (!url) return;
-        this.loader.style.width = '40%';
+      async switchContent(url) {
+        if (!url || this.iframe.src === url) return;
+        this.loader.style.width = '30%';
         this.iframe.src = url;
         this.iframe.onload = () => {
           this.loader.style.width = '100%';
           this.landing.style.opacity = '0';
           setTimeout(() => {
-            this.landing.style.display = 'none';
+            this.landing.style.visibility = 'hidden';
             this.iframe.style.opacity = '1';
-            this.loader.style.width = '0';
           }, 500);
+          setTimeout(() => this.loader.style.width = '0', 300);
         };
-      },
-      async registerSW() {
-        if ('serviceWorker' in navigator) {
-          try {
-            const reg = await navigator.serviceWorker.register('./sw.js');
-            console.log('SW Registered with scope:', reg.scope);
-          } catch (e) {
-            console.error('SW Registration failed:', e);
-          }
-        }
-      },
-      listenInstall() {
-        window.addEventListener('beforeinstallprompt', (e) => {
-          e.preventDefault();
-          this.deferredPrompt = e;
-          this.banner.style.display = 'flex';
-        });
-        window.addEventListener('appinstalled', () => {
-          this.banner.style.display = 'none';
-          console.log('PWA Installed');
-        });
       }
     };
-    window.addEventListener('DOMContentLoaded', () => App.init());
+    document.addEventListener('DOMContentLoaded', () => App.init());
   </script>
 </body>
 
