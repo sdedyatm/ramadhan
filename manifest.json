@@ -8,14 +8,16 @@
   "theme_color": "#24c9c9",
   "icons": [
     {
-      "src": "https://lh3.googleusercontent.com/pw/AP1GczM8TLFTqHG6x9mvEGAsIKV4xe7QjA60n98Q2TeLX8Fp5W4oIW9JtCj_cgqB4NT_1xeVC4OOGn4J3sljhzdp1cJ0_9NiiSjNUNuCfk0cZMo3jsv-_WzdpOFLE_EjXWFhIOck36w-Gx7dYnH636E6vFcj-A=w192-h192-s-no-gm?authuser=0",
+     "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://lh3.googleusercontent.com/pw/AP1GczM8TLFTqHG6x9mvEGAsIKV4xe7QjA60n98Q2TeLX8Fp5W4oIW9JtCj_cgqB4NT_1xeVC4OOGn4J3sljhzdp1cJ0_9NiiSjNUNuCfk0cZMo3jsv-_WzdpOFLE_EjXWFhIOck36w-Gx7dYnH636E6vFcj-A=w512-h512-s-no-gm?authuser=0",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
