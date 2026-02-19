@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#24c9c9" />
+  <title>Offline - Device HMSI</title>
+  <style>
+    :root {
+      --primary: #24c9c9;
+      --bg: #050505;
+      --text: #e5e7eb;
+      --muted: #6b7280;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 80px;
+      margin-bottom: 24px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-12px);
+      }
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 320px;
+      margin-bottom: 8px;
+    }
+
+    .divider {
+      width: 60px;
+      height: 2px;
+      background: var(--primary);
+      border-radius: 99px;
+      margin: 24px auto;
+      opacity: 0.4;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 28px;
+      padding: 12px 28px;
+      background: transparent;
+      border: 1.5px solid var(--primary);
+      border-radius: 999px;
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      text-decoration: none;
+    }
+
+    .btn:hover,
+    .btn:focus {
+      background: var(--primary);
+      color: #000;
+      outline: none;
+    }
+
+    .status {
+      margin-top: 20px;
+      font-size: 11px;
+      color: #374151;
+    }
+
+    .status span {
+      color: var(--primary);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="icon">📡</div>
+
+  <h1>Kamu Sedang Offline</h1>
+
+  <p>Sepertinya koneksi internet kamu terputus.<br />Periksa Wi-Fi atau data selulermu.</p>
+
+  <div class="divider"></div>
+
+  <p>Beberapa konten mungkin masih bisa diakses dari cache. Coba kembali ke halaman utama.</p>
+
+  <a href="./index.html" class="btn" onclick="retry(event)">🔄 Coba Lagi</a>
+
+  <p class="status">Device HMSI &nbsp;|&nbsp; <span id="time"></span></p>
+
+  <script>
+    // Tampilkan waktu saat ini
+    function updateTime() {
+      const now = new Date();
+      document.getElementById('time').textContent = now.toLocaleTimeString('id-ID');
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+    // Coba reload jika sudah online
+    window.addEventListener('online', () => {
+      document.querySelector('h1').textContent = 'Koneksi Pulih!';
+      document.querySelector('p').textContent = 'Koneksi internet kamu sudah tersambung kembali.';
+      setTimeout(() => window.location.href = './index.html', 1500);
+    });
+
+    function retry(e) {
+      if (navigator.onLine) {
+        // Sudah online, biarkan navigasi normal
+        return;
+      }
+      e.preventDefault();
+      window.location.reload();
+    }
+  </script>
+
+</body>
+
+</html>
