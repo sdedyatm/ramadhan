@@ -3,7 +3,7 @@
  * Fitur: Auto-update cache, Offline Support, & Icon Caching
  */
 
-const CACHE_NAME = "hmsi-cache-v2";
+const CACHE_NAME = "hmsi-cache-v3";
 
 // Daftar aset lokal yang wajib ada untuk mode offline
 const PRE_CACHE_ASSETS = [
