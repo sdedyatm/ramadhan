@@ -1,23 +1,32 @@
 {
-  "name": "Atm Tausyiah",
-  "short_name": "Ramadhan",
-  "description": "Aplikasi Mp3 Tausyiah",
-  "start_url": "index.html",
+  "name": "Device HMSI Official",
+  "short_name": "Ngabuburit",
+  "description": "Aplikasi Ibadah Ramadhan",
+  "start_url": "./index.html",
+  "scope": ".",
   "display": "standalone",
   "background_color": "#050505",
-  "theme_color": "#24c9c9",
+  "theme_color": "#050505",
+  "orientation": "portrait",
+  "categories": ["productivity", "utilities"],
   "icons": [
     {
-     "src": "icon-192.png",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "icon-512.png",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
