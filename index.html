@@ -11,6 +11,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
   <style>
     :root {
@@ -251,77 +253,85 @@
   <script>
     "use strict";
     const App = {
-      deferredPrompt: null,
-      init() {
-        this.iframe = document.getElementById('main-frame');
-        this.landing = document.getElementById('landing-screen');
-        this.loader = document.getElementById('loader-bar');
-        this.buttons = document.querySelectorAll('.open-page-btn[data-url]');
-        this.installContainer = document.getElementById('install-container');
-        this.installBtn = document.getElementById('install-button');
-        this.bindEvents();
-        this.handlePWA();
-      },
-      bindEvents() {
-        // Navigasi Menu
-        this.buttons.forEach(btn => {
-          btn.addEventListener('click', () => {
-            const url = btn.getAttribute('data-url');
-            this.buttons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            this.switchContent(url);
+        deferredPrompt: null,
+        init() {
+          this.iframe = document.getElementById('main-frame');
+          this.landing = document.getElementById('landing-screen');
+          this.loader = document.getElementById('loader-bar');
+          this.buttons = document.querySelectorAll('.open-page-btn[data-url]');
+          this.installContainer = document.getElementById('install-container');
+          this.installBtn = document.getElementById('install-button');
+          this.bindEvents();
+          this.handlePWA();
+        },
+        bindEvents() {
+          // Navigasi Menu
+          this.buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+              const url = btn.getAttribute('data-url');
+              this.buttons.forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              this.switchContent(url);
+            });
           });
-        });
-        // Klik Instal
-        this.installBtn.addEventListener('click', async () => {
-          if (this.deferredPrompt) {
-            this.deferredPrompt.prompt();
-            const {
-              outcome
-            } = await this.deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-              this.installContainer.style.display = 'none';
-            }
-            this.deferredPrompt = null;
+          // ──────────────────────────────────────────────
+          //  INSTALL PWA
+          // ──────────────────────────────────────────────
+          let deferredPrompt = null;
+          window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-trigger').classList.add('show');
+          });
+          document.getElementById('install-trigger').addEventListener('click', () => {
+            document.getElementById('install-popup-overlay').classList.add('show');
+          });
+
+          function closeInstallPopup() {
+            document.getElementById('install-popup-overlay').classList.remove('show');
           }
-        });
-      },
-      handlePWA() {
-        // Register SW
-        if ('serviceWorker' in navigator) {
-          window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js')
-              .catch(err => console.error("SW Register Failed", err));
+          document.getElementById('install-popup-close').addEventListener('click', closeInstallPopup);
+          document.getElementById('install-popup-overlay').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('install-popup-overlay')) closeInstallPopup();
           });
-        }
-        // Listen for Install Prompt
-        window.addEventListener('beforeinstallprompt', (e) => {
-          e.preventDefault();
-          this.deferredPrompt = e;
-          this.installContainer.style.display = 'block';
-        });
-        // Hide after installed
-        window.addEventListener('appinstalled', () => {
-          this.installContainer.style.display = 'none';
-          this.deferredPrompt = null;
-        });
-      },
-      async switchContent(url) {
-        if (!url || this.iframe.src === url) return;
-        this.loader.style.width = '30%';
-        this.iframe.src = url;
-        this.iframe.onload = () => {
-          this.loader.style.width = '100%';
-          this.landing.style.opacity = '0';
-          setTimeout(() => {
-            this.landing.style.visibility = 'hidden';
-            this.iframe.style.opacity = '1';
-          }, 500);
-          setTimeout(() => this.loader.style.width = '0', 300);
+          document.getElementById('install-popup-btn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+              deferredPrompt.prompt();
+              const {
+                outcome
+              } = await deferredPrompt.userChoice;
+              if (outcome === 'accepted') {
+                closeInstallPopup();
+                document.getElementById('install-trigger').classList.remove('show');
+              }
+              deferredPrompt = null;
+            } else {
+              closeInstallPopup(); // fallback: instruksi manual sudah terlihat
+            }
+          });
+          // ─── Service Worker ───
+          window.addEventListener('online', () => location.reload());
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+              .then(() => console.log('SW registered'))
+              .catch(err => console.error('SW error:', err));
+          }
+          async switchContent(url) {
+            if (!url || this.iframe.src === url) return;
+            this.loader.style.width = '30%';
+            this.iframe.src = url;
+            this.iframe.onload = () => {
+              this.loader.style.width = '100%';
+              this.landing.style.opacity = '0';
+              setTimeout(() => {
+                this.landing.style.visibility = 'hidden';
+                this.iframe.style.opacity = '1';
+              }, 500);
+              setTimeout(() => this.loader.style.width = '0', 300);
+            };
+          }
         };
-      }
-    };
-    document.addEventListener('DOMContentLoaded', () => App.init());
+        document.addEventListener('DOMContentLoaded', () => App.init());
   </script>
 </body>
 
