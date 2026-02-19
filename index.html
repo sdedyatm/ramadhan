@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="Aplikasi Device Hmsi">
+  <meta name="description" content="Aplikasi Device HMSI">
   <meta name="theme-color" content="#050505">
-  <title>Device HMSI</title>
+  <title>Device HMSI - Official App</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
@@ -16,6 +16,7 @@
     :root {
       --primary-glow: #24c9c9;
       --bg-dark: #050505;
+      --accent-gold: #fbbf24;
     }
 
     body,
@@ -27,16 +28,15 @@
       height: 100vh;
       width: 100vw;
       overflow: hidden;
-      /* Mencegah scroll pada body utama */
     }
 
-    /* Navigasi Melayang Tetap di Atas */
+    /* --- NAVIGATION --- */
     .navbar-container {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      padding: 25px 10px;
+      padding: 20px 10px;
       z-index: 100;
       pointer-events: none;
       background: linear-gradient(to bottom, rgba(5, 5, 5, 1) 0%, rgba(5, 5, 5, 0) 100%);
@@ -49,7 +49,7 @@
     .open-page-btn {
       perspective: 500px;
       cursor: pointer;
-      width: 95px;
+      width: 85px;
       height: 38px;
       position: relative;
     }
@@ -76,8 +76,9 @@
       justify-content: center;
       border: 1px solid var(--primary-glow);
       border-radius: 12px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: bold;
+      text-transform: uppercase;
     }
 
     .btn-front {
@@ -92,7 +93,19 @@
       transform: rotateX(-90deg) translateZ(19px);
     }
 
-    /* Area Konten Utama */
+    /* Khusus Tombol Instal */
+    .btn-install-front {
+      border-color: var(--accent-gold);
+      color: var(--accent-gold);
+    }
+
+    .btn-install-bottom {
+      background: var(--accent-gold);
+      color: #000;
+      transform: rotateX(-90deg) translateZ(19px);
+    }
+
+    /* --- VIEWPORT --- */
     .app-view {
       position: relative;
       width: 100%;
@@ -100,55 +113,49 @@
       z-index: 1;
     }
 
-    /* Landing Screen dengan Fungsi Scroll */
+    /* Landing Screen with Scroll */
     #landing-screen {
       position: absolute;
       inset: 0;
       background: var(--bg-dark);
       z-index: 10;
       overflow-y: auto;
-      /* MENGAKTIFKAN SCROLL VERTIKAL */
       -webkit-overflow-scrolling: touch;
-      /* Scroll halus di iOS */
       display: flex;
       flex-direction: column;
       align-items: center;
       transition: opacity 0.5s ease, visibility 0.5s;
-      padding-bottom: 50px;
-      /* Ruang di bawah agar teks tidak mepet */
+      padding-bottom: 60px;
     }
 
-    /* Custom Scrollbar */
     #landing-screen::-webkit-scrollbar {
-      width: 4px;
+      width: 3px;
     }
 
     #landing-screen::-webkit-scrollbar-thumb {
       background: var(--primary-glow);
-      border-radius: 10px;
     }
 
     .welcome-img {
-      margin-top: 120px;
-      /* Jarak dari tombol */
+      margin-top: 130px;
       width: 90vw;
-      max-width: 400px;
-      /* Ratio otomatis mengikuti tinggi asli gambar agar tidak terpotong */
+      max-width: 420px;
       height: auto;
-      border-radius: 20px;
+      border-radius: 24px;
       border: 2px solid var(--primary-glow);
-      box-shadow: 0 10px 40px rgba(36, 201, 201, 0.2);
-      animation: fadeIn 0.8s ease-out;
+      box-shadow: 0 15px 45px rgba(36, 201, 201, 0.2);
+      animation: fadeInDown 0.8s ease-out;
     }
 
     .welcome-text {
-      margin-top: 30px;
-      padding: 0 20px;
-      max-width: 450px;
-      animation: fadeIn 1s ease-out;
+      margin-top: 35px;
+      padding: 0 25px;
+      max-width: 480px;
+      text-align: center;
+      animation: fadeInUp 0.8s ease-out;
     }
 
-    /* Iframe Konten */
+    /* Iframe Display */
     #main-frame {
       position: absolute;
       inset: 0;
@@ -159,6 +166,7 @@
       transition: opacity 0.6s ease;
     }
 
+    /* --- UI UTILS --- */
     .loader-bar {
       position: fixed;
       top: 0;
@@ -170,10 +178,22 @@
       transition: width 0.3s ease;
     }
 
-    @keyframes fadeIn {
+    @keyframes fadeInDown {
       from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
       }
 
       to {
@@ -231,37 +251,70 @@
   <script>
     "use strict";
     const App = {
+      deferredPrompt: null,
       init() {
         this.iframe = document.getElementById('main-frame');
         this.landing = document.getElementById('landing-screen');
         this.loader = document.getElementById('loader-bar');
-        this.buttons = document.querySelectorAll('.open-page-btn');
+        this.buttons = document.querySelectorAll('.open-page-btn[data-url]');
+        this.installContainer = document.getElementById('install-container');
+        this.installBtn = document.getElementById('install-button');
         this.bindEvents();
+        this.handlePWA();
       },
       bindEvents() {
+        // Navigasi Menu
         this.buttons.forEach(btn => {
           btn.addEventListener('click', () => {
             const url = btn.getAttribute('data-url');
-            if (!url) return;
-            // Visual Feedback
             this.buttons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             this.switchContent(url);
           });
         });
+        // Klik Instal
+        this.installBtn.addEventListener('click', async () => {
+          if (this.deferredPrompt) {
+            this.deferredPrompt.prompt();
+            const {
+              outcome
+            } = await this.deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+              this.installContainer.style.display = 'none';
+            }
+            this.deferredPrompt = null;
+          }
+        });
+      },
+      handlePWA() {
+        // Register SW
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+              .catch(err => console.error("SW Register Failed", err));
+          });
+        }
+        // Listen for Install Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          this.deferredPrompt = e;
+          this.installContainer.style.display = 'block';
+        });
+        // Hide after installed
+        window.addEventListener('appinstalled', () => {
+          this.installContainer.style.display = 'none';
+          this.deferredPrompt = null;
+        });
       },
       async switchContent(url) {
-        if (this.iframe.src === url) return;
+        if (!url || this.iframe.src === url) return;
         this.loader.style.width = '30%';
-        // Load URL ke Iframe
         this.iframe.src = url;
         this.iframe.onload = () => {
           this.loader.style.width = '100%';
-          // Sembunyikan Landing Screen
           this.landing.style.opacity = '0';
           setTimeout(() => {
             this.landing.style.visibility = 'hidden';
-            // Munculkan Iframe
             this.iframe.style.opacity = '1';
           }, 500);
           setTimeout(() => this.loader.style.width = '0', 300);
