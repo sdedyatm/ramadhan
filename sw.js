@@ -1,87 +1,243 @@
 /**
- * HMSI Service Worker - Auto Update Version
+ * ProPWA — sw.js
+ * Service Worker: Stale-While-Revalidate, offline fallback, auto-update
+ * @version 1.0.0
  */
-const CACHE_NAME = "hmsi-pwa-v-" + Date.now();
 
-const ASSETS_TO_CACHE = [
-  "/",
-  "/index.html",
-  "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png",
-  "https://cdn.tailwindcss.com",
-  "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" // Sekarang ada koma
+"use strict";
+
+const CACHE_VERSION = "v1.0.0";
+const STATIC_CACHE = `propwa-static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `propwa-dynamic-${CACHE_VERSION}`;
+const OFFLINE_URL = "./offline-fallback.html";
+
+/** Assets to pre-cache on install */
+const STATIC_ASSETS = [
+  "./",
+  "./index.html",
+  "./app.js",
+  "./sw.js",
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./offline-fallback.html"
 ];
 
-// URL Eksternal yang mungkin bermasalah dengan CORS dipisahkan
-const EXTERNAL_SCRIPTS = [
-  "https://script.google.com/macros/s/AKfycbwund0gPq9RHMugPQcVPcRG-xUaBZ6-m95-CQCfF_qKjF4f_nzcGFcfw_Omji_CBLhw/exec",
-  "https://script.google.com/macros/s/AKfycbwTmLdlKnUOINitKwTUUWwTzMOai4-Uk2ZqvZMV86_O98DgNXT8tFih4HFoKXCoJJDrow/exec",
-  "https://script.google.com/macros/s/AKfycbyPGjbGPzM_T6RxrG4FvKogMA1btoKMtgFXo_kpVDomY39D0InB3n7htYx_Nx7p5QXW/exec"
-];
-
+/* ─────────────────────────────
+   INSTALL — pre-cache statics
+───────────────────────────── */
 self.addEventListener("install", (event) => {
+  console.info("[SW] Installing...", CACHE_VERSION);
   event.waitUntil(
     caches
-      .open(CACHE_NAME)
-      .then((cache) => {
-        console.log("Caching essential assets...");
-        // Menambahkan aset utama
-        return cache.addAll(ASSETS_TO_CACHE);
-      })
+      .open(STATIC_CACHE)
+      .then((cache) => cache.addAll(STATIC_ASSETS))
       .then(() => {
-        // Menambahkan script eksternal secara terpisah agar tidak menggagalkan instalasi utama jika satu gagal
-        const cacheRequests = EXTERNAL_SCRIPTS.map((url) => {
-          return fetch(url, { mode: "no-cors" })
-            .then((response) => {
-              return caches
-                .open(CACHE_NAME)
-                .then((cache) => cache.put(url, response));
-            })
-            .catch((err) =>
-              console.warn("Failed to cache external script:", url)
-            );
-        });
-        return Promise.all(cacheRequests);
+        console.info("[SW] Static assets cached");
+        return self.skipWaiting(); // Force activate immediately
       })
-      .then(() => self.skipWaiting())
+      .catch((err) => console.warn("[SW] Pre-cache failed:", err))
   );
 });
 
+/* ─────────────────────────────
+   ACTIVATE — clean old caches
+───────────────────────────── */
 self.addEventListener("activate", (event) => {
+  console.info("[SW] Activating...", CACHE_VERSION);
   event.waitUntil(
     caches
       .keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cache) => {
-            if (cache !== CACHE_NAME) {
-              console.log("Deleting old cache:", cache);
-              return caches.delete(cache);
-            }
-          })
-        );
-      })
-      .then(() => self.clients.claim())
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
+            .map((key) => {
+              console.info("[SW] Deleting old cache:", key);
+              return caches.delete(key);
+            })
+        )
+      )
+      .then(() => self.clients.claim()) // Take control of all clients
   );
 });
 
+/* ─────────────────────────────
+   FETCH — routing strategies
+───────────────────────────── */
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
+  const { request } = event;
+  const url = new URL(request.url);
 
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Jangan simpan respon dari Google Apps Script ke cache saat fetch
-        // karena sering berubah (dynamic content)
-        if (event.request.url.includes("google.com")) return response;
+  // Skip non-GET, chrome-extension, and cross-origin non-API requests
+  if (request.method !== "GET") return;
+  if (url.protocol === "chrome-extension:") return;
 
-        const resClone = response.clone();
-        caches
-          .open(CACHE_NAME)
-          .then((cache) => cache.put(event.request, resClone));
-        return response;
-      })
-      .catch(() => caches.match(event.request))
+  // API requests → Network First
+  if (
+    url.pathname.includes("/api/") ||
+    url.hostname !== self.location.hostname
+  ) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // HTML navigation → Stale While Revalidate (offline fallback)
+  if (
+    request.mode === "navigate" ||
+    request.headers.get("accept")?.includes("text/html")
+  ) {
+    event.respondWith(staleWhileRevalidateWithFallback(request));
+    return;
+  }
+
+  // Static assets → Cache First
+  if (isStaticAsset(url.pathname)) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  // Dynamic content → Stale While Revalidate
+  event.respondWith(staleWhileRevalidate(request));
+});
+
+/* ─────────────────────────────
+   STRATEGY: Cache First
+   Best for: immutable static assets
+───────────────────────────── */
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  try {
+    const response = await fetch(request);
+    if (response.ok) await putInCache(STATIC_CACHE, request, response.clone());
+    return response;
+  } catch {
+    return offlineFallback(request);
+  }
+}
+
+/* ─────────────────────────────
+   STRATEGY: Network First
+   Best for: API / dynamic data
+───────────────────────────── */
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) await putInCache(DYNAMIC_CACHE, request, response.clone());
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    return cached || offlineFallback(request);
+  }
+}
+
+/* ─────────────────────────────
+   STRATEGY: Stale While Revalidate
+   Best for: pages, non-critical assets
+───────────────────────────── */
+async function staleWhileRevalidate(request) {
+  const cached = await caches.match(request);
+  const fetchPromise = fetch(request)
+    .then((response) => {
+      if (response.ok) putInCache(DYNAMIC_CACHE, request, response.clone());
+      return response;
+    })
+    .catch(() => cached);
+
+  return cached || fetchPromise;
+}
+
+/* ─────────────────────────────
+   STRATEGY: SWR with offline fallback
+   Best for: HTML navigations
+───────────────────────────── */
+async function staleWhileRevalidateWithFallback(request) {
+  const cached = await caches.match(request);
+
+  const networkPromise = fetch(request)
+    .then((response) => {
+      if (response.ok) putInCache(DYNAMIC_CACHE, request, response.clone());
+      return response;
+    })
+    .catch(async () => {
+      // Return offline fallback page
+      const fallback = await caches.match(OFFLINE_URL);
+      return (
+        fallback ||
+        new Response("<h1>Offline</h1>", {
+          headers: { "Content-Type": "text/html" }
+        })
+      );
+    });
+
+  return cached || networkPromise;
+}
+
+/* ─────────────────────────────
+   HELPERS
+───────────────────────────── */
+async function putInCache(cacheName, request, response) {
+  try {
+    const cache = await caches.open(cacheName);
+    await cache.put(request, response);
+  } catch (e) {
+    console.warn("[SW] Cache put failed:", e);
+  }
+}
+
+async function offlineFallback(request) {
+  const fallback = await caches.match(OFFLINE_URL);
+  if (fallback) return fallback;
+  return new Response(JSON.stringify({ error: "Offline", url: request.url }), {
+    headers: { "Content-Type": "application/json" },
+    status: 503
+  });
+}
+
+function isStaticAsset(pathname) {
+  return /\.(js|css|png|jpg|jpeg|svg|ico|woff2?|ttf|webp|avif|gif)$/.test(
+    pathname
   );
+}
+
+/* ─────────────────────────────
+   PUSH NOTIFICATIONS
+───────────────────────────── */
+self.addEventListener("push", (event) => {
+  const data = event.data?.json() ?? {};
+  const title = data.title || "ProPWA";
+  const options = {
+    body: data.body || "New notification",
+    icon: data.icon || "./icon-192.png",
+    badge: data.badge || "./icon-192.png",
+    tag: data.tag || "propwa",
+    data: { url: data.url || "./" },
+    actions: [{ action: "open", title: "Open App" }]
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((list) => {
+        const url = event.notification.data?.url || "./";
+        const existing = list.find((c) => c.url === url);
+        if (existing) return existing.focus();
+        return clients.openWindow(url);
+      })
+  );
+});
+
+/* ─────────────────────────────
+   BACKGROUND SYNC (future-ready)
+───────────────────────────── */
+self.addEventListener("sync", (event) => {
+  if (event.tag === "sync-data") {
+    console.info("[SW] Background sync triggered");
+    // event.waitUntil(syncData());
+  }
 });
