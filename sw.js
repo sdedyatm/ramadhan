@@ -1,12 +1,12 @@
 /**
  * ProPWA — sw.js
  * Service Worker: Stale-While-Revalidate, offline fallback, auto-update
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 "use strict";
 
-const CACHE_VERSION = "v1.0.5";
+const CACHE_VERSION = "v1.0.6";
 const STATIC_CACHE = `propwa-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `propwa-dynamic-${CACHE_VERSION}`;
 const OFFLINE_URL = "./offline-fallback.html";
@@ -20,7 +20,11 @@ const STATIC_ASSETS = [
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
-  "./offline-fallback.html"
+  "./offline-fallback.html",
+  "./biodata.html",
+  "./alquran.html",
+  "./tausyiah.html",
+  "./sholawat.html"
 ];
 
 /* ─────────────────────────────
