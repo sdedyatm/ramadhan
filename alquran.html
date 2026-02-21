@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Aplikasi Device Hmsi Professional">
+  <meta name="keywords" content="sdedyatm,atm,hmsi,hino,app,enterprise">
+  <meta name="author" content="sdedyatm">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <title>MP3 Player</title>
+  <link rel=stylesheet href="style.css" media=all>
+</head>
+
+<body>
+  <style>
+    .judul-halaman {
+      font-size: 36px;
+      text-align: center;
+      color: #ffffff;
+      /* Warna teks */
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      /* Efek bayangan */
+    }
+
+    body {
+      background-color: #000000;
+      color: #ffc266;
+      font-family: 'Roboto', sans-serif;
+      background-image: url('https://i.pinimg.com/originals/b6/15/f3/b615f30527f9fe38777ea1e070abeaba.jpg');
+    }
+
+    #myProgress {
+      width: 420px;
+      background-color: #d9d9f2;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+
+    #myBar {
+      width: 0%;
+      height: 5px;
+      background-color: #ffc266;
+      border-radius: 10px;
+    }
+
+    .logo {
+      fill: red;
+    }
+
+    .btn-action {
+      cursor: pointer;
+      padding-top: 10px;
+      width: 30px;
+    }
+
+    .btn-ctn,
+    .infos-ctn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .infos-ctn {
+      padding-top: 20px;
+    }
+
+    .btn-ctn>div {
+      padding: 5px;
+      margin-top: 18px;
+      margin-bottom: 18px;
+    }
+
+    .infos-ctn>div {
+      margin-bottom: 8px;
+      color: #ffc266;
+    }
+
+    .first-btn {
+      margin-left: 3px;
+    }
+
+    .duration {
+      margin-left: 10px;
+    }
+
+    .title {
+      margin-left: 10px;
+      width: 210px;
+      text-align: center;
+    }
+
+    .player-ctn {
+      border-radius: 15px;
+      width: 420px;
+      padding: 10px;
+      background-color: #373737;
+      margin: auto;
+      margin-top: 100px;
+    }
+
+    .playlist-track-ctn {
+      display: flex;
+      background-color: #464646;
+      margin-top: 3px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .playlist-track-ctn:last-child {
+      /*border: 1px solid #ffc266; */
+    }
+
+    .playlist-track-ctn>div {
+      margin: 10px;
+    }
+
+    .playlist-info-track {
+      width: 80%;
+    }
+
+    .playlist-info-track,
+    .playlist-duration {
+      padding-top: 7px;
+      padding-bottom: 7px;
+      color: #e9cc95;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .playlist-ctn {
+      padding-bottom: 20px;
+    }
+
+    .active-track {
+      background: #4d4d4d;
+      color: #ffc266 !important;
+      font-weight: bold;
+    }
+
+    .active-track>.playlist-info-track,
+    .active-track>.playlist-duration,
+    .active-track>.playlist-btn-play {
+      color: #ffc266 !important;
+    }
+
+    .playlist-btn-play {
+      pointer-events: none;
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+
+    .fas {
+      color: #ffc266;
+      font-size: 20px;
+    }
+  </style>
+
+  <audio id="myAudio" ontimeupdate="onTimeUpdate()">
+    <!-- <source src="audio.ogg" type="audio/ogg"> -->
+    <source id="source-audio" src="" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <div class="player-ctn">
+    <center>
+      <img src="https://lh3.googleusercontent.com/pw/AP1GczPJ_BJAVXYVisyJOLxTiiKX8cYTCL1ZetAWc227gGYm6Q6VfAWkXH3Ava90CQD06L_b9GOyEGJL-GnZUnDu6Chv5V3jL66dF8xXXaa4BdlSykExBMo3P2LEzb3I5YxB3GW4_wxIr9rexTPdj-2d7VyZ0A=w190-h190-s-no-gm?authuser=0" width="190">
+    </center>
+    <h3 class="judul-halaman">Quran & Terjemahan</h3>
+    <div class="infos-ctn">
+      <div class="timer">00:00</div>
+      <div class="title"></div>
+      <div class="duration">00:00</div>
+    </div>
+    <div id="myProgress">
+      <div id="myBar"></div>
+    </div>
+    <div class="btn-ctn">
+      <div class="btn-action first-btn" onclick="previous()">
+        <div id="btn-faws-back">
+          <i class='fas fa-step-backward'></i>
+        </div>
+      </div>
+      <div class="btn-action" onclick="rewind()">
+        <div id="btn-faws-rewind">
+          <i class='fas fa-backward'></i>
+        </div>
+      </div>
+      <div class="btn-action" onclick="toggleAudio()">
+        <div id="btn-faws-play-pause">
+          <i class='fas fa-play' id="icon-play"></i>
+          <i class='fas fa-pause' id="icon-pause" style="display: none"></i>
+        </div>
+      </div>
+      <div class="btn-play" onclick="forward()">
+        <div id="btn-faws-forward">
+          <i class='fas fa-forward'></i>
+        </div>
+      </div>
+      <div class="btn-action" onclick="next()">
+        <div id="btn-faws-next">
+          <i class='fas fa-step-forward'></i>
+        </div>
+      </div>
+      <div class="btn-mute" id="toggleMute" onclick="toggleMute()">
+        <div id="btn-faws-volume">
+          <i id="icon-vol-up" class='fas fa-volume-up'></i>
+          <i id="icon-vol-mute" class='fas fa-volume-mute' style="display: none"></i>
+        </div>
+      </div>
+    </div>
+    <div class="playlist-ctn"></div>
+  </div>
+
+  <script>
+    function createTrackItem(index, name, duration) {
+      var trackItem = document.createElement('div');
+      trackItem.setAttribute("class", "playlist-track-ctn");
+      trackItem.setAttribute("id", "ptc-" + index);
+      trackItem.setAttribute("data-index", index);
+      document.querySelector(".playlist-ctn").appendChild(trackItem);
+      var playBtnItem = document.createElement('div');
+      playBtnItem.setAttribute("class", "playlist-btn-play");
+      playBtnItem.setAttribute("id", "pbp-" + index);
+      document.querySelector("#ptc-" + index).appendChild(playBtnItem);
+      var btnImg = document.createElement('i');
+      btnImg.setAttribute("class", "fas fa-play");
+      btnImg.setAttribute("height", "40");
+      btnImg.setAttribute("width", "40");
+      btnImg.setAttribute("id", "p-img-" + index);
+      document.querySelector("#pbp-" + index).appendChild(btnImg);
+      var trackInfoItem = document.createElement('div');
+      trackInfoItem.setAttribute("class", "playlist-info-track");
+      trackInfoItem.innerHTML = name
+      document.querySelector("#ptc-" + index).appendChild(trackInfoItem);
+      var trackDurationItem = document.createElement('div');
+      trackDurationItem.setAttribute("class", "playlist-duration");
+      trackDurationItem.innerHTML = duration
+      document.querySelector("#ptc-" + index).appendChild(trackDurationItem);
+    }
+    var listAudio = [{
+        name: "1 • Al-Fatihah",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/001AlFaatihah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Pembukaan 7 ayat"
+      },
+      {
+        name: "2 • Al-Baqarah",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/002AlBaqarah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Sapi Betina 286 ayat"
+      },
+      {
+        name: "3 • Ali 'Imran",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/003Aliimran-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Keluarga Imran 200 ayat"
+      },
+      {
+        name: "4 • An-Nisa",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/004AnNisaa-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Wanita 176 ayat"
+      },
+      {
+        name: "5 •  Al-Ma'idah",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/005AlMaaidah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Hidangan Makanan 120 ayat"
+      },
+      {
+        name: "6 • Al-An'am",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/006AlAnaam-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Binatang Ternak 165 ayat"
+      },
+      {
+        name: "7 • Al-A'raf",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/007AlAraaf-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Tempat-tempat Tinggi 206 ayat"
+      },
+      {
+        name: "8 • Al-Anfal",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/008AlAnfaal-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Rampasan Perang 75 ayat"
+      },
+      {
+        name: "9 • At-Taubah",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/009AtTaubah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Pengampunan 129 ayat"
+      },
+      {
+        name: "10 • Surah Yunus",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/010Yunus-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Yunus 109 ayat"
+      },
+      {
+        name: "11 • Surah Hud",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/011Huud-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Hud 123 ayat"
+      },
+      {
+        name: "12 • Surah Yusuf",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/012Yusuf-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Yusuf 111 ayat"
+      },
+      {
+        name: "13 • Surah Ar-Ra'd",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/013ArRad-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Guruh (Petir) 43 ayat"
+      },
+      {
+        name: "14 • Surah Ibrahim",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/014Ibrahim-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Ibrahim 52 ayat"
+      },
+      {
+        name: "15 • Surat Al-Hijr",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/015AlHijr-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Bukit 99 ayat"
+      },
+      {
+        name: "16 • Surat An-Nahl",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/016AnNahl-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Lebah Madu 128 ayat"
+      },
+      {
+        name: "17 • Surat Al-Isra",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/017AlIsraa-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Perjalanan Malam 111 ayat"
+      },
+      {
+        name: "18 • Al-Kahfi",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/018AlKahfi-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Para Penghuni Gua 110 ayat"
+      },
+      {
+        name: "19 • Surat Maryam",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/019Maryam-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Maryam 98 ayat"
+      },
+      {
+        name: "20 • Surat Thaha",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/020Thaahaa-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Tha-Ha 135 ayat"
+      },
+      {
+        name: "21 • Al-Anbiyaa",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/021AlAnbiyaa-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Para Nabi 112 ayat"
+      },
+      {
+        name: "22 • Al-Hajj",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/022AlHajj-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Haji 78 ayat"
+      },
+      {
+        name: "23 • Al-Mu'minun",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/023AlMuminuun-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Orang-orang Mukmin 118 ayat"
+      },
+      {
+        name: "24 • An-Nur",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/024AnNuur-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Cahaya 64 ayat"
+      },
+      {
+        name: "25 •  Al-Furqan",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/025AlFurqaan-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Pembeda 77 ayat"
+      },
+      {
+        name: "26 • Ash-Shu'araa",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/026AsySyuaraa-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Penyair 227 ayat"
+      },
+      {
+        name: "27 •  An-Naml",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/027AnNaml-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Semut 93 ayat"
+      },
+      {
+        name: "28 • Al-Qashash",
+        file: "https://ia600903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/028AlQashash-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Kisah- kisah 88 ayat"
+      },
+      {
+        name: "29 • Al-Ankabut",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/029Alankabuut-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Laba-laba 69 ayat"
+      },
+      {
+        name: "30 • Ar-Rum",
+        file: "https://ia800903.us.archive.org/17/items/BacaanQuranTerjemahanIndonesia/030ArRuum-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Bangsa Romawi 60 ayat"
+      },
+      {
+        name: "31 • Surat Luqman",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/031Luqman-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Luqman 34 ayat"
+      },
+      {
+        name: "32 •As-Sajdah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/032AsSajdah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Sujud 30 ayat"
+      },
+      {
+        name: "33 • Al-Ahzab",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/033AlAhzab-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Golongan yang Bersekutu 73 ayat"
+      },
+      {
+        name: "34 • Surah Saba",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/034Saba-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Kaum Saba 54 ayat"
+      },
+      {
+        name: "35 • Surah Faathir",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/035Faathir-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Pencipta 45 ayat"
+      },
+      {
+        name: "36 • Surat Ya-Sin",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/036Yaasiin-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Yas Sin 83 ayat"
+      },
+      {
+        name: "37 • Ash-Shaffat",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/037AshShaaffaat-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Barisan-barisan 182 ayat"
+      },
+      {
+        name: "38 • Surah Sad",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/038Shaad-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Shad 88 ayat"
+      },
+      {
+        name: "39 • Az-Zumar",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/039AzZumar-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Para Rombongan 75 ayat"
+      },
+      {
+        name: "40 • Al-Mu'min",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/040AlMumin-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Orang-orang beriman 85 ayat"
+      },
+      {
+        name: "41 •Surah Fussilat",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/041Fushshilat-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Yang Dijelaskan 54 ayat"
+      },
+      {
+        name: "42 • Asy-Shura",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/042AsySyuura-MurottalDanTerjemahanAlQuran.mp3",
+        duration: " Musyawarah 53 ayat"
+      },
+      {
+        name: "43 • Az-Zukhruf",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/043AzZukhruf-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Perhiasan 89 ayat"
+      },
+      {
+        name: "44 • Ad-Dukhan",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/044AdDukhaan-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Kabut 59 ayat"
+      },
+      {
+        name: "45 • Al-Jathiyah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/045AlJaatsiyah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Yang Bertekuk Lutut 37 ayat"
+      },
+      {
+        name: "46 •  Al-Ahqaf",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/046AlAhqaaf-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Bukit-bukit Pasir 35 ayat"
+      },
+      {
+        name: "47 • Surah Muhammad",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/047Muhammad-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Muhammad 38 ayat"
+      },
+      {
+        name: "48 •  Al-Fath",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/048AlFath-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Kemenangan 29 ayat"
+      },
+      {
+        name: "49 •  Al-Hujurat",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/049AlHujuraat-MurottalDanTerjemahanAlQuran.mp3",
+        duration: " Kamar-kamar 18 ayat"
+      },
+      {
+        name: "50 • Surah Qaaf",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/050Qaaf-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Qaf 45 ayat"
+      },
+      {
+        name: "51 • Adh-Dhariyat",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/051AdzDzaariyaat-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Angin yang Menerbangkan 60 ayat"
+      },
+      {
+        name: "52 •  At-Tur",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/052AthThuur-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Bukit 49 ayat"
+      },
+      {
+        name: "53 • An-Najm",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/053AnNajm-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Bintang 62 ayat"
+      },
+      {
+        name: "54 • Al-Qamar",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/054AlQamar-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Bulan 55 ayat"
+      },
+      {
+        name: "55 • Ar-Rahman",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/055ArRahmaan-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Yang Maha Pemurah 78 ayat"
+      },
+      {
+        name: "56 • Al-Waaqi'ah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/056AlWaqiah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Hari Kiamat 96 ayat"
+      },
+      {
+        name: "57 • Al-Hadid",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/057AlHadiid-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Besi 29 ayat"
+      },
+      {
+        name: "58 • Al-Mujadilah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/058AlMujaadilah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Wanita yang Menggugat 22 ayat"
+      },
+      {
+        name: "59 • Al-Hasyr",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/059AlHasyr-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Pengusiran 24 ayat"
+      },
+      {
+        name: "60 • Al-Mumtahanah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/060AlMumtahanah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Wanita yang Diuji 13 ayat"
+      },
+      {
+        name: "61 • As-Shaff",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/061AshShaff-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Barisan 14 ayat"
+      },
+      {
+        name: "62 • Al-Jumu'ah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/062AlJumuah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Hari Jum'at 11 ayat"
+      },
+      {
+        name: "63 • Al-Munafiqun",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/063AlMunaafiquun-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Kaum Munafik 11 ayat"
+      },
+      {
+        name: "64 • At-Taghabun",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/064AtTaghaabun-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Hari Dinampakkan Kesalahan 18 ayat"
+      },
+      {
+        name: "65 • At-Talaq",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/065AthThalaaq-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Perceraian 12 ayat"
+      },
+      {
+        name: "66 • At-Tahrim",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/066AtTahrim-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Mengharamkan 12 ayat"
+      },
+      {
+        name: "67 • Al-Mulk",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/067AlMulk-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Kerajaan 30 ayat"
+      },
+      {
+        name: "68 • Al-Qalam",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/068AlQalam-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Pena 52 ayat"
+      },
+      {
+        name: "69 • Al-Haqqah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/069AlHaaqqah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Kenyataan (Hari Kiamat) 52 ayat"
+      },
+      {
+        name: "70 • Al-Ma'arij",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/070AlMaaarij-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Tempat yang Naik 44 ayat"
+      },
+      {
+        name: "71 • Surat Nuh",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/071Nuh-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Nuh 28 ayat"
+      },
+      {
+        name: "72 • Al -Jin",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/072AlJin-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Jin 28 ayat"
+      },
+      {
+        name: "73 • Al-Muzzammil",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/073AlMuzzammil-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Orang yang Berselimut 20 ayat"
+      },
+      {
+        name: "74 • Al-Muddatsir",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/074AlMuddatstsir-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Orang yang Berkemul 56 ayat"
+      },
+      {
+        name: "75 • Al-Qiyamah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/075AlQiyaamah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Hari Berbangkit 40 ayat"
+      },
+      {
+        name: "76 • Al-Insan",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/076AlInsaan-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Manusia 31 ayat"
+      },
+      {
+        name: "77 • Al-Mursalat",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/077AlMursalaat-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Malaikat-malaikat yang Diutus 50 ayat"
+      },
+      {
+        name: "78 • An-Nabaa",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/078AnNaba-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Berita Besar 40 ayat"
+      },
+      {
+        name: "79 • An-Nazi'at",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/079AnNaaziaat-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Malaikat yang Mencabut 46 ayat"
+      },
+      {
+        name: "80 • Surat 'Abasa",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/080abasa-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Bermuka Masam 42 ayat"
+      },
+      {
+        name: "81 • At-Takwir",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/081AtTakwiir-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Menggulung 29 ayat"
+      },
+      {
+        name: "82 • Al-Infitar",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/082AlInfithaar-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Terbelah 19 ayat"
+      },
+      {
+        name: "83 • Al-Mutaffifin",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/083AlMuthaffifin-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Orang-orang Curang 36 ayat"
+      },
+      {
+        name: "84 • Al-Inshiqaq",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/084AlInsyiqaaq-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Terbelah 25 ayat"
+      },
+      {
+        name: "85 • Al-Buruj",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/085AlBuruuj-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Gugusan Bintang 22 ayat"
+      },
+      {
+        name: "86 • At-Tariq",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/086AthThaariq-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Yang Datang di Malam Hari 17 ayat"
+      },
+      {
+        name: "87 • Al-A'la",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/087AlAlaa-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Yang Paling Tinggi 19 ayat"
+      },
+      {
+        name: "88 • Al-Ghashiyah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/088AlGhaasyiyah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Hari Pembalasan 26 ayat"
+      },
+      {
+        name: "89 • Al-Fajr",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/089AlFajr-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Fajar 30 ayat"
+      },
+      {
+        name: "90 • Al-Balad",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/090AlBalad-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Negeri 20 ayat"
+      },
+      {
+        name: "91 • Ash-Shams",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/091AsySyams-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Matahari 15 ayat"
+      },
+      {
+        name: "92 • Al-Lail",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/092AlLail-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Malam 21 ayat"
+      },
+      {
+        name: "93 • Adz-Dhuha",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/093AdhDhuhaa-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Waktu Dhuha 11 ayat"
+      },
+      {
+        name: "94 • Asy- Syarh",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/094AlamNasyrah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Melapangkan 8 ayat"
+      },
+      {
+        name: "95 • At-Tin",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/095AtTiin-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Buah Tin 8 ayat"
+      }, {
+        name: "96 • Al-'Alaq",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/096Alalaq-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Segumpal Darah 19 ayat"
+      },
+      {
+        name: "97 • Al-Qadr",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/097AlQadr-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Kemuliaan 5 ayat"
+      },
+      {
+        name: "98 • Al-Bayyinah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/098AlBayyinah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Pembuktian 8 ayat"
+      },
+      {
+        name: "99 • Al-Zalzalah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/099AlZalzalah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Kegoncangan 8 ayat"
+      },
+      {
+        name: "100 • Al-'Adiyat",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/100Alaadiyaat-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Berlari Kencang 11 ayat"
+      },
+      {
+        name: "101 • Al-Qari'ah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/101AlQaariah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Hari Kiamat 11 ayat"
+      },
+      {
+        name: "102 • At-Takatsur",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/102AtTakaatsur-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Bermegah-megahan 8 ayat"
+      },
+      {
+        name: "103 • Al- 'Ashar",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/103Alashr-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Waktu Sore 3 ayat"
+      },
+      {
+        name: "104 • Al-Humazah",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/104AlHumazah-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Pengumpat 9 ayat"
+      },
+      {
+        name: "105 • Al-Fil",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/105AlFiil-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Gajah 5 ayat"
+      },
+      {
+        name: "106 • Surat Quraisy",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/106Quraisy-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Suku Quraisy 4 ayat"
+      },
+      {
+        name: "107 • Al-Ma'un",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/107AlMaauun-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Barang yang Berguna 7 ayat"
+      },
+      {
+        name: "108 • Al-Kautsar",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/108AlKautsar-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Nikmat Berlimpah 3 ayat"
+      },
+      {
+        name: "109 • Al-Kafirun",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/109AlKaafiruun-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Orang-orang Kafir 6 ayat"
+      },
+      {
+        name: "110 • An-Nashr",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/110AnNashr-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Pertolongan 3 ayat"
+      },
+      {
+        name: "111 • Al-Lahab",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/111AlLahab-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Gejolak Api (Sabut) 5 ayat"
+      },
+      {
+        name: "112 • Al-Ikhlas",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/112AlIkhlash-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Ikhlash 4 ayat"
+      },
+      {
+        name: "113 • Al-Falaq",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/113AlFalaq-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Waktu Shubuh 5 ayat"
+      },
+      {
+        name: "114 • Al-Nas",
+        file: "https://archive.org/download/BacaanQuranTerjemahanIndonesia/114An-naas-MurottalDanTerjemahanAlQuran.mp3",
+        duration: "Umat Manusia 6 ayat"
+      },
+    ]
+    for (var i = 0; i < listAudio.length; i++) {
+      createTrackItem(i, listAudio[i].name, listAudio[i].duration);
+    }
+    var indexAudio = 0;
+
+    function loadNewTrack(index) {
+      var player = document.querySelector('#source-audio')
+      player.src = listAudio[index].file
+      document.querySelector('.title').innerHTML = listAudio[index].name
+      this.currentAudio = document.getElementById("myAudio");
+      this.currentAudio.load()
+      this.toggleAudio()
+      this.updateStylePlaylist(this.indexAudio, index)
+      this.indexAudio = index;
+    }
+    var playListItems = document.querySelectorAll(".playlist-track-ctn");
+    for (let i = 0; i < playListItems.length; i++) {
+      playListItems[i].addEventListener("click", getClickedElement.bind(this));
+    }
+
+    function getClickedElement(event) {
+      for (let i = 0; i < playListItems.length; i++) {
+        if (playListItems[i] == event.target) {
+          var clickedIndex = event.target.getAttribute("data-index")
+          if (clickedIndex == this.indexAudio) { // alert('Same audio');
+            this.toggleAudio()
+          } else {
+            loadNewTrack(clickedIndex);
+          }
+        }
+      }
+    }
+    document.querySelector('#source-audio').src = listAudio[indexAudio].file
+    document.querySelector('.title').innerHTML = listAudio[indexAudio].name
+    var currentAudio = document.getElementById("myAudio");
+    currentAudio.load()
+    currentAudio.onloadedmetadata = function() {
+      document.getElementsByClassName('duration')[0].innerHTML = this.getMinutes(this.currentAudio.duration)
+    }.bind(this);
+    var interval1;
+
+    function toggleAudio() {
+      if (this.currentAudio.paused) {
+        document.querySelector('#icon-play').style.display = 'none';
+        document.querySelector('#icon-pause').style.display = 'block';
+        document.querySelector('#ptc-' + this.indexAudio).classList.add("active-track");
+        this.playToPause(this.indexAudio)
+        this.currentAudio.play();
+      } else {
+        document.querySelector('#icon-play').style.display = 'block';
+        document.querySelector('#icon-pause').style.display = 'none';
+        this.pauseToPlay(this.indexAudio)
+        this.currentAudio.pause();
+      }
+    }
+
+    function pauseAudio() {
+      this.currentAudio.pause();
+      clearInterval(interval1);
+    }
+    var timer = document.getElementsByClassName('timer')[0]
+    var barProgress = document.getElementById("myBar");
+    var width = 0;
+
+    function onTimeUpdate() {
+      var t = this.currentAudio.currentTime
+      timer.innerHTML = this.getMinutes(t);
+      this.setBarProgress();
+      if (this.currentAudio.ended) {
+        document.querySelector('#icon-play').style.display = 'block';
+        document.querySelector('#icon-pause').style.display = 'none';
+        this.pauseToPlay(this.indexAudio)
+        if (this.indexAudio < listAudio.length - 1) {
+          var index = parseInt(this.indexAudio) + 1
+          this.loadNewTrack(index)
+        }
+      }
+    }
+
+    function setBarProgress() {
+      var progress = (this.currentAudio.currentTime / this.currentAudio.duration) * 100;
+      document.getElementById("myBar").style.width = progress + "%";
+    }
+
+    function getMinutes(t) {
+      var min = parseInt(parseInt(t) / 60);
+      var sec = parseInt(t % 60);
+      if (sec < 10) {
+        sec = "0" + sec
+      }
+      if (min < 10) {
+        min = "0" + min
+      }
+      return min + ":" + sec
+    }
+    var progressbar = document.querySelector('#myProgress')
+    progressbar.addEventListener("click", seek.bind(this));
+
+    function seek(event) {
+      var percent = event.offsetX / progressbar.offsetWidth;
+      this.currentAudio.currentTime = percent * this.currentAudio.duration;
+      barProgress.style.width = percent * 100 + "%";
+    }
+
+    function forward() {
+      this.currentAudio.currentTime = this.currentAudio.currentTime + 5
+      this.setBarProgress();
+    }
+
+    function rewind() {
+      this.currentAudio.currentTime = this.currentAudio.currentTime - 5
+      this.setBarProgress();
+    }
+
+    function next() {
+      if (this.indexAudio < listAudio.length - 1) {
+        var oldIndex = this.indexAudio
+        this.indexAudio++;
+        updateStylePlaylist(oldIndex, this.indexAudio)
+        this.loadNewTrack(this.indexAudio);
+      }
+    }
+
+    function previous() {
+      if (this.indexAudio > 0) {
+        var oldIndex = this.indexAudio
+        this.indexAudio--;
+        updateStylePlaylist(oldIndex, this.indexAudio)
+        this.loadNewTrack(this.indexAudio);
+      }
+    }
+
+    function updateStylePlaylist(oldIndex, newIndex) {
+      document.querySelector('#ptc-' + oldIndex).classList.remove("active-track");
+      this.pauseToPlay(oldIndex);
+      document.querySelector('#ptc-' + newIndex).classList.add("active-track");
+      this.playToPause(newIndex)
+    }
+
+    function playToPause(index) {
+      var ele = document.querySelector('#p-img-' + index)
+      ele.classList.remove("fa-play");
+      ele.classList.add("fa-pause");
+    }
+
+    function pauseToPlay(index) {
+      var ele = document.querySelector('#p-img-' + index)
+      ele.classList.remove("fa-pause");
+      ele.classList.add("fa-play");
+    }
+
+    function toggleMute() {
+      var btnMute = document.querySelector('#toggleMute');
+      var volUp = document.querySelector('#icon-vol-up');
+      var volMute = document.querySelector('#icon-vol-mute');
+      if (this.currentAudio.muted == false) {
+        this.currentAudio.muted = true
+        volUp.style.display = "none"
+        volMute.style.display = "block"
+      } else {
+        this.currentAudio.muted = false
+        volMute.style.display = "none"
+        volUp.style.display = "block"
+      }
+    }
+  </script>
+  <script src=app.js></script>
+
+</body>
+
+</html>
