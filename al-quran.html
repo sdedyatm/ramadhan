@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Al-Qur'an Digital</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f9fc;
+      --card: #ffffff;
+      --text: #1a1a2e;
+      --accent: #4361ee;
+      --accent-light: #4895ef;
+      --shadow: 0 10px 30px rgba(67, 97, 238, 0.15);
+      --radius: 20px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      touch-action: manipulation;
+      /* bantu gesture lebih smooth */
+    }
+
+    /* Floating Title */
+    .floating-title {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 10px 28px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+      border: 1px solid rgba(67, 97, 238, 0.18);
+      white-space: nowrap;
+      max-width: 85vw;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    /* Tombol Pilih Surat (floating) */
+    .surah-toggle {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 110;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-size: 1.6rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 25px rgba(67, 97, 238, 0.35);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .surah-toggle:hover {
+      transform: scale(1.08);
+    }
+
+    .container {
+      padding: 80px 16px 40px;
+    }
+
+    /* Roulette - hidden by default */
+    .surah-roulette {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s;
+    }
+
+    .surah-roulette.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .roulette-inner {
+      height: 420px;
+      perspective: 800px;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      max-width: 360px;
+      width: 90vw;
+    }
+
+    .roulette-inner::-webkit-scrollbar {
+      display: none;
+    }
+
+    .surah-list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 160px 0;
+    }
+
+    .surah-item {
+      width: 280px;
+      height: 100px;
+      background: linear-gradient(135deg, #f0f4ff, #e6ecff);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+      scroll-snap-align: center;
+      border: 1px solid rgba(67, 97, 238, 0.12);
+      transform: scale(0.85) rotateX(15deg);
+      opacity: 0.65;
+    }
+
+    .surah-item.active,
+    .surah-item:hover {
+      transform: scale(1.08) rotateX(0deg) translateZ(40px);
+      opacity: 1;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .surah-item .number {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .surah-item .name {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    /* Ayat */
+    .ayah {
+      background: var(--card);
+      padding: 28px 20px;
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+      animation: fadeInUp 0.5s ease-out;
+      touch-action: pan-y pinch-zoom;
+      /* izinkan pinch di area ayat */
+    }
+
+    .arab {
+      font-family: 'Amiri Quran', serif;
+      font-size: 32px;
+      direction: rtl;
+      text-align: right;
+      line-height: 2.4;
+      color: #0f172a;
+      transition: font-size 0.15s ease;
+    }
+
+    .translation {
+      margin-top: 16px;
+      font-size: 15px;
+      color: #475569;
+      line-height: 1.8;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Tombol toggle surah -->
+  <div class="surah-toggle" id="toggleSurah">📖</div>
+
+  <!-- Floating Title -->
+  <div class="floating-title" id="surahTitle">Pilih Surat</div>
+
+  <div class="container">
+    <div id="content"></div>
+  </div>
+
+  <!-- Roulette Modal -->
+  <div class="surah-roulette" id="surahRoulette">
+    <div class="roulette-inner">
+      <div class="surah-list" id="surahList"></div>
+    </div>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById("toggleSurah");
+    const roulette = document.getElementById("surahRoulette");
+    const surahListEl = document.getElementById("surahList");
+    const content = document.getElementById("content");
+    const titleEl = document.getElementById("surahTitle");
+    let fontSize = 32;
+    let currentSurahName = "";
+    let pointers = {}; // untuk track multi-touch
+    // Toggle roulette
+    toggleBtn.onclick = () => {
+      roulette.classList.toggle("visible");
+    };
+    // Tutup roulette jika klik di luar inner (opsional, bisa dihapus)
+    roulette.onclick = (e) => {
+      if (e.target === roulette) roulette.classList.remove("visible");
+    };
+    // Load daftar surah
+    fetch("https://api.alquran.cloud/v1/surah")
+      .then(res => res.json())
+      .then(data => {
+        data.data.forEach(s => {
+          const item = document.createElement("div");
+          item.className = "surah-item";
+          item.innerHTML = `
+            <div class="number">${s.number}</div>
+            <div class="name">${s.englishName}</div>
+          `;
+          item.onclick = () => {
+            loadSurah(s.number, s.englishName, item);
+            roulette.classList.remove("visible"); // hilang setelah pilih
+          };
+          surahListEl.appendChild(item);
+        });
+        // Load surah pertama secara default
+        if (data.data.length > 0) loadSurah(1, "Al-Fatihah", surahListEl.children[0]);
+      });
+
+    function loadSurah(num, name, clickedItem) {
+      currentSurahName = name || `Surah ${num}`;
+      titleEl.textContent = currentSurahName;
+      if (clickedItem) {
+        document.querySelectorAll('.surah-item').forEach(el => el.classList.remove('active'));
+        clickedItem.classList.add('active');
+        clickedItem.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+      content.innerHTML = "<p style='text-align:center; color:#64748b; padding:60px 0;'>Memuat ayat...</p>";
+      Promise.all([
+          fetch(`https://api.alquran.cloud/v1/surah/${num}/ar.alafasy`),
+          fetch(`https://api.alquran.cloud/v1/surah/${num}/id.indonesian`)
+        ])
+        .then(res => Promise.all(res.map(r => r.json())))
+        .then(([arabic, indo]) => {
+          content.innerHTML = "";
+          arabic.data.ayahs.forEach((a, i) => {
+            const div = document.createElement("div");
+            div.className = "ayah";
+            div.innerHTML = `
+            <div class="arab">${a.text}</div>
+            <div class="translation">${indo.data.ayahs[i].text}</div>
+          `;
+            content.appendChild(div);
+          });
+        });
+    }
+    // Pinch gesture untuk zoom font arab (hanya di area konten)
+    document.addEventListener('pointerdown', e => {
+      pointers[e.pointerId] = {
+        x: e.clientX,
+        y: e.clientY
+      };
+    });
+    document.addEventListener('pointermove', e => {
+      if (!pointers[e.pointerId]) return;
+      pointers[e.pointerId] = {
+        x: e.clientX,
+        y: e.clientY
+      };
+      const ids = Object.keys(pointers);
+      if (ids.length === 2) {
+        const p1 = pointers[ids[0]];
+        const p2 = pointers[ids[1]];
+        const distance = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        // Simpan distance awal saat pertama kali dua jari terdeteksi
+        if (!window.prevDistance) window.prevDistance = distance;
+        const delta = distance - window.prevDistance;
+        if (Math.abs(delta) > 5) { // threshold agar tidak terlalu sensitif
+          fontSize += delta > 0 ? 1.5 : -1.5;
+          fontSize = Math.max(20, Math.min(60, fontSize));
+          document.querySelectorAll(".arab").forEach(el => {
+            el.style.fontSize = fontSize + "px";
+          });
+          window.prevDistance = distance;
+        }
+      }
+    });
+    document.addEventListener('pointerup', e => {
+      delete pointers[e.pointerId];
+      if (Object.keys(pointers).length < 2) window.prevDistance = null;
+    });
+    document.addEventListener('pointercancel', e => {
+      delete pointers[e.pointerId];
+      if (Object.keys(pointers).length < 2) window.prevDistance = null;
+    });
+  </script>
+</body>
+
+</html>
