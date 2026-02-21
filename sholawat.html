@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta name="description" content="Aplikasi Device Hmsi">
+  <meta name="keywords" content="sdedyatm,atm,hmsi,hino">
+  <meta name="author" content="sdedyatm">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script type="text/javascript" src="https://code.jquery.com/jquery-latest.min.js"></script>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+  <title>MP3 Player</title>
+</head>
+
+<body>
+  <div class="app-container">
+    <center>
+      <style>
+        body {
+          margin: 0;
+          padding: 0;
+          background-color: black;
+          color: grey;
+          font-weight: bold;
+          box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+          font-family: Arial, sans-serif;
+        }
+
+        .app-container {
+          background-image: url('https://i.pinimg.com/originals/b6/15/f3/b615f30527f9fe38777ea1e070abeaba.jpg');
+          border: 2px solid grey;
+          margin: 20px;
+          padding: 20px;
+          border-radius: 15px;
+          box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .app-content {
+          /* Gaya untuk konten aplikasi Anda akan di sini */
+        }
+
+        /* batas css iframe */
+        footer {
+          background-color: #333;
+          color: #a6a2a2;
+          text-align: center;
+          padding: 1rem;
+          border-radius: 15px;
+          font-size: 1rem;
+          font-weight: bold;
+        }
+
+        footer span {
+          font-size: 1.2rem;
+          font-weight: bold;
+          background: linear-gradient(60deg, red, orange, yellow, green, blue, indigo, violet);
+          background-size: 400%;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: rainbow-text 5s linear infinite;
+          text-shadow: 1px 1px 1px #000, 0 0 5px #fff, 0 0 48px #fff;
+        }
+
+        @keyframes rainbow-text {
+          0% {
+            background-position: 0%;
+          }
+
+          100% {
+            background-position: 400%;
+          }
+        }
+
+        .judul-halaman {
+          font-size: 36px;
+          text-align: center;
+          color: #ffffff;
+          /* Warna teks */
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+          /* Efek bayangan */
+        }
+
+        #myProgress {
+          width: 250px;
+          background-color: #d9d9f2;
+          cursor: pointer;
+          border-radius: 10px;
+        }
+
+        #myBar {
+          width: 0%;
+          height: 5px;
+          background-color: #ffc266;
+          border-radius: 10px;
+        }
+
+        .logo {
+          fill: red;
+        }
+
+        .btn-action {
+          cursor: pointer;
+          padding-top: 10px;
+          width: 30px;
+        }
+
+        .btn-ctn,
+        .infos-ctn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .infos-ctn {
+          padding-top: 20px;
+        }
+
+        .btn-ctn>div {
+          padding: 5px;
+          margin-top: 18px;
+          margin-bottom: 18px;
+        }
+
+        .infos-ctn>div {
+          margin-bottom: 8px;
+          color: #ffc266;
+        }
+
+        .first-btn {
+          margin-left: 3px;
+        }
+
+        .duration {
+          margin-left: 10px;
+        }
+
+        .title {
+          margin-left: 10px;
+          width: 210px;
+          text-align: center;
+        }
+
+        .player-ctn {
+          border-radius: 15px;
+          width: 340px;
+          padding: 10px;
+          background-color: #373737;
+          margin: auto;
+          margin-top: 100px;
+        }
+
+        .playlist-track-ctn {
+          display: flex;
+          background-color: #464646;
+          margin-top: 3px;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+
+        .playlist-track-ctn:last-child {
+          /*border: 1px solid #ffc266; */
+        }
+
+        .playlist-track-ctn>div {
+          margin: 10px;
+        }
+
+        .playlist-info-track {
+          width: 80%;
+        }
+
+        .playlist-info-track,
+        .playlist-duration {
+          padding-top: 7px;
+          padding-bottom: 7px;
+          color: #e9cc95;
+          font-size: 14px;
+          pointer-events: none;
+        }
+
+        .playlist-ctn {
+          padding-bottom: 20px;
+        }
+
+        .active-track {
+          background: #4d4d4d;
+          color: #ffc266 !important;
+          font-weight: bold;
+        }
+
+        .active-track>.playlist-info-track,
+        .active-track>.playlist-duration,
+        .active-track>.playlist-btn-play {
+          color: #ffc266 !important;
+        }
+
+        .playlist-btn-play {
+          pointer-events: none;
+          padding-top: 5px;
+          padding-bottom: 5px;
+        }
+
+        .fas {
+          color: #ffc266;
+          font-size: 20px;
+        }
+
+        /* Kontainer utama */
+        .app-container {
+          margin: 10px;
+          padding: 15px;
+          border-radius: 10px;
+        }
+
+        /* Responsif untuk header */
+        .app-header {
+          font-size: 20px;
+          padding: 10px;
+        }
+
+        /* Tombol responsif */
+        .open-page-btn {
+          width: 80px;
+          height: 35px;
+          font-size: 12px;
+        }
+
+        /* Gambar responsif */
+        .rounded-image {
+          max-width: 100%;
+          height: auto;
+          border-radius: 15px;
+        }
+
+        /* Modal responsif */
+        .modal-content {
+          width: 95%;
+          max-width: 500px;
+        }
+
+        iframe {
+          height: 60vh;
+        }
+
+        /* Tabel responsif */
+        .table-responsive {
+          overflow-x: auto;
+        }
+
+        /* Gaya khusus untuk layar kecil */
+        @media (max-width: 600px) {
+          .app-header {
+            font-size: 18px;
+          }
+
+          .open-page-btn {
+            font-size: 10px;
+            padding: 5px;
+          }
+
+          iframe {
+            height: 50vh;
+          }
+        }
+
+        /* Gaya khusus untuk layar sangat kecil (misalnya, perangkat ponsel lawas) */
+        @media (max-width: 400px) {
+          .app-header {
+            font-size: 16px;
+          }
+
+          .open-page-btn {
+            font-size: 8px;
+          }
+
+          iframe {
+            height: 45vh;
+          }
+        }
+      </style>
+
+      <!-- Isi konten aplikasi Anda akan di sini -->
+
+      <audio id="myAudio" ontimeupdate="onTimeUpdate()">
+        <!-- <source src="audio.ogg" type="audio/ogg"> -->
+        <source id="source-audio" src="" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
+
+      <div class="player-ctn">
+        <center>
+          <img src="https://lh3.googleusercontent.com/pw/AP1GczPJ_BJAVXYVisyJOLxTiiKX8cYTCL1ZetAWc227gGYm6Q6VfAWkXH3Ava90CQD06L_b9GOyEGJL-GnZUnDu6Chv5V3jL66dF8xXXaa4BdlSykExBMo3P2LEzb3I5YxB3GW4_wxIr9rexTPdj-2d7VyZ0A=w190-h190-s-no-gm?authuser=0" width="190">
+        </center>
+        <h3 class="judul-halaman">Sholawat</h3>
+        <div class="infos-ctn">
+          <div class="timer">00:00</div>
+          <div class="title"></div>
+          <div class="duration">00:00</div>
+        </div>
+        <div id="myProgress">
+          <div id="myBar"></div>
+        </div>
+        <div class="btn-ctn">
+          <div class="btn-action first-btn" onclick="previous()">
+            <div id="btn-faws-back">
+              <i class='fas fa-step-backward'></i>
+            </div>
+          </div>
+          <div class="btn-action" onclick="rewind()">
+            <div id="btn-faws-rewind">
+              <i class='fas fa-backward'></i>
+            </div>
+          </div>
+          <div class="btn-action" onclick="toggleAudio()">
+            <div id="btn-faws-play-pause">
+              <i class='fas fa-play' id="icon-play"></i>
+              <i class='fas fa-pause' id="icon-pause" style="display: none"></i>
+            </div>
+          </div>
+          <div class="btn-play" onclick="forward()">
+            <div id="btn-faws-forward">
+              <i class='fas fa-forward'></i>
+            </div>
+          </div>
+          <div class="btn-action" onclick="next()">
+            <div id="btn-faws-next">
+              <i class='fas fa-step-forward'></i>
+            </div>
+          </div>
+          <div class="btn-mute" id="toggleMute" onclick="toggleMute()">
+            <div id="btn-faws-volume">
+              <i id="icon-vol-up" class='fas fa-volume-up'></i>
+              <i id="icon-vol-mute" class='fas fa-volume-mute' style="display: none"></i>
+            </div>
+          </div>
+        </div>
+        <div class="playlist-ctn"></div>
+      </div>
+
+      <script>
+        function createTrackItem(index, name, duration) {
+          var trackItem = document.createElement('div');
+          trackItem.setAttribute("class", "playlist-track-ctn");
+          trackItem.setAttribute("id", "ptc-" + index);
+          trackItem.setAttribute("data-index", index);
+          document.querySelector(".playlist-ctn").appendChild(trackItem);
+          var playBtnItem = document.createElement('div');
+          playBtnItem.setAttribute("class", "playlist-btn-play");
+          playBtnItem.setAttribute("id", "pbp-" + index);
+          document.querySelector("#ptc-" + index).appendChild(playBtnItem);
+          var btnImg = document.createElement('i');
+          btnImg.setAttribute("class", "fas fa-play");
+          btnImg.setAttribute("height", "40");
+          btnImg.setAttribute("width", "40");
+          btnImg.setAttribute("id", "p-img-" + index);
+          document.querySelector("#pbp-" + index).appendChild(btnImg);
+          var trackInfoItem = document.createElement('div');
+          trackInfoItem.setAttribute("class", "playlist-info-track");
+          trackInfoItem.innerHTML = name
+          document.querySelector("#ptc-" + index).appendChild(trackInfoItem);
+          var trackDurationItem = document.createElement('div');
+          trackDurationItem.setAttribute("class", "playlist-duration");
+          trackDurationItem.innerHTML = duration
+          document.querySelector("#ptc-" + index).appendChild(trackDurationItem);
+        }
+        var listAudio = [{
+            name: "1• Sholawat Asyghil",
+            file: "https://ia804506.us.archive.org/14/items/asyghil-versi-fitriana-kamila/Asyghil%20versi%20Fitriana%20Kamila.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "2• Sholawat Burdah",
+            file: "https://ia801402.us.archive.org/9/items/shalawat-burdah-penyembuh-penyakit/Shalawat%20burdah%20penyembuh%20penyakit.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "3• Sholawat Jibril",
+            file: "https://ia801402.us.archive.org/9/items/shalawat-burdah-penyembuh-penyakit/Shalawat%20Jibril%20merdu%20pelancar%20rezeki.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "4• Sholawat Nariyah",
+            file: "https://ia903100.us.archive.org/11/items/kumpulanlagufitrianakamila/Sholawat%20Nariyah%20-%20Fitriana%20Kamila.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "5• Sholawat Busyro",
+            file: "https://dn720302.ca.archive.org/0/items/sholawat-busyro_202304/Sholawat%20Busyro.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "6• Astaghfirullah",
+            file: "https://ia902302.us.archive.org/1/items/19.-kisah-sang-rosul-inema/18.%20Astaghfirullah%20-%20NancyDAUN.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "7• Allah Aghisna",
+            file: "https://ia902302.us.archive.org/1/items/19.-kisah-sang-rosul-inema/1.%20Allah%20Allah%20Aghisna%20-%20Nazwa%20Maulidia.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "8• Alfa Sholallah",
+            file: "https://ia600608.us.archive.org/25/items/alfa-sholallah/Alfa%20Sholallah%20-.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "9• Eling Eling",
+            file: "https://ia801709.us.archive.org/3/items/eling-eling_202101/Eling%20Eling.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "10• Saben Malam Jumat",
+            file: "https://ia802907.us.archive.org/32/items/saben-malam-jumat/Saben%20Malam%20Jum%27at.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "11• Kidung Wahyu Kolosebo",
+            file: "https://ia601508.us.archive.org/12/items/kelayung-layung-bugie/KIDUNG%20Wahyu%20KoloSebo%20%20Full%20HD.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "12• Sholi Wasalimda",
+            file: "https://dn720305.ca.archive.org/0/items/eman-eman-temen-sholli-wasalimda-sholawat-syiir-jawa-warisan-wali-songo/EMAN%20-%20EMAN%20TEMEN%20SHOLLI%20WASALIMDA%2C%20SHOLAWAT%20SYIIR%20JAWA%20WARISAN%20WALI%20SONGO.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "13• Sholawat Badar",
+            file: "https://ia800304.us.archive.org/29/items/sholawat-badar-sabyan/SHOLAWAT%20BADAR%20%28%D8%B5%D9%84%D9%88%D8%A7%D8%AA%20%D8%A8%D8%AF%D8%B1%29%20-%20SABYAN.mp3",
+            duration: "Mp3"
+          },
+          {
+            name: "14• Yasir Lana",
+            file: "https://ia801609.us.archive.org/15/items/sholawat-merdu-risa-solihah/Yassir%20Lanaa%20%20Risa%20Solihah.mp3",
+            duration: "Mp3"
+          },
+        ]
+        for (var i = 0; i < listAudio.length; i++) {
+          createTrackItem(i, listAudio[i].name, listAudio[i].duration);
+        }
+        var indexAudio = 0;
+
+        function loadNewTrack(index) {
+          var player = document.querySelector('#source-audio')
+          player.src = listAudio[index].file
+          document.querySelector('.title').innerHTML = listAudio[index].name
+          this.currentAudio = document.getElementById("myAudio");
+          this.currentAudio.load()
+          this.toggleAudio()
+          this.updateStylePlaylist(this.indexAudio, index)
+          this.indexAudio = index;
+        }
+        var playListItems = document.querySelectorAll(".playlist-track-ctn");
+        for (let i = 0; i < playListItems.length; i++) {
+          playListItems[i].addEventListener("click", getClickedElement.bind(this));
+        }
+
+        function getClickedElement(event) {
+          for (let i = 0; i < playListItems.length; i++) {
+            if (playListItems[i] == event.target) {
+              var clickedIndex = event.target.getAttribute("data-index")
+              if (clickedIndex == this.indexAudio) { // alert('Same audio');
+                this.toggleAudio()
+              } else {
+                loadNewTrack(clickedIndex);
+              }
+            }
+          }
+        }
+        document.querySelector('#source-audio').src = listAudio[indexAudio].file
+        document.querySelector('.title').innerHTML = listAudio[indexAudio].name
+        var currentAudio = document.getElementById("myAudio");
+        currentAudio.load()
+        currentAudio.onloadedmetadata = function() {
+          document.getElementsByClassName('duration')[0].innerHTML = this.getMinutes(this.currentAudio.duration)
+        }.bind(this);
+        var interval1;
+
+        function toggleAudio() {
+          if (this.currentAudio.paused) {
+            document.querySelector('#icon-play').style.display = 'none';
+            document.querySelector('#icon-pause').style.display = 'block';
+            document.querySelector('#ptc-' + this.indexAudio).classList.add("active-track");
+            this.playToPause(this.indexAudio)
+            this.currentAudio.play();
+          } else {
+            document.querySelector('#icon-play').style.display = 'block';
+            document.querySelector('#icon-pause').style.display = 'none';
+            this.pauseToPlay(this.indexAudio)
+            this.currentAudio.pause();
+          }
+        }
+
+        function pauseAudio() {
+          this.currentAudio.pause();
+          clearInterval(interval1);
+        }
+        var timer = document.getElementsByClassName('timer')[0]
+        var barProgress = document.getElementById("myBar");
+        var width = 0;
+
+        function onTimeUpdate() {
+          var t = this.currentAudio.currentTime
+          timer.innerHTML = this.getMinutes(t);
+          this.setBarProgress();
+          if (this.currentAudio.ended) {
+            document.querySelector('#icon-play').style.display = 'block';
+            document.querySelector('#icon-pause').style.display = 'none';
+            this.pauseToPlay(this.indexAudio)
+            if (this.indexAudio < listAudio.length - 1) {
+              var index = parseInt(this.indexAudio) + 1
+              this.loadNewTrack(index)
+            }
+          }
+        }
+
+        function setBarProgress() {
+          var progress = (this.currentAudio.currentTime / this.currentAudio.duration) * 100;
+          document.getElementById("myBar").style.width = progress + "%";
+        }
+
+        function getMinutes(t) {
+          var min = parseInt(parseInt(t) / 60);
+          var sec = parseInt(t % 60);
+          if (sec < 10) {
+            sec = "0" + sec
+          }
+          if (min < 10) {
+            min = "0" + min
+          }
+          return min + ":" + sec
+        }
+        var progressbar = document.querySelector('#myProgress')
+        progressbar.addEventListener("click", seek.bind(this));
+
+        function seek(event) {
+          var percent = event.offsetX / progressbar.offsetWidth;
+          this.currentAudio.currentTime = percent * this.currentAudio.duration;
+          barProgress.style.width = percent * 100 + "%";
+        }
+
+        function forward() {
+          this.currentAudio.currentTime = this.currentAudio.currentTime + 5
+          this.setBarProgress();
+        }
+
+        function rewind() {
+          this.currentAudio.currentTime = this.currentAudio.currentTime - 5
+          this.setBarProgress();
+        }
+
+        function next() {
+          if (this.indexAudio < listAudio.length - 1) {
+            var oldIndex = this.indexAudio
+            this.indexAudio++;
+            updateStylePlaylist(oldIndex, this.indexAudio)
+            this.loadNewTrack(this.indexAudio);
+          }
+        }
+
+        function previous() {
+          if (this.indexAudio > 0) {
+            var oldIndex = this.indexAudio
+            this.indexAudio--;
+            updateStylePlaylist(oldIndex, this.indexAudio)
+            this.loadNewTrack(this.indexAudio);
+          }
+        }
+
+        function updateStylePlaylist(oldIndex, newIndex) {
+          document.querySelector('#ptc-' + oldIndex).classList.remove("active-track");
+          this.pauseToPlay(oldIndex);
+          document.querySelector('#ptc-' + newIndex).classList.add("active-track");
+          this.playToPause(newIndex)
+        }
+
+        function playToPause(index) {
+          var ele = document.querySelector('#p-img-' + index)
+          ele.classList.remove("fa-play");
+          ele.classList.add("fa-pause");
+        }
+
+        function pauseToPlay(index) {
+          var ele = document.querySelector('#p-img-' + index)
+          ele.classList.remove("fa-pause");
+          ele.classList.add("fa-play");
+        }
+
+        function toggleMute() {
+          var btnMute = document.querySelector('#toggleMute');
+          var volUp = document.querySelector('#icon-vol-up');
+          var volMute = document.querySelector('#icon-vol-mute');
+          if (this.currentAudio.muted == false) {
+            this.currentAudio.muted = true
+            volUp.style.display = "none"
+            volMute.style.display = "block"
+          } else {
+            this.currentAudio.muted = false
+            volMute.style.display = "none"
+            volUp.style.display = "block"
+          }
+        }
+      </script>
+      <br>
+      <br>
+
+      <footer>
+        <span>&copy; by sdedyatm</span>
+      </footer>
+
+  </div>
+  <script src="script.js"></script>
+</body>
+
+</html>
