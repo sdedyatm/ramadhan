@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>Kitab Digital</title>
+  <title>Kitab Digital Ihya Ulumuddin</title>
 
   <style>
     body {
@@ -19,6 +19,7 @@
         radial-gradient(circle at 20% 20%, rgba(0, 0, 0, 0.03), transparent 40%),
         radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.04), transparent 40%),
         #f4ecd8;
+      /* parchment background */
     }
 
     .viewer {
@@ -59,7 +60,7 @@
   </div>
 
   <script>
-    const TOTAL_PAGES = 1200; // sesuaikan
+    const TOTAL_PAGES = 650; // ganti sesuai jumlah file
     let currentPage = parseInt(localStorage.getItem("ihya-page")) || 0;
     let scale = 1;
     let translateX = 0;
@@ -68,6 +69,8 @@
     let startTime = 0;
     let velocity = 0;
     let initialDistance = 0;
+    let startDragX = 0;
+    let startDragY = 0;
     const img = document.getElementById('page');
     const wrapper = document.getElementById('wrapper');
 
@@ -84,12 +87,13 @@
       translateX = 0;
       translateY = 0;
       updateTransform();
-      img.src = `/assets/ihya/Ringkasan Ihya Ulumuddin_${pad(n)}.webp`;
+      // Sesuai folder Anda: aset/ihya/
+      img.src = `aset/ihya/${pad(n)}.webp`;
       savePosition();
-      // preload next
+      // preload next page
       if (n + 1 < TOTAL_PAGES) {
         const preload = new Image();
-        preload.src = `/assets/ihya/Ringkasan Ihya Ulumuddin_${pad(n+1)}.webp`;
+        preload.src = `aset/ihya/${pad(n+1)}.webp`;
       }
     }
 
@@ -122,10 +126,11 @@
     }
 
     function updateTransform() {
-      img.style.transform =
-        `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+      img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     }
+    // Load first page
     loadPage(currentPage);
+    // TOUCH EVENTS
     wrapper.addEventListener('touchstart', e => {
       startTime = Date.now();
       if (e.touches.length === 2) {
