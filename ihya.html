@@ -60,11 +60,14 @@
   </div>
 
   <script>
-    const TOTAL_PAGES = 650; // ganti sesuai jumlah file
+    // Jumlah halaman
+    const TOTAL_PAGES = 600; // ganti sesuai jumlah file WebP
     let currentPage = parseInt(localStorage.getItem("ihya-page")) || 0;
+    // Zoom & drag
     let scale = 1;
     let translateX = 0;
     let translateY = 0;
+    // Swipe
     let startX = 0;
     let startTime = 0;
     let velocity = 0;
@@ -87,10 +90,8 @@
       translateX = 0;
       translateY = 0;
       updateTransform();
-      // Sesuai folder Anda: aset/ihya/
       img.src = `aset/ihya/${pad(n)}.webp`;
       savePosition();
-      // preload next page
       if (n + 1 < TOTAL_PAGES) {
         const preload = new Image();
         preload.src = `aset/ihya/${pad(n+1)}.webp`;
@@ -128,9 +129,8 @@
     function updateTransform() {
       img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     }
-    // Load first page
     loadPage(currentPage);
-    // TOUCH EVENTS
+    // Touch events
     wrapper.addEventListener('touchstart', e => {
       startTime = Date.now();
       if (e.touches.length === 2) {
@@ -169,7 +169,7 @@
         }
       }
     });
-    // double tap reset zoom
+    // Double tap reset zoom
     let lastTap = 0;
     wrapper.addEventListener('touchend', () => {
       let now = Date.now();
