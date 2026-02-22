@@ -189,16 +189,16 @@
       translateX = 0;
       translateY = 0;
       updateTransform();
-      img.src = `aset/ihya/${pad(n)}.webp`;
+      img.src = `assets/ihya/${pad(n)}.webp`;
       savePosition();
       updatePageInfo();
       if (n + 1 < TOTAL_PAGES) {
         const preload = new Image();
-        preload.src = `aset/ihya/${pad(n+1)}.webp`;
+        preload.src = `assets/ihya/${pad(n+1)}.webp`;
       }
       if (n - 1 >= 0) {
         const preloadPrev = new Image();
-        preloadPrev.src = `aset/ihya/${pad(n-1)}.webp`;
+        preloadPrev.src = `assets/ihya/${pad(n-1)}.webp`;
       }
     }
 
