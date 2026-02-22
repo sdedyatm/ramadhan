@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="id" dir="rtl">
+<!-- Assuming RTL for Arabic content, adjust if needed -->
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Kitab Digital Ihya Ulumuddin</title>
-
   <style>
     body {
       margin: 0;
@@ -14,12 +14,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: serif;
+      font-family: 'Noto Naskh Arabic', serif;
+      /* Modern Arabic font for professionalism */
       background:
         radial-gradient(circle at 20% 20%, rgba(0, 0, 0, 0.03), transparent 40%),
         radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.04), transparent 40%),
         #f4ecd8;
-      /* parchment background */
+      /* Parchment background */
+      color: #333;
     }
 
     .viewer {
@@ -35,47 +37,139 @@
     .page-wrapper {
       touch-action: none;
       position: relative;
-      transition: transform .35s cubic-bezier(.25, .8, .25, 1);
+      transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+      /* Smoother transition */
+      perspective: 1200px;
+      /* For 3D flip effect */
     }
 
     .page {
-      max-width: 100%;
-      max-height: 100vh;
+      max-width: 90%;
+      /* Slightly smaller for book margins */
+      max-height: 95vh;
       object-fit: contain;
       box-shadow:
-        0 30px 60px rgba(0, 0, 0, .25),
-        inset 0 0 60px rgba(0, 0, 0, .08);
-      border-radius: 8px;
-      transition: transform .15s ease;
+        0 30px 60px rgba(0, 0, 0, 0.25),
+        inset 0 0 60px rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
+      /* Softer corners */
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      backface-visibility: hidden;
+      /* For flip */
+      transform-style: preserve-3d;
     }
+
+    .page:hover {
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
+      /* Hover effect for interactivity */
+    }
+
+    /* Navigation controls */
+    .nav {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px 20px;
+      border-radius: 30px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+
+    .nav button {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0 15px;
+      color: #555;
+      transition: color 0.2s;
+    }
+
+    .nav button:hover {
+      color: #000;
+    }
+
+    .page-number {
+      font-size: 16px;
+      margin: 0 20px;
+      color: #333;
+    }
+
+    /* Progress bar */
+    .progress {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50%;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 2px;
+      z-index: 10;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: #8b4513;
+      /* Brown for book theme */
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
+      .page {
+        max-width: 60%;
+        /* Larger on desktop */
+      }
+    }
+
+    /* Font import for professionalism */
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap');
   </style>
 </head>
 
 <body>
-
   <div class="viewer">
     <div class="page-wrapper" id="wrapper">
-      <img id="page" class="page">
+      <img id="page" class="page" alt="Halaman Kitab">
     </div>
   </div>
-
+  <!-- Navigation -->
+  <div class="nav">
+    <button onclick="prevPage()">&#9664;</button> <!-- Left arrow -->
+    <span class="page-number" id="pageNum">1 / 600</span>
+    <button onclick="nextPage()">&#9654;</button> <!-- Right arrow -->
+  </div>
+  <!-- Progress bar -->
+  <div class="progress">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
   <script>
     // Jumlah halaman
-    const TOTAL_PAGES = 600; // ganti sesuai jumlah file WebP
+    const TOTAL_PAGES = 600; // Ganti sesuai jumlah file WebP
     let currentPage = parseInt(localStorage.getItem("ihya-page")) || 0;
     // Zoom & drag
     let scale = 1;
     let translateX = 0;
     let translateY = 0;
-    // Swipe
+    // Swipe & mouse
     let startX = 0;
+    let startY = 0;
     let startTime = 0;
     let velocity = 0;
     let initialDistance = 0;
     let startDragX = 0;
     let startDragY = 0;
+    let isDragging = false;
     const img = document.getElementById('page');
     const wrapper = document.getElementById('wrapper');
+    const pageNum = document.getElementById('pageNum');
+    const progressBar = document.getElementById('progressBar');
 
     function pad(num) {
       return num.toString().padStart(4, '0');
@@ -85,6 +179,11 @@
       localStorage.setItem("ihya-page", currentPage);
     }
 
+    function updatePageInfo() {
+      pageNum.textContent = `${currentPage + 1} / ${TOTAL_PAGES}`;
+      progressBar.style.width = `${((currentPage + 1) / TOTAL_PAGES) * 100}%`;
+    }
+
     function loadPage(n) {
       scale = 1;
       translateX = 0;
@@ -92,38 +191,44 @@
       updateTransform();
       img.src = `aset/ihya/${pad(n)}.webp`;
       savePosition();
+      updatePageInfo();
       if (n + 1 < TOTAL_PAGES) {
         const preload = new Image();
         preload.src = `aset/ihya/${pad(n+1)}.webp`;
+      }
+      if (n - 1 >= 0) {
+        const preloadPrev = new Image();
+        preloadPrev.src = `aset/ihya/${pad(n-1)}.webp`;
       }
     }
 
     function nextPage() {
       if (currentPage < TOTAL_PAGES - 1) {
-        animateSlide(-window.innerWidth, () => {
+        animateFlip('next', () => {
           currentPage++;
           loadPage(currentPage);
           wrapper.style.transition = "none";
-          wrapper.style.transform = "translateX(0)";
+          wrapper.style.transform = "rotateY(0deg)";
         });
       }
     }
 
     function prevPage() {
       if (currentPage > 0) {
-        animateSlide(window.innerWidth, () => {
+        animateFlip('prev', () => {
           currentPage--;
           loadPage(currentPage);
           wrapper.style.transition = "none";
-          wrapper.style.transform = "translateX(0)";
+          wrapper.style.transform = "rotateY(0deg)";
         });
       }
     }
 
-    function animateSlide(distance, callback) {
-      wrapper.style.transition = "transform .35s cubic-bezier(.25,.8,.25,1)";
-      wrapper.style.transform = `translateX(${distance}px)`;
-      setTimeout(callback, 350);
+    function animateFlip(direction, callback) {
+      wrapper.style.transition = "transform 0.6s ease-in-out";
+      const angle = direction === 'next' ? -180 : 180;
+      wrapper.style.transform = `rotateY(${angle}deg)`;
+      setTimeout(callback, 600);
     }
 
     function updateTransform() {
@@ -133,14 +238,13 @@
     // Touch events
     wrapper.addEventListener('touchstart', e => {
       startTime = Date.now();
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
       if (e.touches.length === 2) {
         initialDistance = getDistance(e.touches[0], e.touches[1]);
-      } else if (e.touches.length === 1) {
-        startX = e.touches[0].clientX;
-        if (scale > 1) {
-          startDragX = e.touches[0].clientX - translateX;
-          startDragY = e.touches[0].clientY - translateY;
-        }
+      } else if (scale > 1) {
+        startDragX = startX - translateX;
+        startDragY = startY - translateY;
       }
     });
     wrapper.addEventListener('touchmove', e => {
@@ -159,12 +263,12 @@
     });
     wrapper.addEventListener('touchend', e => {
       if (scale === 1) {
-        let diff = e.changedTouches[0].clientX - startX;
+        let diffX = e.changedTouches[0].clientX - startX;
         let time = Date.now() - startTime;
-        velocity = diff / time;
-        if (diff < -50 || velocity < -0.5) {
+        velocity = diffX / time;
+        if (diffX < -50 || velocity < -0.5) {
           nextPage();
-        } else if (diff > 50 || velocity > 0.5) {
+        } else if (diffX > 50 || velocity > 0.5) {
           prevPage();
         }
       }
@@ -187,8 +291,40 @@
       let dy = t1.clientY - t2.clientY;
       return Math.sqrt(dx * dx + dy * dy);
     }
+    // Mouse support for desktop
+    wrapper.addEventListener('mousedown', e => {
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      startDragX = startX - translateX;
+      startDragY = startY - translateY;
+      wrapper.style.cursor = 'grabbing';
+    });
+    document.addEventListener('mousemove', e => {
+      if (isDragging && scale > 1) {
+        translateX = e.clientX - startDragX;
+        translateY = e.clientY - startDragY;
+        updateTransform();
+      }
+    });
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      wrapper.style.cursor = 'grab';
+    });
+    // Wheel zoom
+    wrapper.addEventListener('wheel', e => {
+      e.preventDefault();
+      const delta = e.deltaY * -0.01;
+      scale += delta;
+      scale = Math.max(1, Math.min(scale, 5));
+      updateTransform();
+    });
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') prevPage(); // RTL: right key for prev
+      if (e.key === 'ArrowLeft') nextPage(); // RTL: left key for next
+    });
   </script>
-
 </body>
 
 </html>
