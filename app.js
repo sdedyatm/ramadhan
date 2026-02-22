@@ -196,15 +196,44 @@ const SpaPages = {
   },
 
   '/viewer': () => `
-  <div style="position:relative;width:100%;height:calc(100dvh - 140px);overflow:hidden;border-radius:14px">
-    <iframe
-      src="./imsyak.html"
-      style="position:absolute;inset:0;width:100%;height:100%;border:none"
-      loading="lazy"
-      referrerpolicy="no-referrer">
-    </iframe>
-  </div>
-`,
+    <p class="section-label">Rendering Resolusi Tinggi</p>
+    <h2 class="section-title">Image Viewer</h2>
+    <p class="text-muted text-sm" style="margin-bottom:22px;line-height:1.65">
+      Zoom, geser, dan periksa gambar tanpa kehilangan ketajaman. Mendukung pinch-zoom di layar sentuh.
+    </p>
+    <div class="grid-2" style="margin-bottom:24px">
+      ${[
+        { label: 'Biru Langit', emoji: '🌊', c1: '#22d3ee', c2: '#6366f1' },
+        { label: 'Fajar Emas',  emoji: '🌅', c1: '#f59e0b', c2: '#ef4444' },
+        { label: 'Hutan Sejuk', emoji: '🌿', c1: '#34d399', c2: '#0ea5e9' },
+      ].map((item, i) => `
+        <div class="card" style="cursor:pointer;text-align:center;padding:16px" onclick="ViewerPage.openDemo(${i})">
+          <div style="height:130px;background:linear-gradient(135deg,${item.c1},${item.c2});border-radius:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:2.2rem">
+            ${item.emoji}
+          </div>
+          <div style="font-size:0.84rem;font-weight:600">${item.label}</div>
+          <div style="font-size:0.7rem;color:var(--text3);margin-top:3px">Klik untuk zoom</div>
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      <h3 style="font-size:0.93rem;font-weight:600;margin-bottom:8px">📂 Upload Gambar Sendiri</h3>
+      <p class="text-muted text-sm" style="margin-bottom:14px;line-height:1.55">
+        Buka PNG, JPG, atau WebP apapun — resolusi asli dipertahankan saat zoom.
+      </p>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <label class="btn btn-primary" style="cursor:pointer">
+          Pilih Gambar
+          <input type="file" accept="image/*" style="display:none" onchange="ViewerPage.openFile(this)">
+        </label>
+        <span class="text-xs text-faint" id="viewer-file-name">Belum ada file</span>
+      </div>
+      <div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:9px;font-size:0.76rem;color:var(--text3);line-height:1.65">
+        🖱️ <b style="color:var(--text2)">Mouse wheel</b> — zoom<br>
+        ✋ <b style="color:var(--text2)">Drag</b> — geser<br>
+        👆 <b style="color:var(--text2)">Pinch</b> — zoom sentuh<br>
+        ⌨️ <b style="color:var(--text2)">Escape</b> — tutup
+      </div>
+    </div>`,
 
   '/device': () => `
     <p class="section-label">Diagnostik Hardware</p>
