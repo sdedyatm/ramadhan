@@ -196,12 +196,15 @@ const SpaPages = {
   },
 
   '/viewer': () => `
-  <iframe 
-    src="imsyak.html" 
-    style="width:100%;height:100dvh;border:none;display:block"
-    loading="lazy">
-  </iframe>
-`
+  <div style="position:relative;width:100%;height:calc(100dvh - 140px);overflow:hidden;border-radius:14px">
+    <iframe
+      src="./imsyak.html"
+      style="position:absolute;inset:0;width:100%;height:100%;border:none"
+      loading="lazy"
+      referrerpolicy="no-referrer">
+    </iframe>
+  </div>
+`,
 
   '/device': () => `
     <p class="section-label">Diagnostik Hardware</p>
