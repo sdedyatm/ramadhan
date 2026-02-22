@@ -1,0 +1,4013 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jadwal Imsyak Indonesia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0f1a;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.8);
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.3);
+      --text-primary: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: rgba(148, 163, 184, 0.1);
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background Animation */
+    .bg-pattern {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bg-pattern::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 70%);
+      animation: bgFloat 20s ease-in-out infinite;
+    }
+
+    @keyframes bgFloat {
+
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+
+      33% {
+        transform: translate(2%, 2%) rotate(1deg);
+      }
+
+      66% {
+        transform: translate(-1%, 1%) rotate(-1deg);
+      }
+    }
+
+    /* Grid Pattern */
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 30px 0 20px;
+    }
+
+    .header h1 {
+      font-size: clamp(1.8rem, 5vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Location Card */
+    .location-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .location-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 30px var(--accent-glow);
+      transform: translateY(-2px);
+    }
+
+    .location-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .location-value {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .location-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .location-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .location-arrow {
+      margin-left: auto;
+      color: var(--text-muted);
+      transition: transform 0.3s ease;
+    }
+
+    .location-card:hover .location-arrow {
+      transform: translateX(4px);
+      color: var(--accent);
+    }
+
+    /* Countdown */
+    .countdown-section {
+      text-align: center;
+      margin-bottom: 24px;
+      padding: 24px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+      border-radius: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .countdown-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .countdown-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(2.5rem, 8vw, 3.5rem);
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .countdown-target {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* Prayer Times Grid */
+    .prayer-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .prayer-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prayer-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .prayer-item.active {
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .prayer-item.active::before {
+      opacity: 1;
+    }
+
+    .prayer-item.imsak {
+      grid-column: span 2;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .prayer-item.imsak::before {
+      background: var(--warning);
+    }
+
+    .prayer-item.imsak.active::before {
+      opacity: 1;
+    }
+
+    .prayer-name {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .prayer-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .prayer-item.imsak .prayer-time {
+      font-size: 2rem;
+      color: var(--warning);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 480px;
+      max-height: 85vh;
+      background: var(--bg-secondary);
+      border-radius: 24px 24px 0 0;
+      padding: 24px;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* Search */
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 14px 14px 48px;
+      font-size: 1rem;
+      font-family: inherit;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* City List */
+    .city-list {
+      flex: 1;
+      overflow-y: auto;
+      margin: 0 -24px;
+      padding: 0 24px;
+    }
+
+    .province-group {
+      margin-bottom: 16px;
+    }
+
+    .province-name {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+      position: sticky;
+      top: 0;
+      background: var(--bg-secondary);
+    }
+
+    .city-btn {
+      width: 100%;
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .city-btn:hover {
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .city-btn.selected {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent);
+    }
+
+    .city-coord {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Status */
+    .status-bar {
+      text-align: center;
+      padding: 16px;
+      margin-top: 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+    }
+
+    .status-bar.loading {
+      background: rgba(59, 130, 246, 0.1);
+      color: #60a5fa;
+    }
+
+    .status-bar.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .status-bar.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent);
+    }
+
+    /* Loading Animation */
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Responsive */
+    @media (min-width: 640px) {
+      .container {
+        padding: 40px 20px;
+      }
+
+      .modal-content {
+        border-radius: 24px;
+        margin: auto;
+        max-height: 80vh;
+      }
+
+      .modal-overlay {
+        align-items: center;
+        padding: 20px;
+      }
+    }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Scrollbar */
+    .city-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .city-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .city-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    .city-list::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-pattern"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="container">
+    <div class="header">
+      <center>
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczPJ_BJAVXYVisyJOLxTiiKX8cYTCL1ZetAWc227gGYm6Q6VfAWkXH3Ava90CQD06L_b9GOyEGJL-GnZUnDu6Chv5V3jL66dF8xXXaa4BdlSykExBMo3P2LEzb3I5YxB3GW4_wxIr9rexTPdj-2d7VyZ0A=w190-h190-s-no-gm?authuser=0" width="190">
+      </center>
+      <h1>Jadwal Imsyak</h1>
+      <div class="header-date" id="headerDate"></div>
+    </div>
+
+    <div class="location-card" id="locationCard">
+      <div class="location-label">Lokasi Anda</div>
+      <div class="location-value">
+        <svg class="location-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+        <span class="location-name" id="locationName">Pilih Kota</span>
+        <svg class="location-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      </div>
+    </div>
+
+    <div class="countdown-section">
+      <div class="countdown-label">Menuju</div>
+      <div class="countdown-time" id="countdown">--:--:--</div>
+      <div class="countdown-target" id="countdownTarget">Pilih kota terlebih dahulu</div>
+    </div>
+
+    <div class="prayer-grid">
+      <div class="prayer-item imsak">
+        <div class="prayer-name">Imsak</div>
+        <div class="prayer-time" id="imsak">--:--</div>
+      </div>
+      <div class="prayer-item">
+        <div class="prayer-name">Subuh</div>
+        <div class="prayer-time" id="fajr">--:--</div>
+      </div>
+      <div class="prayer-item">
+        <div class="prayer-name">Dzuhur</div>
+        <div class="prayer-time" id="dhuhr">--:--</div>
+      </div>
+      <div class="prayer-item">
+        <div class="prayer-name">Ashar</div>
+        <div class="prayer-time" id="asr">--:--</div>
+      </div>
+      <div class="prayer-item">
+        <div class="prayer-name">Maghrib</div>
+        <div class="prayer-time" id="maghrib">--:--</div>
+      </div>
+      <div class="prayer-item">
+        <div class="prayer-name">Isya</div>
+        <div class="prayer-time" id="isha">--:--</div>
+      </div>
+    </div>
+
+    <div class="status-bar loading" id="statusBar" style="display: none;">
+      <span class="loading-spinner"></span>
+      <span id="statusText">Memuat...</span>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Pilih Kota</h2>
+        <button class="modal-close" id="modalClose">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="search-wrapper">
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.35-4.35" />
+        </svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Cari kota...">
+      </div>
+
+      <div class="city-list" id="cityList"></div>
+    </div>
+  </div>
+
+  <script>
+    // Data Kota Indonesia
+    const citiesData = [
+      // ACEH
+      {
+        province: "Aceh",
+        name: "Banda Aceh",
+        lat: 5.5483,
+        lon: 95.3238
+      },
+      {
+        province: "Aceh",
+        name: "Sabang",
+        lat: 5.8900,
+        lon: 95.3200
+      },
+      {
+        province: "Aceh",
+        name: "Langsa",
+        lat: 4.4733,
+        lon: 97.9633
+      },
+      {
+        province: "Aceh",
+        name: "Lhokseumawe",
+        lat: 5.1833,
+        lon: 97.1333
+      },
+      {
+        province: "Aceh",
+        name: "Subulussalam",
+        lat: 2.6167,
+        lon: 98.0000
+      },
+      {
+        province: "Aceh",
+        name: "Singkil",
+        lat: 2.4167,
+        lon: 97.7833
+      },
+      {
+        province: "Aceh",
+        name: "Calang",
+        lat: 4.6333,
+        lon: 95.8000
+      },
+      {
+        province: "Aceh",
+        name: "Meulaboh",
+        lat: 4.2500,
+        lon: 96.1167
+      },
+      {
+        province: "Aceh",
+        name: "Tapaktuan",
+        lat: 3.2667,
+        lon: 97.1667
+      },
+      {
+        province: "Aceh",
+        name: "Kutacane",
+        lat: 3.5000,
+        lon: 97.8000
+      },
+      {
+        province: "Aceh",
+        name: "Blangkejeren",
+        lat: 3.9167,
+        lon: 97.2833
+      },
+      {
+        province: "Aceh",
+        name: "Takengon",
+        lat: 4.6167,
+        lon: 96.8500
+      },
+      // SUMATERA UTARA
+      {
+        province: "Sumatera Utara",
+        name: "Medan",
+        lat: 3.5894,
+        lon: 98.6739
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Binjai",
+        lat: 3.6000,
+        lon: 98.4833
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Pematangsiantar",
+        lat: 2.9667,
+        lon: 99.0667
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Sibolga",
+        lat: 1.7500,
+        lon: 98.7833
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Tanjungbalai",
+        lat: 2.9667,
+        lon: 99.8000
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Tebing Tinggi",
+        lat: 3.3167,
+        lon: 99.1500
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Padang Sidempuan",
+        lat: 1.3833,
+        lon: 99.2833
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Deli Serdang (Lubuk Pakam)",
+        lat: 3.5667,
+        lon: 98.8833
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Serdang Bedagai (Perbaungan)",
+        lat: 3.3000,
+        lon: 99.0833
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Langkat (Stabat)",
+        lat: 3.9167,
+        lon: 98.3833
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Asahan (Kisaran)",
+        lat: 2.9833,
+        lon: 99.6000
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Batubara (Lima Puluh)",
+        lat: 3.0333,
+        lon: 99.4500
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Labuhanbatu (Rantauprapat)",
+        lat: 2.1000,
+        lon: 99.8500
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Nias (Gunungsitoli)",
+        lat: 1.2833,
+        lon: 97.6000
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Karo (Kabanjahe)",
+        lat: 3.2333,
+        lon: 98.5000
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Simalungun (Pematang Raya)",
+        lat: 2.8167,
+        lon: 99.3667
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Dairi (Sidikalang)",
+        lat: 2.7500,
+        lon: 98.3333
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Samosir (Pangururan)",
+        lat: 2.6000,
+        lon: 98.8333
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Toba Samosir (Balige)",
+        lat: 2.3333,
+        lon: 99.0667
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Humbang Hasundutan (Dolok Sanggul)",
+        lat: 2.2500,
+        lon: 98.7833
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Pakpak Bharat (Salak)",
+        lat: 2.8500,
+        lon: 98.0667
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Tapanuli Tengah (Pandan)",
+        lat: 1.7333,
+        lon: 98.9500
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Tapanuli Utara (Tarutung)",
+        lat: 2.0000,
+        lon: 98.9833
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Tapanuli Selatan (Padangsidempuan)",
+        lat: 1.3833,
+        lon: 99.2833
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Mandailing Natal (Panyabungan)",
+        lat: 0.8167,
+        lon: 99.7000
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Labuhanbatu Selatan (Kota Pinang)",
+        lat: 1.6667,
+        lon: 100.0500
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Labuhanbatu Utara (Aek Kanopan)",
+        lat: 2.4500,
+        lon: 99.9167
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Nias Utara (Lotu)",
+        lat: 1.0500,
+        lon: 97.7167
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Nias Selatan (Teluk Dalam)",
+        lat: 0.5333,
+        lon: 97.7833
+      },
+      {
+        province: "Sumatera Utara",
+        name: "Nias Barat (Lahomi)",
+        lat: 1.0500,
+        lon: 97.4833
+      },
+      // SUMATERA BARAT
+      {
+        province: "Sumatera Barat",
+        name: "Padang",
+        lat: -0.9492,
+        lon: 100.3543
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Bukittinggi",
+        lat: -0.3000,
+        lon: 100.3667
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Padang Panjang",
+        lat: -0.4500,
+        lon: 100.4167
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Pariaman",
+        lat: -0.6167,
+        lon: 100.1167
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Payakumbuh",
+        lat: -0.2167,
+        lon: 100.6333
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Sawahlunto",
+        lat: -0.6667,
+        lon: 100.8000
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Solok",
+        lat: -0.8000,
+        lon: 100.6500
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Solok Selatan (Sawahlunto)",
+        lat: -1.2333,
+        lon: 101.2833
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Tanah Datar (Batusangkar)",
+        lat: -0.4500,
+        lon: 100.5833
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Agam (Lubuk Basung)",
+        lat: -0.2667,
+        lon: 100.0667
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Limapuluh Kota (Sarilamak)",
+        lat: -0.2333,
+        lon: 100.7333
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Pasaman (Lubuk Sikaping)",
+        lat: 0.2167,
+        lon: 100.2833
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Pasaman Barat (Simpang Empat)",
+        lat: 0.0833,
+        lon: 99.9500
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Dharmasraya (Pulau Punjung)",
+        lat: -1.0500,
+        lon: 101.4833
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Sijunjung (Muaro Sijunjung)",
+        lat: -0.7500,
+        lon: 100.9667
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Kepulauan Mentawai (Tuapejat)",
+        lat: -2.5333,
+        lon: 99.0000
+      },
+      {
+        province: "Sumatera Barat",
+        name: "Pesisir Selatan (Painan)",
+        lat: -1.3667,
+        lon: 100.6000
+      },
+      // RIAU
+      {
+        province: "Riau",
+        name: "Pekanbaru",
+        lat: 0.5025,
+        lon: 101.4175
+      },
+      {
+        province: "Riau",
+        name: "Dumai",
+        lat: 1.6944,
+        lon: 101.4450
+      },
+      {
+        province: "Riau",
+        name: "Bengkalis",
+        lat: 1.4833,
+        lon: 102.1167
+      },
+      {
+        province: "Riau",
+        name: "Kampar (Bangkinang)",
+        lat: 0.3000,
+        lon: 100.9833
+      },
+      {
+        province: "Riau",
+        name: "Rokan Hilir (Bagansiapiapi)",
+        lat: 2.0500,
+        lon: 100.5000
+      },
+      {
+        province: "Riau",
+        name: "Rokan Hulu (Pasir Pengaraian)",
+        lat: 1.0833,
+        lon: 100.2833
+      },
+      {
+        province: "Riau",
+        name: "Siak (Sungaipenuju)",
+        lat: 1.0500,
+        lon: 101.8500
+      },
+      {
+        province: "Riau",
+        name: "Kuantan Singingi (Teluk Kuantan)",
+        lat: -0.5167,
+        lon: 101.3000
+      },
+      {
+        province: "Riau",
+        name: "Indragiri Hilir (Tembilahan)",
+        lat: -0.2500,
+        lon: 103.3000
+      },
+      {
+        province: "Riau",
+        name: "Indragiri Hulu (Rengat)",
+        lat: 0.3667,
+        lon: 102.3167
+      },
+      {
+        province: "Riau",
+        name: "Pelalawan (Pangkalan Kerinci)",
+        lat: 0.1500,
+        lon: 101.4000
+      },
+      {
+        province: "Riau",
+        name: "Meranti Islands (Selatpanjang)",
+        lat: 1.0500,
+        lon: 102.3500
+      },
+      // KEPULAUAN RIAU
+      {
+        province: "Kepulauan Riau",
+        name: "Batam",
+        lat: 1.0833,
+        lon: 104.0500
+      },
+      {
+        province: "Kepulauan Riau",
+        name: "Tanjung Pinang",
+        lat: 0.9167,
+        lon: 104.4500
+      },
+      {
+        province: "Kepulauan Riau",
+        name: "Bintan (Bandar Seri Bentan)",
+        lat: 1.1667,
+        lon: 104.4000
+      },
+      {
+        province: "Kepulauan Riau",
+        name: "Karimun (Tanjung Balai Karimun)",
+        lat: 1.0000,
+        lon: 103.4500
+      },
+      {
+        province: "Kepulauan Riau",
+        name: "Lingga (Daik)",
+        lat: -0.1500,
+        lon: 104.6167
+      },
+      {
+        province: "Kepulauan Riau",
+        name: "Natuna (Ranai)",
+        lat: 3.9500,
+        lon: 108.3833
+      },
+      {
+        province: "Kepulauan Riau",
+        name: "Anambas (Tarempa)",
+        lat: 2.8833,
+        lon: 106.2833
+      },
+      {
+        province: "Kepulauan Riau",
+        name: "Lingga (Terempa)",
+        lat: 2.9833,
+        lon: 106.2333
+      },
+      // JAMBI
+      {
+        province: "Jambi",
+        name: "Jambi",
+        lat: -1.6000,
+        lon: 103.6167
+      },
+      {
+        province: "Jambi",
+        name: "Sungai Penuh",
+        lat: -2.0833,
+        lon: 101.3833
+      },
+      {
+        province: "Jambi",
+        name: "Muaro Jambi (Sengeti)",
+        lat: -1.6000,
+        lon: 103.7500
+      },
+      {
+        province: "Jambi",
+        name: "Batanghari (Muara Bulian)",
+        lat: -1.8333,
+        lon: 103.4667
+      },
+      {
+        province: "Jambi",
+        name: "Tanjung Jabung Barat (Muara Sabak)",
+        lat: -1.1167,
+        lon: 103.4000
+      },
+      {
+        province: "Jambi",
+        name: "Tanjung Jabung Timur (Muara Sabak)",
+        lat: -0.8333,
+        lon: 103.9500
+      },
+      {
+        province: "Jambi",
+        name: "Bungo (Muara Bungo)",
+        lat: -1.4833,
+        lon: 102.1000
+      },
+      {
+        province: "Jambi",
+        name: "Tebo (Muara Tebo)",
+        lat: -1.3667,
+        lon: 102.2667
+      },
+      {
+        province: "Jambi",
+        name: "Merangin (Bangko)",
+        lat: -2.0167,
+        lon: 102.1500
+      },
+      {
+        province: "Jambi",
+        name: "Sarolangun (Sarolangun)",
+        lat: -1.9167,
+        lon: 102.7500
+      },
+      {
+        province: "Jambi",
+        name: "Kerinci (Sungai Penuh)",
+        lat: -2.0833,
+        lon: 101.3833
+      },
+      // SUMATERA SELATAN
+      {
+        province: "Sumatera Selatan",
+        name: "Palembang",
+        lat: -2.9947,
+        lon: 104.7577
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Prabumulih",
+        lat: -3.4333,
+        lon: 104.2333
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Pagar Alam",
+        lat: -4.1333,
+        lon: 103.2500
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Lubuklinggau",
+        lat: -3.3000,
+        lon: 102.8667
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Banyuasin (Pangkalan Balai)",
+        lat: -2.3500,
+        lon: 104.7333
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Ogan Ilir (Indralaya)",
+        lat: -3.1333,
+        lon: 104.5333
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Ogan Komering Ilir (Kayu Agung)",
+        lat: -3.3000,
+        lon: 104.9167
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Ogan Komering Ulu (Baturaja)",
+        lat: -4.1333,
+        lon: 104.1667
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Ogan Komering Ulu Selatan (Muaradua)",
+        lat: -4.4000,
+        lon: 104.0833
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Ogan Komering Ulu Timur (Martapura)",
+        lat: -4.1000,
+        lon: 104.8500
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Muara Enim (Muara Enim)",
+        lat: -3.6500,
+        lon: 103.7667
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Lahat (Lahat)",
+        lat: -3.7833,
+        lon: 103.4833
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Musi Banyuasin (Sekayu)",
+        lat: -2.1000,
+        lon: 104.1000
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Musi Rawas (Muara Beliti)",
+        lat: -2.6500,
+        lon: 103.0833
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Musi Rawas Utara (Rupit)",
+        lat: -2.3000,
+        lon: 102.9667
+      },
+      {
+        province: "Sumatera Selatan",
+        name: "Empat Lawang (Tebing Tinggi)",
+        lat: -3.4500,
+        lon: 103.0500
+      },
+      // BANGKA BELITUNG
+      {
+        province: "Bangka Belitung",
+        name: "Pangkal Pinang",
+        lat: -2.1333,
+        lon: 106.1167
+      },
+      {
+        province: "Bangka Belitung",
+        name: "Bangka (Sungailiat)",
+        lat: -1.8667,
+        lon: 106.1167
+      },
+      {
+        province: "Bangka Belitung",
+        name: "Bangka Barat (Muntok)",
+        lat: -2.0667,
+        lon: 105.1833
+      },
+      {
+        province: "Bangka Belitung",
+        name: "Bangka Tengah (Koba)",
+        lat: -2.5000,
+        lon: 106.4667
+      },
+      {
+        province: "Bangka Belitung",
+        name: "Bangka Selatan (Toboali)",
+        lat: -2.9333,
+        lon: 106.4500
+      },
+      {
+        province: "Bangka Belitung",
+        name: "Belitung (Tanjungpandan)",
+        lat: -2.8500,
+        lon: 107.6333
+      },
+      {
+        province: "Bangka Belitung",
+        name: "Belitung Timur (Manggar)",
+        lat: -2.8667,
+        lon: 108.2500
+      },
+      // BENGKULU
+      {
+        province: "Bengkulu",
+        name: "Bengkulu",
+        lat: -3.8000,
+        lon: 102.2667
+      },
+      {
+        province: "Bengkulu",
+        name: "Rejang Lebong (Curup)",
+        lat: -3.4500,
+        lon: 102.5167
+      },
+      {
+        province: "Bengkulu",
+        name: "Kepahiang (Kepahiang)",
+        lat: -3.6333,
+        lon: 102.6000
+      },
+      {
+        province: "Bengkulu",
+        name: "Lebong (Tubei)",
+        lat: -3.4000,
+        lon: 102.3167
+      },
+      {
+        province: "Bengkulu",
+        name: "Bengkulu Tengah (Karang Tinggi)",
+        lat: -3.7000,
+        lon: 102.5167
+      },
+      {
+        province: "Bengkulu",
+        name: "Bengkulu Utara (Arga Makmur)",
+        lat: -3.4667,
+        lon: 102.0333
+      },
+      {
+        province: "Bengkulu",
+        name: "Bengkulu Selatan (Manna)",
+        lat: -4.4000,
+        lon: 102.2833
+      },
+      {
+        province: "Bengkulu",
+        name: "Kaur (Bintuhan)",
+        lat: -4.6333,
+        lon: 103.4000
+      },
+      {
+        province: "Bengkulu",
+        name: "Seluma (Tais)",
+        lat: -4.0833,
+        lon: 102.4167
+      },
+      {
+        province: "Bengkulu",
+        name: "Mukomuko (Mukomuko)",
+        lat: -2.5833,
+        lon: 101.1500
+      },
+      // LAMPUNG
+      {
+        province: "Lampung",
+        name: "Bandar Lampung",
+        lat: -5.4500,
+        lon: 105.2667
+      },
+      {
+        province: "Lampung",
+        name: "Metro",
+        lat: -5.1167,
+        lon: 105.3000
+      },
+      {
+        province: "Lampung",
+        name: "Lampung Tengah (Gunung Sugih)",
+        lat: -4.9167,
+        lon: 105.3167
+      },
+      {
+        province: "Lampung",
+        name: "Lampung Selatan (Kalianda)",
+        lat: -5.7333,
+        lon: 105.6000
+      },
+      {
+        province: "Lampung",
+        name: "Lampung Utara (Kotabumi)",
+        lat: -4.8167,
+        lon: 104.8500
+      },
+      {
+        province: "Lampung",
+        name: "Lampung Timur (Sukadana)",
+        lat: -5.1000,
+        lon: 105.5333
+      },
+      {
+        province: "Lampung",
+        name: "Lampung Barat (Liwa)",
+        lat: -5.0333,
+        lon: 104.0500
+      },
+      {
+        province: "Lampung",
+        name: "Tanggamus (Kota Agung)",
+        lat: -5.4500,
+        lon: 104.8500
+      },
+      {
+        province: "Lampung",
+        name: "Tulang Bawang (Menggala)",
+        lat: -4.3833,
+        lon: 105.2667
+      },
+      {
+        province: "Lampung",
+        name: "Tulang Bawang Barat (Panaragan Jaya)",
+        lat: -4.3333,
+        lon: 105.1000
+      },
+      {
+        province: "Lampung",
+        name: "Way Kanan (Blambangan Umpu)",
+        lat: -4.5333,
+        lon: 104.6667
+      },
+      {
+        province: "Lampung",
+        name: "Pesawaran (Gedong Tataan)",
+        lat: -5.3500,
+        lon: 105.0167
+      },
+      {
+        province: "Lampung",
+        name: "Pringsewu (Pringsewu)",
+        lat: -5.3667,
+        lon: 104.9500
+      },
+      {
+        province: "Lampung",
+        name: "Pesisir Barat (Krui)",
+        lat: -4.8333,
+        lon: 103.9333
+      },
+      // BANTEN
+      {
+        province: "Banten",
+        name: "Serang",
+        lat: -6.1167,
+        lon: 106.1500
+      },
+      {
+        province: "Banten",
+        name: "Cilegon",
+        lat: -6.0167,
+        lon: 106.0167
+      },
+      {
+        province: "Banten",
+        name: "Tangerang",
+        lat: -6.1703,
+        lon: 106.6403
+      },
+      {
+        province: "Banten",
+        name: "Tangerang Selatan",
+        lat: -6.2833,
+        lon: 106.7167
+      },
+      {
+        province: "Banten",
+        name: "Pandeglang",
+        lat: -6.3000,
+        lon: 106.1000
+      },
+      {
+        province: "Banten",
+        name: "Lebak (Rangkasbitung)",
+        lat: -6.3667,
+        lon: 106.2500
+      },
+      // DKI JAKARTA
+      {
+        province: "DKI Jakarta",
+        name: "Jakarta Pusat",
+        lat: -6.1750,
+        lon: 106.8275
+      },
+      {
+        province: "DKI Jakarta",
+        name: "Jakarta Utara",
+        lat: -6.1333,
+        lon: 106.8333
+      },
+      {
+        province: "DKI Jakarta",
+        name: "Jakarta Barat",
+        lat: -6.1500,
+        lon: 106.7500
+      },
+      {
+        province: "DKI Jakarta",
+        name: "Jakarta Selatan",
+        lat: -6.2667,
+        lon: 106.8000
+      },
+      {
+        province: "DKI Jakarta",
+        name: "Jakarta Timur",
+        lat: -6.2333,
+        lon: 106.9000
+      },
+      {
+        province: "DKI Jakarta",
+        name: "Kepulauan Seribu",
+        lat: -5.6000,
+        lon: 106.6500
+      },
+      // JAWA BARAT
+      {
+        province: "Jawa Barat",
+        name: "Bandung",
+        lat: -6.9222,
+        lon: 107.6069
+      },
+      {
+        province: "Jawa Barat",
+        name: "Bogor",
+        lat: -6.5833,
+        lon: 106.7833
+      },
+      {
+        province: "Jawa Barat",
+        name: "Cimahi",
+        lat: -6.8833,
+        lon: 107.5333
+      },
+      {
+        province: "Jawa Barat",
+        name: "Cirebon",
+        lat: -6.7000,
+        lon: 108.5500
+      },
+      {
+        province: "Jawa Barat",
+        name: "Depok",
+        lat: -6.3940,
+        lon: 106.8225
+      },
+      {
+        province: "Jawa Barat",
+        name: "Sukabumi",
+        lat: -6.9167,
+        lon: 106.9333
+      },
+      {
+        province: "Jawa Barat",
+        name: "Tasikmalaya",
+        lat: -7.3333,
+        lon: 108.2167
+      },
+      {
+        province: "Jawa Barat",
+        name: "Banjar",
+        lat: -7.3667,
+        lon: 108.5333
+      },
+      {
+        province: "Jawa Barat",
+        name: "Bekasi",
+        lat: -6.2349,
+        lon: 106.9923
+      },
+      {
+        province: "Jawa Barat",
+        name: "Karawang",
+        lat: -6.3167,
+        lon: 107.3333
+      },
+      {
+        province: "Jawa Barat",
+        name: "Purwakarta",
+        lat: -6.5500,
+        lon: 107.4500
+      },
+      {
+        province: "Jawa Barat",
+        name: "Subang",
+        lat: -6.5667,
+        lon: 107.7667
+      },
+      {
+        province: "Jawa Barat",
+        name: "Sumedang",
+        lat: -6.8500,
+        lon: 107.9167
+      },
+      {
+        province: "Jawa Barat",
+        name: "Garut",
+        lat: -7.2333,
+        lon: 107.9000
+      },
+      {
+        province: "Jawa Barat",
+        name: "Cianjur",
+        lat: -6.8167,
+        lon: 107.1500
+      },
+      {
+        province: "Jawa Barat",
+        name: "Indramayu",
+        lat: -6.3333,
+        lon: 108.3500
+      },
+      {
+        province: "Jawa Barat",
+        name: "Majalengka",
+        lat: -6.8500,
+        lon: 108.2333
+      },
+      {
+        province: "Jawa Barat",
+        name: "Kuningan",
+        lat: -6.9833,
+        lon: 108.4833
+      },
+      {
+        province: "Jawa Barat",
+        name: "Ciamis",
+        lat: -7.3333,
+        lon: 108.3333
+      },
+      {
+        province: "Jawa Barat",
+        name: "Pangandaran (Parigi)",
+        lat: -7.7000,
+        lon: 108.6500
+      },
+      {
+        province: "Jawa Barat",
+        name: "Bandung Barat (Ngamprah)",
+        lat: -6.8500,
+        lon: 107.4167
+      },
+      {
+        province: "Jawa Barat",
+        name: "West Bandung (Ngamprah)",
+        lat: -6.8500,
+        lon: 107.4167
+      },
+      {
+        province: "Jawa Barat",
+        name: "Sukabumi (Pelabuhan Ratu)",
+        lat: -7.0333,
+        lon: 106.5500
+      },
+      // JAWA TENGAH
+      {
+        province: "Jawa Tengah",
+        name: "Semarang",
+        lat: -6.9900,
+        lon: 110.4225
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Surakarta",
+        lat: -7.5667,
+        lon: 110.8333
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Pekalongan",
+        lat: -6.9000,
+        lon: 109.6667
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Salatiga",
+        lat: -7.3333,
+        lon: 110.5000
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Tegal",
+        lat: -6.8833,
+        lon: 109.1333
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Magelang",
+        lat: -7.4833,
+        lon: 110.2167
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Kudus",
+        lat: -6.8000,
+        lon: 110.8500
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Purwokerto",
+        lat: -7.4167,
+        lon: 109.2500
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Klaten",
+        lat: -7.7000,
+        lon: 110.6000
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Kendal",
+        lat: -6.9167,
+        lon: 110.1833
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Demak",
+        lat: -6.8833,
+        lon: 110.6333
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Sragen",
+        lat: -7.4500,
+        lon: 111.0167
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Sukoharjo",
+        lat: -7.6833,
+        lon: 110.8333
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Wonogiri",
+        lat: -7.9333,
+        lon: 110.9333
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Karanganyar",
+        lat: -7.6000,
+        lon: 110.9333
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Boyolali",
+        lat: -7.5500,
+        lon: 110.6167
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Jepara",
+        lat: -6.6000,
+        lon: 110.6667
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Rembang",
+        lat: -6.7000,
+        lon: 111.3500
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Blora",
+        lat: -6.9667,
+        lon: 111.4000
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Pati",
+        lat: -6.7500,
+        lon: 111.0333
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Brebes",
+        lat: -7.0333,
+        lon: 109.0333
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Banyumas",
+        lat: -7.4333,
+        lon: 109.4333
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Cilacap",
+        lat: -7.7000,
+        lon: 109.0167
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Bumiayu",
+        lat: -7.2000,
+        lon: 109.2167
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Purbalingga",
+        lat: -7.3833,
+        lon: 109.3500
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Banjarnegara",
+        lat: -7.4000,
+        lon: 109.5333
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Wonosobo",
+        lat: -7.3500,
+        lon: 109.9667
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Temanggung",
+        lat: -7.2667,
+        lon: 110.1833
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Batang",
+        lat: -6.9333,
+        lon: 109.7500
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Pemalang",
+        lat: -6.8833,
+        lon: 109.4000
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Grobogan",
+        lat: -7.0833,
+        lon: 110.5500
+      },
+      {
+        province: "Jawa Tengah",
+        name: "Kebumen",
+        lat: -7.6667,
+        lon: 109.6500
+      },
+      // DI YOGYAKARTA
+      {
+        province: "DI Yogyakarta",
+        name: "Yogyakarta",
+        lat: -7.7956,
+        lon: 110.3695
+      },
+      {
+        province: "DI Yogyakarta",
+        name: "Sleman",
+        lat: -7.7000,
+        lon: 110.3500
+      },
+      {
+        province: "DI Yogyakarta",
+        name: "Bantul",
+        lat: -7.8833,
+        lon: 110.3333
+      },
+      {
+        province: "DI Yogyakarta",
+        name: "Gunungkidul (Wonosari)",
+        lat: -7.9667,
+        lon: 110.6000
+      },
+      {
+        province: "DI Yogyakarta",
+        name: "Kulon Progo (Wates)",
+        lat: -7.8667,
+        lon: 110.1500
+      },
+      // JAWA TIMUR
+      {
+        province: "Jawa Timur",
+        name: "Surabaya",
+        lat: -7.2458,
+        lon: 112.7378
+      },
+      {
+        province: "Jawa Timur",
+        name: "Malang",
+        lat: -7.9800,
+        lon: 112.6200
+      },
+      {
+        province: "Jawa Timur",
+        name: "Kediri",
+        lat: -7.8333,
+        lon: 112.0167
+      },
+      {
+        province: "Jawa Timur",
+        name: "Madiun",
+        lat: -7.6167,
+        lon: 111.5167
+      },
+      {
+        province: "Jawa Timur",
+        name: "Blitar",
+        lat: -7.9833,
+        lon: 112.1667
+      },
+      {
+        province: "Jawa Timur",
+        name: "Mojokerto",
+        lat: -7.4667,
+        lon: 112.4333
+      },
+      {
+        province: "Jawa Timur",
+        name: "Pasuruan",
+        lat: -7.6500,
+        lon: 112.9000
+      },
+      {
+        province: "Jawa Timur",
+        name: "Probolinggo",
+        lat: -7.7500,
+        lon: 113.2167
+      },
+      {
+        province: "Jawa Timur",
+        name: "Batu",
+        lat: -7.8667,
+        lon: 112.5333
+      },
+      {
+        province: "Jawa Timur",
+        name: "Jember",
+        lat: -8.1667,
+        lon: 113.7000
+      },
+      {
+        province: "Jawa Timur",
+        name: "Banyuwangi",
+        lat: -8.2167,
+        lon: 114.3667
+      },
+      {
+        province: "Jawa Timur",
+        name: "Bondowoso",
+        lat: -7.9167,
+        lon: 113.8167
+      },
+      {
+        province: "Jawa Timur",
+        name: "Situbondo",
+        lat: -7.7000,
+        lon: 113.8500
+      },
+      {
+        province: "Jawa Timur",
+        name: "Lumajang",
+        lat: -8.1333,
+        lon: 113.0000
+      },
+      {
+        province: "Jawa Timur",
+        name: "Tulungagung",
+        lat: -8.0667,
+        lon: 111.9000
+      },
+      {
+        province: "Jawa Timur",
+        name: "Trenggalek",
+        lat: -8.0500,
+        lon: 111.6833
+      },
+      {
+        province: "Jawa Timur",
+        name: "Ponorogo",
+        lat: -7.7000,
+        lon: 111.4667
+      },
+      {
+        province: "Jawa Timur",
+        name: "Magetan",
+        lat: -7.6500,
+        lon: 111.3667
+      },
+      {
+        province: "Jawa Timur",
+        name: "Ngawi",
+        lat: -7.4000,
+        lon: 111.4500
+      },
+      {
+        province: "Jawa Timur",
+        name: "Bojonegoro",
+        lat: -7.0667,
+        lon: 111.8833
+      },
+      {
+        province: "Jawa Timur",
+        name: "Tuban",
+        lat: -6.9500,
+        lon: 112.0333
+      },
+      {
+        province: "Jawa Timur",
+        name: "Lamongan",
+        lat: -7.1167,
+        lon: 112.4167
+      },
+      {
+        province: "Jawa Timur",
+        name: "Gresik",
+        lat: -7.1500,
+        lon: 112.6500
+      },
+      {
+        province: "Jawa Timur",
+        name: "Sidoarjo",
+        lat: -7.4500,
+        lon: 112.7167
+      },
+      {
+        province: "Jawa Timur",
+        name: "Bangkalan",
+        lat: -7.0500,
+        lon: 112.7333
+      },
+      {
+        province: "Jawa Timur",
+        name: "Sampang",
+        lat: -7.0333,
+        lon: 113.0500
+      },
+      {
+        province: "Jawa Timur",
+        name: "Pamekasan",
+        lat: -7.1500,
+        lon: 113.4833
+      },
+      {
+        province: "Jawa Timur",
+        name: "Sumenep",
+        lat: -7.0000,
+        lon: 113.8500
+      },
+      {
+        province: "Jawa Timur",
+        name: "Nganjuk",
+        lat: -7.6000,
+        lon: 111.9000
+      },
+      {
+        province: "Jawa Timur",
+        name: "Jombang",
+        lat: -7.5500,
+        lon: 112.2333
+      },
+      {
+        province: "Jawa Timur",
+        name: "Pacitan",
+        lat: -8.2000,
+        lon: 111.1333
+      },
+      // BALI
+      {
+        province: "Bali",
+        name: "Denpasar",
+        lat: -8.6705,
+        lon: 115.2126
+      },
+      {
+        province: "Bali",
+        name: "Singaraja",
+        lat: -8.1167,
+        lon: 115.0833
+      },
+      {
+        province: "Bali",
+        name: "Gianyar",
+        lat: -8.5000,
+        lon: 115.3167
+      },
+      {
+        province: "Bali",
+        name: "Badung (Mengwi)",
+        lat: -8.5833,
+        lon: 115.1833
+      },
+      {
+        province: "Bali",
+        name: "Tabanan",
+        lat: -8.5333,
+        lon: 115.1167
+      },
+      {
+        province: "Bali",
+        name: "Bangli",
+        lat: -8.4500,
+        lon: 115.3333
+      },
+      {
+        province: "Bali",
+        name: "Karangasem (Amlapura)",
+        lat: -8.4500,
+        lon: 115.5833
+      },
+      {
+        province: "Bali",
+        name: "Klungkung (Semarapura)",
+        lat: -8.5500,
+        lon: 115.4000
+      },
+      {
+        province: "Bali",
+        name: "Buleleng (Singaraja)",
+        lat: -8.1167,
+        lon: 115.0833
+      },
+      {
+        province: "Bali",
+        name: "Jembrana (Negara)",
+        lat: -8.3833,
+        lon: 114.8167
+      },
+      {
+        province: "Bali",
+        name: "Negara",
+        lat: -8.3833,
+        lon: 114.8167
+      },
+      // NUSA TENGGARA BARAT
+      {
+        province: "Nusa Tenggara Barat",
+        name: "Mataram",
+        lat: -8.6500,
+        lon: 116.1000
+      },
+      {
+        province: "Nusa Tenggara Barat",
+        name: "Bima",
+        lat: -8.4500,
+        lon: 118.7333
+      },
+      {
+        province: "Nusa Tenggara Barat",
+        name: "Lombok Barat (Gerung)",
+        lat: -8.7167,
+        lon: 116.0500
+      },
+      {
+        province: "Nusa Tenggara Barat",
+        name: "Lombok Tengah (Praya)",
+        lat: -8.7000,
+        lon: 116.2833
+      },
+      {
+        province: "Nusa Tenggara Barat",
+        name: "Lombok Timur (Selong)",
+        lat: -8.6500,
+        lon: 116.5500
+      },
+      {
+        province: "Nusa Tenggara Barat",
+        name: "Lombok Utara (Tanjung)",
+        lat: -8.3500,
+        lon: 116.3500
+      },
+      {
+        province: "Nusa Tenggara Barat",
+        name: "Sumbawa (Sumbawa Besar)",
+        lat: -8.4833,
+        lon: 117.4167
+      },
+      {
+        province: "Nusa Tenggara Barat",
+        name: "Sumbawa Barat (Taliwang)",
+        lat: -8.7500,
+        lon: 117.2000
+      },
+      {
+        province: "Nusa Tenggara Barat",
+        name: "Dompu",
+        lat: -8.5500,
+        lon: 118.4667
+      },
+      {
+        province: "Nusa Tenggara Barat",
+        name: "Sumbawa Besar",
+        lat: -8.4833,
+        lon: 117.4167
+      },
+      // NUSA TENGGARA TIMUR
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Kupang",
+        lat: -10.1667,
+        lon: 123.5833
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Ende",
+        lat: -8.8500,
+        lon: 121.6667
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Maumere",
+        lat: -8.6167,
+        lon: 122.2167
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Ruteng",
+        lat: -8.6000,
+        lon: 120.4667
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Bajawa",
+        lat: -8.8000,
+        lon: 120.9833
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Labuan Bajo",
+        lat: -8.4500,
+        lon: 119.8667
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Waingapu",
+        lat: -9.6500,
+        lon: 120.2833
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Waikabubak",
+        lat: -9.6500,
+        lon: 119.4333
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Atambua",
+        lat: -9.1000,
+        lon: 124.9000
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Kefamenanu",
+        lat: -9.4500,
+        lon: 124.4500
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Larantuka",
+        lat: -8.3500,
+        lon: 122.9833
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Rote (Baa)",
+        lat: -10.8000,
+        lon: 123.0833
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Sabu (Seba)",
+        lat: -10.5000,
+        lon: 121.8833
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Alor (Kalabahi)",
+        lat: -8.3000,
+        lon: 124.6000
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Lembata (Lewoleba)",
+        lat: -8.4500,
+        lon: 123.4000
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Sikka (Maumere)",
+        lat: -8.6167,
+        lon: 122.2167
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Flores Timur (Larantuka)",
+        lat: -8.3500,
+        lon: 122.9833
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Manggarai (Ruteng)",
+        lat: -8.6000,
+        lon: 120.4667
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Manggarai Barat (Labuan Bajo)",
+        lat: -8.4500,
+        lon: 119.8667
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Manggarai Timur (Borong)",
+        lat: -8.5500,
+        lon: 120.8667
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Ngada (Bajawa)",
+        lat: -8.8000,
+        lon: 120.9833
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Nagekeo (Mbay)",
+        lat: -8.6500,
+        lon: 121.0167
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Ende",
+        lat: -8.8500,
+        lon: 121.6667
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Sumba Timur (Waingapu)",
+        lat: -9.6500,
+        lon: 120.2833
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Sumba Barat (Waikabubak)",
+        lat: -9.6500,
+        lon: 119.4333
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Sumba Barat Daya (Tambolaka)",
+        lat: -9.7000,
+        lon: 119.2000
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Sumba Tengah (Waibakul)",
+        lat: -9.8000,
+        lon: 119.0500
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Timor Tengah Selatan (Soe)",
+        lat: -9.8667,
+        lon: 124.3000
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Timor Tengah Utara (Kefamenanu)",
+        lat: -9.4500,
+        lon: 124.4500
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Belu (Atambua)",
+        lat: -9.1000,
+        lon: 124.9000
+      },
+      {
+        province: "Nusa Tenggara Timur",
+        name: "Malaka (Betun)",
+        lat: -9.5000,
+        lon: 124.8000
+      },
+      // KALIMANTAN BARAT
+      {
+        province: "Kalimantan Barat",
+        name: "Pontianak",
+        lat: -0.0200,
+        lon: 109.3410
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Singkawang",
+        lat: 0.9000,
+        lon: 108.9833
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Sambas",
+        lat: 1.3500,
+        lon: 109.3000
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Ketapang",
+        lat: -1.8000,
+        lon: 110.6000
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Sintang",
+        lat: 0.1000,
+        lon: 111.4833
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Kapuas Hulu (Putussibau)",
+        lat: 0.8500,
+        lon: 112.9333
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Melawi (Nanga Pinoh)",
+        lat: -0.1833,
+        lon: 111.4500
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Sekadau",
+        lat: 0.0500,
+        lon: 110.6500
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Landak (Ngabang)",
+        lat: 0.3500,
+        lon: 109.9000
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Mempawah",
+        lat: 0.7500,
+        lon: 109.0333
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Bengkayang",
+        lat: 1.0000,
+        lon: 109.5000
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Kayong Utara (Sukadana)",
+        lat: -1.0333,
+        lon: 110.1833
+      },
+      {
+        province: "Kalimantan Barat",
+        name: "Kubu Raya (Sungai Raya)",
+        lat: -0.1833,
+        lon: 109.3500
+      },
+      // KALIMANTAN TENGAH
+      {
+        province: "Kalimantan Tengah",
+        name: "Palangkaraya",
+        lat: -2.2167,
+        lon: 113.9167
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Sampit",
+        lat: -2.9500,
+        lon: 112.9500
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Pangkalan Bun",
+        lat: -2.7000,
+        lon: 111.6000
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Kotawaringin Barat (Pangkalan Bun)",
+        lat: -2.7000,
+        lon: 111.6000
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Kotawaringin Timur (Sampit)",
+        lat: -2.9500,
+        lon: 112.9500
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Kapuas (Kuala Kapuas)",
+        lat: -2.9833,
+        lon: 114.4000
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Barito Selatan (Buntok)",
+        lat: -2.9500,
+        lon: 115.3500
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Barito Utara (Muara Teweh)",
+        lat: -0.9333,
+        lon: 114.9000
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Barito Timur (Tamiang Layang)",
+        lat: -1.8500,
+        lon: 115.6000
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Murung Raya (Puruk Cahu)",
+        lat: -0.3500,
+        lon: 114.8500
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Pulang Pisau (Pulang Pisau)",
+        lat: -2.8500,
+        lon: 114.0667
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Gunung Mas (Kuala Kurun)",
+        lat: -0.9833,
+        lon: 113.9833
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Katingan (Kasongan)",
+        lat: -1.8167,
+        lon: 113.5500
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Seruyan (Kuala Pembuang)",
+        lat: -2.6000,
+        lon: 112.1833
+      },
+      {
+        province: "Kalimantan Tengah",
+        name: "Sukamara",
+        lat: -2.6833,
+        lon: 111.2833
+      },
+      // KALIMANTAN SELATAN
+      {
+        province: "Kalimantan Selatan",
+        name: "Banjarmasin",
+        lat: -3.3194,
+        lon: 114.5908
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Banjarbaru",
+        lat: -3.4500,
+        lon: 114.8333
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Martapura",
+        lat: -3.4167,
+        lon: 114.8500
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Banjar (Martapura)",
+        lat: -3.4167,
+        lon: 114.8500
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Tanah Laut (Pelaihari)",
+        lat: -3.7833,
+        lon: 114.8333
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Tanah Bumbu (Batulicin)",
+        lat: -3.6000,
+        lon: 115.9000
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Kotabaru",
+        lat: -3.3000,
+        lon: 116.2000
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Hulu Sungai Selatan (Kandangan)",
+        lat: -2.7500,
+        lon: 115.0167
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Hulu Sungai Tengah (Barabai)",
+        lat: -2.8167,
+        lon: 115.3000
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Hulu Sungai Utara (Amuntai)",
+        lat: -2.4333,
+        lon: 115.2500
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Balangan (Paringin)",
+        lat: -2.4833,
+        lon: 115.4833
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Tabalong (Tanjung)",
+        lat: -1.9500,
+        lon: 115.3500
+      },
+      {
+        province: "Kalimantan Selatan",
+        name: "Tapin (Rantau)",
+        lat: -2.8500,
+        lon: 115.0667
+      },
+      // KALIMANTAN TIMUR
+      {
+        province: "Kalimantan Timur",
+        name: "Samarinda",
+        lat: -1.2420,
+        lon: 116.8460
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Balikpapan",
+        lat: -1.2399,
+        lon: 116.8312
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Bontang",
+        lat: 0.1333,
+        lon: 117.4833
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Tarakan",
+        lat: 3.3000,
+        lon: 117.6000
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Tenggarong",
+        lat: -0.5000,
+        lon: 117.0500
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Kutai Kartanegara (Tenggarong)",
+        lat: -0.5000,
+        lon: 117.0500
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Kutai Barat (Sendawar)",
+        lat: -0.0833,
+        lon: 116.5333
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Kutai Timur (Sangatta)",
+        lat: 0.4833,
+        lon: 117.5500
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Berau (Tanjung Redeb)",
+        lat: 2.1333,
+        lon: 117.4500
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Bulungan (Tanjung Selor)",
+        lat: 2.8500,
+        lon: 117.3667
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Malinau",
+        lat: 3.5500,
+        lon: 116.6333
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Nunukan",
+        lat: 4.1000,
+        lon: 117.1000
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Tana Tidung (Tideng Pale)",
+        lat: 3.4000,
+        lon: 117.5500
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Paser (Tanah Grogot)",
+        lat: -1.4500,
+        lon: 116.2500
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Penajam Paser Utara (Penajam)",
+        lat: -1.2167,
+        lon: 116.8167
+      },
+      {
+        province: "Kalimantan Timur",
+        name: "Mahakam Ulu (Ujoh Bilang)",
+        lat: -0.3000,
+        lon: 115.8500
+      },
+      // KALIMANTAN UTARA
+      {
+        province: "Kalimantan Utara",
+        name: "Tanjung Selor",
+        lat: 2.8500,
+        lon: 117.3667
+      },
+      {
+        province: "Kalimantan Utara",
+        name: "Nunukan",
+        lat: 4.1000,
+        lon: 117.1000
+      },
+      {
+        province: "Kalimantan Utara",
+        name: "Malinau",
+        lat: 3.5500,
+        lon: 116.6333
+      },
+      {
+        province: "Kalimantan Utara",
+        name: "Bulungan",
+        lat: 2.8500,
+        lon: 117.3667
+      },
+      {
+        province: "Kalimantan Utara",
+        name: "Tana Tidung",
+        lat: 3.4000,
+        lon: 117.5500
+      },
+      // SULAWESI UTARA
+      {
+        province: "Sulawesi Utara",
+        name: "Manado",
+        lat: 1.4400,
+        lon: 125.0000
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Bitung",
+        lat: 1.4500,
+        lon: 125.2000
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Tomohon",
+        lat: 1.3000,
+        lon: 124.8500
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Kotamobagu",
+        lat: 0.7333,
+        lon: 124.3167
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Minahasa (Tondano)",
+        lat: 1.3000,
+        lon: 124.9000
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Minahasa Utara (Airmadidi)",
+        lat: 1.4500,
+        lon: 124.9667
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Minahasa Selatan (Amurang)",
+        lat: 1.2000,
+        lon: 124.7500
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Minahasa Tenggara (Ratahan)",
+        lat: 1.0500,
+        lon: 124.7500
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Kepulauan Sangihe (Tahuna)",
+        lat: 3.5500,
+        lon: 125.5833
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Kepulauan Talaud (Melonguane)",
+        lat: 4.0000,
+        lon: 126.7000
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Bolaang Mongondow (Kotabunan)",
+        lat: 0.7500,
+        lon: 124.3333
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Bolaang Mongondow Utara (Boroko)",
+        lat: 0.9333,
+        lon: 123.8167
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Bolaang Mongondow Selatan (Molibagu)",
+        lat: 0.4167,
+        lon: 123.7333
+      },
+      {
+        province: "Sulawesi Utara",
+        name: "Bolaang Mongondow Timur (Tutuyan)",
+        lat: 0.6833,
+        lon: 124.1500
+      },
+      // GORONTALO
+      {
+        province: "Gorontalo",
+        name: "Gorontalo",
+        lat: 0.5500,
+        lon: 123.0667
+      },
+      {
+        province: "Gorontalo",
+        name: "Gorontalo Utara (Kwandang)",
+        lat: 1.0500,
+        lon: 122.4167
+      },
+      {
+        province: "Gorontalo",
+        name: "Bone Bolango (Suwawa)",
+        lat: 0.5167,
+        lon: 123.1667
+      },
+      {
+        province: "Gorontalo",
+        name: "Boalemo (Tilamuta)",
+        lat: 0.5000,
+        lon: 122.4333
+      },
+      {
+        province: "Gorontalo",
+        name: "Pohuwato (Marisa)",
+        lat: 0.5500,
+        lon: 121.8333
+      },
+      // SULAWESI TENGAH
+      {
+        province: "Sulawesi Tengah",
+        name: "Palu",
+        lat: -0.9000,
+        lon: 119.8500
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Poso",
+        lat: -1.4000,
+        lon: 120.7500
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Donggala (Banawa)",
+        lat: -0.7000,
+        lon: 119.7167
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Parigi Moutong (Parigi)",
+        lat: -0.8000,
+        lon: 120.5000
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Toli-Toli",
+        lat: 1.0333,
+        lon: 120.7833
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Buol",
+        lat: 1.0333,
+        lon: 121.3833
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Tojo Una-Una (Ampana)",
+        lat: -1.0500,
+        lon: 121.6500
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Tana Toraja (Makale)",
+        lat: -3.0000,
+        lon: 119.8500
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Toraja Utara (Rantepao)",
+        lat: -2.8333,
+        lon: 119.9667
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Sigi (Sigi Biromaru)",
+        lat: -1.0500,
+        lon: 119.9000
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Banggai (Luwuk)",
+        lat: -1.0167,
+        lon: 122.7833
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Banggai Kepulauan (Salakan)",
+        lat: -1.7167,
+        lon: 123.4167
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Banggai Laut (Banggai)",
+        lat: -1.6333,
+        lon: 123.5000
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Morowali (Kolonodale)",
+        lat: -1.6833,
+        lon: 121.3000
+      },
+      {
+        province: "Sulawesi Tengah",
+        name: "Morowali Utara (Kolonedale)",
+        lat: -1.6833,
+        lon: 121.3000
+      },
+      // SULAWESI BARAT
+      {
+        province: "Sulawesi Barat",
+        name: "Mamuju",
+        lat: -2.6667,
+        lon: 118.9000
+      },
+      {
+        province: "Sulawesi Barat",
+        name: "Mamuju Utara (Pasangkayu)",
+        lat: -1.4500,
+        lon: 119.3500
+      },
+      {
+        province: "Sulawesi Barat",
+        name: "Mamuju Tengah (Tobadak)",
+        lat: -2.5500,
+        lon: 118.9833
+      },
+      {
+        province: "Sulawesi Barat",
+        name: "Majene",
+        lat: -2.9500,
+        lon: 118.9667
+      },
+      {
+        province: "Sulawesi Barat",
+        name: "Polman (Polewali)",
+        lat: -3.2500,
+        lon: 119.0833
+      },
+      {
+        province: "Sulawesi Barat",
+        name: "Pasangkayu",
+        lat: -1.4500,
+        lon: 119.3500
+      },
+      // SULAWESI SELATAN
+      {
+        province: "Sulawesi Selatan",
+        name: "Makassar",
+        lat: -5.1354,
+        lon: 119.4124
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Parepare",
+        lat: -4.0333,
+        lon: 119.6333
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Palopo",
+        lat: -2.9945,
+        lon: 120.1955
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Gowa (Sungguminasa)",
+        lat: -5.2000,
+        lon: 119.4500
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Takalar",
+        lat: -5.4000,
+        lon: 119.4000
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Jeneponto (Bontosikuyu)",
+        lat: -5.5833,
+        lon: 119.4833
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Bantaeng",
+        lat: -5.3833,
+        lon: 119.9333
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Bulukumba",
+        lat: -5.5500,
+        lon: 120.2167
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Selayar (Benteng)",
+        lat: -6.1000,
+        lon: 120.5000
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Sinjai",
+        lat: -5.2000,
+        lon: 119.8500
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Bone (Watampone)",
+        lat: -5.0000,
+        lon: 119.9000
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Soppeng (Watansoppeng)",
+        lat: -4.3000,
+        lon: 119.8500
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Wajo (Sengkang)",
+        lat: -4.0167,
+        lon: 120.0333
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Sidrap (Sidenreng)",
+        lat: -3.9167,
+        lon: 119.8500
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Pinrang",
+        lat: -3.3833,
+        lon: 119.6500
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Enrekang",
+        lat: -3.3000,
+        lon: 119.7833
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Tana Toraja (Makale)",
+        lat: -3.0000,
+        lon: 119.8500
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Toraja Utara (Rantepao)",
+        lat: -2.8333,
+        lon: 119.9667
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Luwu (Palopo)",
+        lat: -2.9945,
+        lon: 120.1955
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Luwu Utara (Masamba)",
+        lat: -2.5167,
+        lon: 120.2000
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Luwu Timur (Malili)",
+        lat: -2.4500,
+        lon: 121.1000
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Maros",
+        lat: -5.0000,
+        lon: 119.5833
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Pangkep (Pangkajene)",
+        lat: -4.8500,
+        lon: 119.6000
+      },
+      {
+        province: "Sulawesi Selatan",
+        name: "Barru",
+        lat: -4.4167,
+        lon: 119.6167
+      },
+      // SULAWESI TENGGARA
+      {
+        province: "Sulawesi Tenggara",
+        name: "Kendari",
+        lat: -4.0000,
+        lon: 122.5000
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Bau-Bau",
+        lat: -5.4667,
+        lon: 122.6000
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Konawe (Unaaha)",
+        lat: -3.7500,
+        lon: 122.5000
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Konawe Selatan (Andoolo)",
+        lat: -4.1333,
+        lon: 122.4167
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Konawe Utara (Wanggudu)",
+        lat: -2.8500,
+        lon: 122.0333
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Konawe Kepulauan (Langara)",
+        lat: -4.2500,
+        lon: 123.2000
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Konawe Tengah (Lalolere)",
+        lat: -3.6333,
+        lon: 122.0833
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Konawe Timur (Tirawuta)",
+        lat: -3.5833,
+        lon: 122.7667
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Muna (Raha)",
+        lat: -4.8833,
+        lon: 122.2500
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Muna Barat (Sawerigadi)",
+        lat: -4.9667,
+        lon: 122.0000
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Buton (Pasarwajo)",
+        lat: -5.5333,
+        lon: 122.8500
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Buton Utara (Buranga)",
+        lat: -5.0333,
+        lon: 122.9000
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Buton Selatan (Batauga)",
+        lat: -5.5500,
+        lon: 122.6833
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Buton Tengah (Labungkari)",
+        lat: -5.3333,
+        lon: 122.8000
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Wakatobi (Wangi-Wangi)",
+        lat: -5.3500,
+        lon: 123.6000
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Kolaka",
+        lat: -3.5000,
+        lon: 121.1833
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Kolaka Utara (Lasusua)",
+        lat: -3.0000,
+        lon: 121.1000
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Kolaka Timur (Tirawuta)",
+        lat: -3.2500,
+        lon: 121.6000
+      },
+      {
+        province: "Sulawesi Tenggara",
+        name: "Kolaka Selatan (Ranteangin)",
+        lat: -3.8333,
+        lon: 121.2333
+      },
+      // MALUKU
+      {
+        province: "Maluku",
+        name: "Ambon",
+        lat: -3.6547,
+        lon: 128.1906
+      },
+      {
+        province: "Maluku",
+        name: "Tual",
+        lat: -5.6667,
+        lon: 132.7500
+      },
+      {
+        province: "Maluku",
+        name: "Maluku Tengah (Masohi)",
+        lat: -3.3500,
+        lon: 128.5000
+      },
+      {
+        province: "Maluku",
+        name: "Maluku Tenggara (Tual)",
+        lat: -5.6667,
+        lon: 132.7500
+      },
+      {
+        province: "Maluku",
+        name: "Maluku Tenggara Barat (Saumlaki)",
+        lat: -8.0000,
+        lon: 131.3000
+      },
+      {
+        province: "Maluku",
+        name: "Kepulauan Aru (Dobo)",
+        lat: -6.1000,
+        lon: 134.2167
+      },
+      {
+        province: "Maluku",
+        name: "Seram Bagian Barat (Piru)",
+        lat: -3.2000,
+        lon: 128.1500
+      },
+      {
+        province: "Maluku",
+        name: "Seram Bagian Timur (Bula)",
+        lat: -3.1500,
+        lon: 129.5167
+      },
+      {
+        province: "Maluku",
+        name: "Buru (Namlea)",
+        lat: -3.2167,
+        lon: 126.8000
+      },
+      {
+        province: "Maluku",
+        name: "Buru Selatan (Namrole)",
+        lat: -3.5833,
+        lon: 126.7000
+      },
+      // MALUKU UTARA
+      {
+        province: "Maluku Utara",
+        name: "Ternate",
+        lat: 0.8000,
+        lon: 127.3833
+      },
+      {
+        province: "Maluku Utara",
+        name: "Tidore",
+        lat: 0.7000,
+        lon: 127.4500
+      },
+      {
+        province: "Maluku Utara",
+        name: "Sofifi",
+        lat: 0.7333,
+        lon: 127.5500
+      },
+      {
+        province: "Maluku Utara",
+        name: "Halmahera Barat (Jailolo)",
+        lat: 1.1000,
+        lon: 127.0667
+      },
+      {
+        province: "Maluku Utara",
+        name: "Halmahera Tengah (Weda)",
+        lat: 0.3500,
+        lon: 128.1667
+      },
+      {
+        province: "Maluku Utara",
+        name: "Halmahera Timur (Maba)",
+        lat: 0.5000,
+        lon: 129.1000
+      },
+      {
+        province: "Maluku Utara",
+        name: "Halmahera Selatan (Labuha)",
+        lat: -0.6500,
+        lon: 127.5333
+      },
+      {
+        province: "Maluku Utara",
+        name: "Halmahera Utara (Tobelo)",
+        lat: 1.7000,
+        lon: 128.0333
+      },
+      {
+        province: "Maluku Utara",
+        name: "Kepulauan Sula (Sanana)",
+        lat: -1.9667,
+        lon: 125.8667
+      },
+      {
+        province: "Maluku Utara",
+        name: "Pulau Morotai (Daruba)",
+        lat: 2.3333,
+        lon: 128.4000
+      },
+      {
+        province: "Maluku Utara",
+        name: "Pulau Taliabu (Bobong)",
+        lat: -1.9167,
+        lon: 124.9500
+      },
+      // PAPUA
+      {
+        province: "Papua",
+        name: "Jayapura",
+        lat: -2.5489,
+        lon: 140.6970
+      },
+      {
+        province: "Papua",
+        name: "Merauke",
+        lat: -8.5000,
+        lon: 140.3000
+      },
+      {
+        province: "Papua",
+        name: "Biak",
+        lat: -1.0333,
+        lon: 136.0000
+      },
+      {
+        province: "Papua",
+        name: "Nabire",
+        lat: -3.3667,
+        lon: 135.5000
+      },
+      {
+        province: "Papua",
+        name: "Timika",
+        lat: -4.5667,
+        lon: 136.9000
+      },
+      {
+        province: "Papua",
+        name: "Wamena",
+        lat: -4.1000,
+        lon: 138.9500
+      },
+      {
+        province: "Papua",
+        name: "Sentani",
+        lat: -2.6000,
+        lon: 140.5000
+      },
+      {
+        province: "Papua",
+        name: "Sarmi",
+        lat: -1.8500,
+        lon: 138.7500
+      },
+      {
+        province: "Papua",
+        name: "Keerom (Waris)",
+        lat: -2.8000,
+        lon: 140.6500
+      },
+      {
+        province: "Papua",
+        name: "Pegunungan Bintang (Oksibil)",
+        lat: -4.9000,
+        lon: 140.6500
+      },
+      {
+        province: "Papua",
+        name: "Yahukimo (Sumohai)",
+        lat: -5.5000,
+        lon: 139.5500
+      },
+      {
+        province: "Papua",
+        name: "Tolikara (Karubaga)",
+        lat: -3.8500,
+        lon: 138.3500
+      },
+      {
+        province: "Papua",
+        name: "Puncak Jaya (Kotamulia)",
+        lat: -3.7500,
+        lon: 137.9833
+      },
+      {
+        province: "Papua",
+        name: "Paniai (Enarotali)",
+        lat: -3.9167,
+        lon: 136.4167
+      },
+      {
+        province: "Papua",
+        name: "Dogiyai (Kigamani)",
+        lat: -4.3000,
+        lon: 136.3333
+      },
+      {
+        province: "Papua",
+        name: "Deiyai (Tigi)",
+        lat: -4.0500,
+        lon: 136.2167
+      },
+      {
+        province: "Papua",
+        name: "Intan Jaya (Sugapa)",
+        lat: -3.8000,
+        lon: 136.7000
+      },
+      {
+        province: "Papua",
+        name: "Puncak (Ilaga)",
+        lat: -4.2333,
+        lon: 137.6000
+      },
+      {
+        province: "Papua",
+        name: "Mimika (Timika)",
+        lat: -4.5667,
+        lon: 136.9000
+      },
+      {
+        province: "Papua",
+        name: "Asmat (Agats)",
+        lat: -5.6500,
+        lon: 138.1333
+      },
+      {
+        province: "Papua",
+        name: "Mappi (Kepi)",
+        lat: -6.3333,
+        lon: 138.9833
+      },
+      {
+        province: "Papua",
+        name: "Boven Digoel (Tanah Merah)",
+        lat: -6.0000,
+        lon: 140.2000
+      },
+      {
+        province: "Papua",
+        name: "Waropen (Botawa)",
+        lat: -2.0500,
+        lon: 136.8500
+      },
+      {
+        province: "Papua",
+        name: "Supiori (Sorendidori)",
+        lat: -0.9500,
+        lon: 135.6500
+      },
+      {
+        province: "Papua",
+        name: "Kepulauan Yapen (Serui)",
+        lat: -1.8500,
+        lon: 136.2000
+      },
+      {
+        province: "Papua",
+        name: "Biak Numfor (Biak)",
+        lat: -1.0333,
+        lon: 136.0000
+      },
+      {
+        province: "Papua",
+        name: "Nabire",
+        lat: -3.3667,
+        lon: 135.5000
+      },
+      {
+        province: "Papua",
+        name: "Teluk Cenderawasih (Wandama)",
+        lat: -2.6833,
+        lon: 134.7500
+      },
+      // PAPUA BARAT
+      {
+        province: "Papua Barat",
+        name: "Manokwari",
+        lat: -0.8667,
+        lon: 134.0667
+      },
+      {
+        province: "Papua Barat",
+        name: "Sorong",
+        lat: -0.8833,
+        lon: 131.2667
+      },
+      {
+        province: "Papua Barat",
+        name: "Fakfak",
+        lat: -2.9333,
+        lon: 132.3000
+      },
+      {
+        province: "Papua Barat",
+        name: "Kaimana",
+        lat: -3.6500,
+        lon: 133.7000
+      },
+      {
+        province: "Papua Barat",
+        name: "Teluk Bintuni (Bintuni)",
+        lat: -1.2000,
+        lon: 133.6500
+      },
+      {
+        province: "Papua Barat",
+        name: "Teluk Wondama (Rasiei)",
+        lat: -2.4500,
+        lon: 134.5000
+      },
+      {
+        province: "Papua Barat",
+        name: "Raja Ampat (Waisai)",
+        lat: -0.4500,
+        lon: 130.8000
+      },
+      {
+        province: "Papua Barat",
+        name: "Sorong Selatan (Teminabuan)",
+        lat: -1.4333,
+        lon: 131.9167
+      },
+      {
+        province: "Papua Barat",
+        name: "Maybrat (Kumurkek)",
+        lat: -1.3500,
+        lon: 132.3833
+      },
+      {
+        province: "Papua Barat",
+        name: "Pegunungan Arfak (Anggi)",
+        lat: -1.4000,
+        lon: 133.9167
+      },
+      {
+        province: "Papua Barat",
+        name: "South Sorong (Teminabuan)",
+        lat: -1.4333,
+        lon: 131.9167
+      },
+      // PAPUA SELATAN
+      {
+        province: "Papua Selatan",
+        name: "Merauke",
+        lat: -8.5000,
+        lon: 140.3000
+      },
+      {
+        province: "Papua Selatan",
+        name: "Asmat (Agats)",
+        lat: -5.6500,
+        lon: 138.1333
+      },
+      {
+        province: "Papua Selatan",
+        name: "Mappi (Kepi)",
+        lat: -6.3333,
+        lon: 138.9833
+      },
+      {
+        province: "Papua Selatan",
+        name: "Boven Digoel (Tanah Merah)",
+        lat: -6.0000,
+        lon: 140.2000
+      },
+      // PAPUA TENGAH
+      {
+        province: "Papua Tengah",
+        name: "Timika",
+        lat: -4.5667,
+        lon: 136.9000
+      },
+      {
+        province: "Papua Tengah",
+        name: "Nabire",
+        lat: -3.3667,
+        lon: 135.5000
+      },
+      {
+        province: "Papua Tengah",
+        name: "Paniai (Enarotali)",
+        lat: -3.9167,
+        lon: 136.4167
+      },
+      {
+        province: "Papua Tengah",
+        name: "Dogiyai (Kigamani)",
+        lat: -4.3000,
+        lon: 136.3333
+      },
+      {
+        province: "Papua Tengah",
+        name: "Deiyai (Tigi)",
+        lat: -4.0500,
+        lon: 136.2167
+      },
+      {
+        province: "Papua Tengah",
+        name: "Intan Jaya (Sugapa)",
+        lat: -3.8000,
+        lon: 136.7000
+      },
+      {
+        province: "Papua Tengah",
+        name: "Mimika (Timika)",
+        lat: -4.5667,
+        lon: 136.9000
+      },
+      // PAPUA PEGUNUNGAN
+      {
+        province: "Papua Pegunungan",
+        name: "Wamena",
+        lat: -4.1000,
+        lon: 138.9500
+      },
+      {
+        province: "Papua Pegunungan",
+        name: "Pegunungan Bintang (Oksibil)",
+        lat: -4.9000,
+        lon: 140.6500
+      },
+      {
+        province: "Papua Pegunungan",
+        name: "Yahukimo (Sumohai)",
+        lat: -5.5000,
+        lon: 139.5500
+      },
+      {
+        province: "Papua Pegunungan",
+        name: "Tolikara (Karubaga)",
+        lat: -3.8500,
+        lon: 138.3500
+      },
+      {
+        province: "Papua Pegunungan",
+        name: "Puncak Jaya (Kotamulia)",
+        lat: -3.7500,
+        lon: 137.9833
+      },
+      {
+        province: "Papua Pegunungan",
+        name: "Puncak (Ilaga)",
+        lat: -4.2333,
+        lon: 137.6000
+      },
+      {
+        province: "Papua Pegunungan",
+        name: "Lanny Jaya (Tiom)",
+        lat: -3.7833,
+        lon: 138.4833
+      },
+      {
+        province: "Papua Pegunungan",
+        name: "Nduga (Kenyam)",
+        lat: -4.3000,
+        lon: 138.2667
+      },
+      {
+        province: "Papua Pegunungan",
+        name: "Pegunungan Bintang (Oksibil)",
+        lat: -4.9000,
+        lon: 140.6500
+      },
+    ];
+    // State
+    let selectedCity = null;
+    let prayerTimes = null;
+    let countdownInterval = null;
+    // DOM Elements
+    const modal = document.getElementById('modal');
+    const modalClose = document.getElementById('modalClose');
+    const locationCard = document.getElementById('locationCard');
+    const locationName = document.getElementById('locationName');
+    const searchInput = document.getElementById('searchInput');
+    const cityList = document.getElementById('cityList');
+    const headerDate = document.getElementById('headerDate');
+    const countdown = document.getElementById('countdown');
+    const countdownTarget = document.getElementById('countdownTarget');
+    const statusBar = document.getElementById('statusBar');
+    const statusText = document.getElementById('statusText');
+    const imsakEl = document.getElementById('imsak');
+    const fajrEl = document.getElementById('fajr');
+    const dhuhrEl = document.getElementById('dhuhr');
+    const asrEl = document.getElementById('asr');
+    const maghribEl = document.getElementById('maghrib');
+    const ishaEl = document.getElementById('isha');
+    // Initialize date
+    function initDate() {
+      const now = new Date();
+      const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      };
+      headerDate.textContent = now.toLocaleDateString('id-ID', options);
+    }
+    // Render city list
+    function renderCityList(filter = '') {
+      const grouped = {};
+      const filterLower = filter.toLowerCase();
+      citiesData.forEach(city => {
+        if (filterLower && !city.name.toLowerCase().includes(filterLower) &&
+          !city.province.toLowerCase().includes(filterLower)) {
+          return;
+        }
+        if (!grouped[city.province]) {
+          grouped[city.province] = [];
+        }
+        grouped[city.province].push(city);
+      });
+      let html = '';
+      Object.keys(grouped).sort().forEach(province => {
+        html += `<div class="province-group">
+          <div class="province-name">${province}</div>`;
+        grouped[province].forEach(city => {
+          const isSelected = selectedCity && selectedCity.name === city.name && selectedCity.province === city.province;
+          html += `
+            <button class="city-btn ${isSelected ? 'selected' : ''}" 
+                    data-lat="${city.lat}" 
+                    data-lon="${city.lon}" 
+                    data-name="${city.name}"
+                    data-province="${city.province}">
+              <span>${city.name}</span>
+              <span class="city-coord">${city.lat.toFixed(4)}, ${city.lon.toFixed(4)}</span>
+            </button>`;
+        });
+        html += '</div>';
+      });
+      cityList.innerHTML = html || '<div class="status-bar error" style="margin: 20px 0;">Kota tidak ditemukan</div>';
+    }
+    // Show/hide modal
+    function showModal() {
+      modal.classList.add('active');
+      searchInput.focus();
+    }
+
+    function hideModal() {
+      modal.classList.remove('active');
+    }
+    // Fetch prayer times
+    async function fetchPrayerTimes(lat, lon) {
+      showStatus('Memuat jadwal sholat...', 'loading');
+      try {
+        const today = new Date();
+        const date = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
+        const url = `https://api.aladhan.com/v1/timings/${date}?latitude=${lat}&longitude=${lon}&method=11`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Gagal mengambil data');
+        const data = await res.json();
+        prayerTimes = data.data.timings;
+        imsakEl.textContent = prayerTimes.Imsak || '--:--';
+        fajrEl.textContent = prayerTimes.Fajr || '--:--';
+        dhuhrEl.textContent = prayerTimes.Dhuhr || '--:--';
+        asrEl.textContent = prayerTimes.Asr || '--:--';
+        maghribEl.textContent = prayerTimes.Maghrib || '--:--';
+        ishaEl.textContent = prayerTimes.Isha || '--:--';
+        hideStatus();
+        updateCountdown();
+        // Save to localStorage
+        if (selectedCity) {
+          localStorage.setItem('lastCity', JSON.stringify(selectedCity));
+        }
+      } catch (error) {
+        showStatus('Gagal memuat jadwal: ' + error.message, 'error');
+      }
+    }
+    // Update countdown
+    function updateCountdown() {
+      if (!prayerTimes) {
+        countdown.textContent = '--:--:--';
+        countdownTarget.textContent = 'Pilih kota terlebih dahulu';
+        return;
+      }
+      const now = new Date();
+      const prayers = [{
+          name: 'Imsak',
+          time: prayerTimes.Imsak
+        },
+        {
+          name: 'Subuh',
+          time: prayerTimes.Fajr
+        },
+        {
+          name: 'Dzuhur',
+          time: prayerTimes.Dhuhr
+        },
+        {
+          name: 'Ashar',
+          time: prayerTimes.Asr
+        },
+        {
+          name: 'Maghrib',
+          time: prayerTimes.Maghrib
+        },
+        {
+          name: 'Isya',
+          time: prayerTimes.Isha
+        }
+      ];
+      // Find next prayer
+      let nextPrayer = null;
+      let nextPrayerDate = null;
+      for (const prayer of prayers) {
+        const [hours, minutes] = prayer.time.split(':').map(Number);
+        const prayerDate = new Date(now);
+        prayerDate.setHours(hours, minutes, 0, 0);
+        if (prayerDate > now) {
+          nextPrayer = prayer;
+          nextPrayerDate = prayerDate;
+          break;
+        }
+      }
+      // If all prayers have passed, show countdown to tomorrow's Imsak
+      if (!nextPrayer) {
+        const [hours, minutes] = prayerTimes.Imsak.split(':').map(Number);
+        nextPrayerDate = new Date(now);
+        nextPrayerDate.setDate(nextPrayerDate.getDate() + 1);
+        nextPrayerDate.setHours(hours, minutes, 0, 0);
+        nextPrayer = {
+          name: 'Imsak (besok)',
+          time: prayerTimes.Imsak
+        };
+      }
+      // Update active state
+      document.querySelectorAll('.prayer-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      if (nextPrayer) {
+        const prayerIndex = prayers.findIndex(p => p.name === nextPrayer.name);
+        if (prayerIndex === 0) {
+          document.querySelector('.prayer-item.imsak').classList.add('active');
+        } else {
+          const prayerElements = document.querySelectorAll('.prayer-item:not(.imsak)');
+          if (prayerElements[prayerIndex - 1]) {
+            prayerElements[prayerIndex - 1].classList.add('active');
+          }
+        }
+      }
+      // Calculate remaining time
+      const diff = nextPrayerDate - now;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      countdown.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      countdownTarget.textContent = `Menuju ${nextPrayer.name} (${nextPrayer.time})`;
+    }
+    // Status bar
+    function showStatus(message, type) {
+      statusBar.style.display = 'block';
+      statusBar.className = `status-bar ${type}`;
+      statusText.textContent = message;
+    }
+
+    function hideStatus() {
+      statusBar.style.display = 'none';
+    }
+    // Load saved city
+    function loadSavedCity() {
+      const saved = localStorage.getItem('lastCity');
+      if (saved) {
+        try {
+          selectedCity = JSON.parse(saved);
+          locationName.textContent = selectedCity.name;
+          fetchPrayerTimes(selectedCity.lat, selectedCity.lon);
+        } catch (e) {
+          console.error('Failed to load saved city:', e);
+        }
+      }
+    }
+    // Event listeners
+    locationCard.addEventListener('click', showModal);
+    modalClose.addEventListener('click', hideModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) hideModal();
+    });
+    searchInput.addEventListener('input', (e) => {
+      renderCityList(e.target.value);
+    });
+    cityList.addEventListener('click', (e) => {
+      const btn = e.target.closest('.city-btn');
+      if (!btn) return;
+      selectedCity = {
+        name: btn.dataset.name,
+        province: btn.dataset.province,
+        lat: parseFloat(btn.dataset.lat),
+        lon: parseFloat(btn.dataset.lon)
+      };
+      locationName.textContent = selectedCity.name;
+      hideModal();
+      fetchPrayerTimes(selectedCity.lat, selectedCity.lon);
+      renderCityList(searchInput.value);
+    });
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        hideModal();
+      }
+    });
+    // Initialize
+    initDate();
+    renderCityList();
+    loadSavedCity();
+    // Update countdown every second
+    setInterval(updateCountdown, 1000);
+    // Update date at midnight
+    setInterval(initDate, 60000);
+  </script>
+</body>
+
+</html>
