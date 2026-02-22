@@ -6,7 +6,7 @@
 
 "use strict";
 
-const CACHE_VERSION = "v1.1.2";
+const CACHE_VERSION = "v1.1.3";
 const STATIC_CACHE = `propwa-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `propwa-dynamic-${CACHE_VERSION}`;
 const OFFLINE_URL = "./offline-fallback.html";
@@ -22,6 +22,7 @@ const STATIC_ASSETS = [
   "./icon-512.png",
   "./offline-fallback.html",
   "./imsyak.html",
+  "./ihya.html",
   "./al-quran.html",
   "./biodata.html",
   "./alquran.html",
