@@ -22,6 +22,31 @@
         #f4ecd8;
       /* Parchment background */
       color: #333;
+      transition: background-color 0.3s, filter 0.3s;
+      /* For night mode */
+    }
+
+    .night-mode {
+      background: #1e1e1e !important;
+      filter: invert(1) hue-rotate(180deg);
+      /* Simple night mode for images */
+      color: #ccc;
+    }
+
+    .night-mode .nav {
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .night-mode .page-number {
+      color: #ccc;
+    }
+
+    .night-mode button {
+      color: #aaa;
+    }
+
+    .night-mode button:hover {
+      color: #fff;
     }
 
     .viewer {
@@ -41,6 +66,11 @@
       /* Smoother transition */
       perspective: 1200px;
       /* For 3D flip effect */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
     }
 
     .page {
@@ -57,6 +87,8 @@
       backface-visibility: hidden;
       /* For flip */
       transform-style: preserve-3d;
+      margin: auto;
+      /* Extra centering */
     }
 
     .page:hover {
@@ -120,6 +152,42 @@
       border-radius: 2px;
     }
 
+    /* Bookmark indicator */
+    .bookmark {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 10;
+      color: #ccc;
+      transition: color 0.2s;
+    }
+
+    .bookmarked {
+      color: #ff0000;
+      /* Red for bookmarked */
+    }
+
+    /* Jump to page modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      z-index: 20;
+    }
+
+    .modal input {
+      width: 100px;
+      margin-right: 10px;
+    }
+
     /* Responsive adjustments */
     @media (min-width: 768px) {
       .page {
@@ -144,17 +212,29 @@
     <button onclick="prevPage()">&#9664;</button> <!-- Left arrow -->
     <span class="page-number" id="pageNum">1 / 600</span>
     <button onclick="nextPage()">&#9654;</button> <!-- Right arrow -->
+    <button onclick="toggleNightMode()">🌙</button> <!-- Night mode -->
+    <button onclick="showJumpModal()">🔍</button> <!-- Jump to page -->
   </div>
   <!-- Progress bar -->
   <div class="progress">
     <div class="progress-bar" id="progressBar"></div>
   </div>
+  <!-- Bookmark -->
+  <div class="bookmark" id="bookmark" onclick="toggleBookmark()">🔖</div>
+  <!-- Jump modal -->
+  <div class="modal" id="jumpModal">
+    <label for="jumpPage">Jump to page:</label>
+    <input type="number" id="jumpPage" min="1" max="600">
+    <button onclick="jumpToPage()">Go</button>
+    <button onclick="closeModal()">Close</button>
+  </div>
   <script>
     // Jumlah halaman
     const TOTAL_PAGES = 600; // Ganti sesuai jumlah file WebP
     let currentPage = parseInt(localStorage.getItem("ihya-page")) || 0;
+    let bookmarks = JSON.parse(localStorage.getItem("ihya-bookmarks")) || [];
     // Zoom & drag
-    let scale = 1;
+    let scale = parseFloat(localStorage.getItem("ihya-scale")) || 1; // Persistent zoom
     let translateX = 0;
     let translateY = 0;
     // Swipe & mouse
@@ -170,6 +250,9 @@
     const wrapper = document.getElementById('wrapper');
     const pageNum = document.getElementById('pageNum');
     const progressBar = document.getElementById('progressBar');
+    const bookmarkIcon = document.getElementById('bookmark');
+    const jumpModal = document.getElementById('jumpModal');
+    const jumpInput = document.getElementById('jumpPage');
 
     function pad(num) {
       return num.toString().padStart(4, '0');
@@ -177,17 +260,21 @@
 
     function savePosition() {
       localStorage.setItem("ihya-page", currentPage);
+      localStorage.setItem("ihya-scale", scale); // Save zoom level
     }
 
     function updatePageInfo() {
       pageNum.textContent = `${currentPage + 1} / ${TOTAL_PAGES}`;
       progressBar.style.width = `${((currentPage + 1) / TOTAL_PAGES) * 100}%`;
+      updateBookmarkIcon();
     }
 
-    function loadPage(n) {
-      scale = 1;
-      translateX = 0;
-      translateY = 0;
+    function loadPage(n, resetZoom = false) {
+      if (resetZoom) {
+        scale = 1;
+        translateX = 0;
+        translateY = 0;
+      }
       updateTransform();
       img.src = `assets/ihya/${pad(n)}.webp`;
       savePosition();
@@ -206,7 +293,7 @@
       if (currentPage < TOTAL_PAGES - 1) {
         animateFlip('next', () => {
           currentPage++;
-          loadPage(currentPage);
+          loadPage(currentPage); // No resetZoom, persistent zoom
           wrapper.style.transition = "none";
           wrapper.style.transform = "rotateY(0deg)";
         });
@@ -217,7 +304,7 @@
       if (currentPage > 0) {
         animateFlip('prev', () => {
           currentPage--;
-          loadPage(currentPage);
+          loadPage(currentPage); // No resetZoom
           wrapper.style.transition = "none";
           wrapper.style.transform = "rotateY(0deg)";
         });
@@ -255,6 +342,7 @@
         scale = Math.max(1, Math.min(scale, 5));
         initialDistance = currentDistance;
         updateTransform();
+        savePosition(); // Save new scale
       } else if (e.touches.length === 1 && scale > 1) {
         translateX = e.touches[0].clientX - startDragX;
         translateY = e.touches[0].clientY - startDragY;
@@ -273,15 +361,16 @@
         }
       }
     });
-    // Double tap reset zoom
+    // Double tap to reset zoom only if zoomed in
     let lastTap = 0;
     wrapper.addEventListener('touchend', () => {
       let now = Date.now();
-      if (now - lastTap < 300) {
+      if (now - lastTap < 300 && scale > 1) {
         scale = 1;
         translateX = 0;
         translateY = 0;
         updateTransform();
+        savePosition();
       }
       lastTap = now;
     });
@@ -318,11 +407,67 @@
       scale += delta;
       scale = Math.max(1, Math.min(scale, 5));
       updateTransform();
+      savePosition();
     });
     // Keyboard navigation
     document.addEventListener('keydown', e => {
       if (e.key === 'ArrowRight') prevPage(); // RTL: right key for prev
       if (e.key === 'ArrowLeft') nextPage(); // RTL: left key for next
+    });
+    // Night mode
+    function toggleNightMode() {
+      document.body.classList.toggle('night-mode');
+      localStorage.setItem('ihya-night-mode', document.body.classList.contains('night-mode'));
+    }
+    if (localStorage.getItem('ihya-night-mode') === 'true') {
+      document.body.classList.add('night-mode');
+    }
+    // Bookmark
+    function toggleBookmark() {
+      const index = bookmarks.indexOf(currentPage);
+      if (index === -1) {
+        bookmarks.push(currentPage);
+      } else {
+        bookmarks.splice(index, 1);
+      }
+      localStorage.setItem("ihya-bookmarks", JSON.stringify(bookmarks));
+      updateBookmarkIcon();
+    }
+
+    function updateBookmarkIcon() {
+      if (bookmarks.includes(currentPage)) {
+        bookmarkIcon.classList.add('bookmarked');
+      } else {
+        bookmarkIcon.classList.remove('bookmarked');
+      }
+    }
+    // Jump to page
+    function showJumpModal() {
+      jumpModal.style.display = 'block';
+      jumpInput.value = currentPage + 1;
+    }
+
+    function closeModal() {
+      jumpModal.style.display = 'none';
+    }
+
+    function jumpToPage() {
+      let page = parseInt(jumpInput.value) - 1;
+      if (page >= 0 && page < TOTAL_PAGES) {
+        currentPage = page;
+        loadPage(currentPage);
+      }
+      closeModal();
+    }
+    // Fullscreen support
+    document.addEventListener('keydown', e => {
+      if (e.key === 'f') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
     });
   </script>
 </body>
