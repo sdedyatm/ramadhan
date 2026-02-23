@@ -78,49 +78,6 @@
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
 
-    .whatsapp-btn {
-      display: inline-block;
-      background-color: #25D366;
-      color: #fff;
-      padding: 5px 10px;
-      border-radius: 15px;
-      text-decoration: none;
-      margin-top: 10px;
-    }
-
-    .popup {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .popup img {
-      max-width: 80%;
-      max-height: 80%;
-      border: 2px solid #fff;
-      border-radius: 15px;
-    }
-
-    .close-btn {
-      position: absolute;
-      bottom: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      cursor: pointer;
-      font-size: 20px;
-      color: #fff;
-      text-decoration: none;
-      background-color: red;
-      padding: 5px;
-      border-radius: 3px;
-    }
-
     h3 {
       padding: 0px;
       margin: 0;
@@ -134,18 +91,15 @@
 <body>
 
   <h1>Biodata Device Hmsi</h1>
-  <h4>( klik profile untuk detailnya )</h4>
-  <br>
-  <center>
-    <img src="https://lh3.googleusercontent.com/pw/ABLVV86l4why0k2zAcWgQtpuAPbx1mQtyWLpFAG8LMyYBxIgDdM1T7WWH-Ewwyh55l-KUl1_5kjWXt9oGPw4tcArZ-dIHZJhLOaTrHG2HtOiq6y0zgqVeJU_2bLJAn8TuW4WwbHmgEYv2jm3fpGwemFe7FPxDQ=w607-h607-s-no-gm?authuser=0" width="240">
-  </center>
 
   <div id="photo-container">
     <script>
       var photoUrls = [
-        "https://lh3.googleusercontent.com/pw/ABLVV86RXcB08XVOG9a3fp-YsXZOFU41YSVWvYI3p_LapDROzrjxSoxdybcyqglZ1d_4ChSNy36xCWktzTo-iWZsEU5-aNmX4XIAuwWZ5ETFll2N9q1mJe4h0vfhKVf3sEyIfIdIS8F1vkmkUmd4qCCyxCLgKg=w607-h607-s-no-gm?authuser=0", "https://lh3.googleusercontent.com/pw/ABLVV84l8scafSEFfzKvbg0T0VBt9f0FyG_NWhw6Ve1KyHeRj5QaOodyyuNr5S_0DSmpItfnYoSJKfeJKCus4y3qEvGWsUh1ldyMoZmHuP8pZBJO34IOvyA1folQbuqeDxGfrbydA_KbXTXV9H8YWBpyKAUV1w=w607-h607-s-no-gm?authuser=0",
+        "https://lh3.googleusercontent.com/pw/AP1GczMQ4u3Ixs6bHu4-2kpZA0l4lXJ9oe4MzPvGQxW2Ror7mKx7umAJJWuFMaaFmrv0YoLcW4cDXtu8H1xdS-88jMCEq1xaz8x6jMsaatZk1QoWTf6aDZHSS47vt_oPNdVDF31gabuisve3ZPRZ3cjEZvtMNA=w713-h511-s-no-gm?authuser=0", "https://lh3.googleusercontent.com/pw/ABLVV84l8scafSEFfzKvbg0T0VBt9f0FyG_NWhw6Ve1KyHeRj5QaOodyyuNr5S_0DSmpItfnYoSJKfeJKCus4y3qEvGWsUh1ldyMoZmHuP8pZBJO34IOvyA1folQbuqeDxGfrbydA_KbXTXV9H8YWBpyKAUV1w=w607-h607-s-no-gm?authuser=0",
         "https://lh3.googleusercontent.com/pw/ABLVV84ByI4trYnoXu-_JVxxJ3nWRxJtiVWVIAFI5cq1NU5ktWN9ruuakiIVfre0G5jA_CLXsidD3GTiVGTpbRxORAbmi6HREVXn3wq1Bgdbz6zAe-eOYSko3MBfNFUi3Sk91vkh1lDt4sXgsQ0pb57oA_sxng=w607-h607-s-no-gm?authuser=0",
+        "https://lh3.googleusercontent.com/pw/AP1GczPAA1Pqg9EAvrU0spmQR89A_YR1yAFg-Ess4MgCIwqDgRCMybu6G2SviDacAuISc7EO2nG7zSBv9PpHR0YnOTarv797cFuyJ3cOj5UppQE939HGvGxnCDrbyTq0GiRtxiiS-UNAFH-acE2JwnoviQ2HdA=w607-h607-s-no-gm?authuser=0",
         "https://lh3.googleusercontent.com/pw/ABLVV87DfvpiskkDs5NwFJ89g448n4HFyN5uyTLANfCUcL-QLZpbNzXFAP0E5Yr7ugReBbnZtQCNS0aAMv3K6JJbphfmF_mqav0xuJ2zObPmE8ZsTUEtoMvMgxF-KaJZOO-dJEFQt2Qs4G6P5AN0_9UjF1RaeA=w607-h607-s-no-gm?authuser=0",
+        "https://lh3.googleusercontent.com/pw/AP1GczP4_HcV_NCWuIp4xuNGDYr_8K_OnuDnMbqXL-ComBkQAZSlqAWK3joKsxWApQYwrHhSZhiQxACutzge4iuiSt5tTe2GBRKzPUttan0qontQKTYI2rVbDsqPsWs34f-TL56XSrTnPNnAK3nNkC7t4v-LCA=w607-h607-s-no-gm?authuser=0",
         "https://lh3.googleusercontent.com/pw/ABLVV87aKSlCN76aY8Bz5HqteDLZkuO2zEx-orvoMpKT82xOrVmPYfB1o5NZuZ1aieZ19k6kZU9spUSSkxufJICUwp3fSmaDLUbbW_lxLh0uvqQmdfsmr9KtkDspsG3wiyDmaea5BjJSIyOAlF0fDOI1UXGecQ=w607-h607-s-no-gm?authuser=0",
         "https://lh3.googleusercontent.com/pw/ABLVV87gWhOYO1KPu-boG02OElPRcUVLkXrQvR1ZaOcC2Q1uq0-ejrkR2Rg3coyHIb3S3FOhQkPQ-S0IFUqghM4G6KVhMiQTnNOEd38aT9Du9-3-COm1DpAakik0gQovyyjMfM2w97Uactyx8xBxfvAF49PpQQ=w607-h607-s-no-gm?authuser=0",
         "https://lh3.googleusercontent.com/pw/ABLVV86PddFNzwPKLfsQwmn-iOFH0MO_lG6QjQxZSIUdPc5FY8phpLa_APuSBTW9ntEsBjmF5knWrregcXmBUxe--TGdM8M88EplYzEXhBK0AUFkGUzmLmKqv6tnFmePcnwdbZQqnCVF04bP_amRUMwNKcusiQ=w607-h607-s-no-gm?authuser=0",
@@ -167,62 +121,43 @@
         "https://lh3.googleusercontent.com/pw/AP1GczP5mDNUHJJ30eCBHWn5JArk0gJYmchCRU9dWspoN536n_iNf8NIptSuhDR94uZh8qIW-gh4Ft14tlgWNik_5OCtu9vg31o_nU6wpwuuS2cWC4t10BcZGFqCeCa7G8xdnRHTDXHOkE03BOMU28LfjDveJw=w684-h484-s-no-gm?authuser=0",
         "https://lh3.googleusercontent.com/pw/AP1GczMUcBmrfGgkuDKaDXzEyA9420OXWzTqEo6f7yn7tadkVF-GWDivXs7r8wK4LFvUxm7VlSUcfT0rLFtOlfLN0Koawn8jwLmRcHYmr9tGOZRVjc8o9hAqzhldoQIcLOvlOHDgxFN5SC7L8_0dgFTdW-Vafw=w713-h505-s-no-gm?authuser=0",
         "https://lh3.googleusercontent.com/pw/AP1GczPVZJIe-0vQ6lkBAfG4yfJsqI9wVeW_KJ2MqE-e6n5DLdrtxyOQ8H7_DLfl2uxriauZapRTCkJ74oISHY7B6Ni9_0J7ouQzcpI4cD4_1M8MiIZE_2ECjoGsT8iPaKfzcHtZSpM2bNqEeqS8Vg0UqQ5pKg=w684-h492-s-no-gm?authuser=0", "https://lh3.googleusercontent.com/pw/AP1GczNhXdwNcK15FIpQasvqE5mVYV2M7jrXECkJx5f3iU5MPEERylz_CJ5J9TBB2UIWuXxF2Mujp_kX_4X7pcqHx4cRpWvSCfeNF_YZOni2DAHk7n4cANO77kwS7iCJ_hgZaBg4ZrzF0nlpqF0phCEhyrPb1Q=w684-h489-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/AP1GczMyfgH2-rt9IE8VItoojIH0e64uYqhdpC_AWpEPHqc3DIrTX3TUMn8Ud8xoW9RDsA5sO3ALQDt4newsqXaspSbu7aXFWYhz0Qki8Xx1cj6c1yyHU93p50hZQJQbSKvulpBZW0cgEVBtdLc48uYNXQQWzw=w607-h607-s-no-gm?authuser=0",
+        "https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0",
+        "https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0",
       ];
-      var popupUrls = [
-        "https://lh3.googleusercontent.com/pw/AP1GczPIG1F3NIlaRTfdEPEoi-tPQ51JusMiCbJHLRVd0gn-JjZnSEw622YK6X8-hgkzzOvP1Ov63LJUPb_l_x_D-o3MulLLg6iG4OpDjstQQPCU9gmYNelixzx5CfbuMVm3MhiTW50EUwsBVTETjD1PnXDqdw=w465-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV86GTQYc6FWQ5Y42CRnI9LzRrfmjfb68LRA909RR8NbzcAYYaRm6x__cuMaXq9DCLypnA-lx9MOBCmv5Liz_FIdiqEm0G9x-8u3zdHDQBmjxcMvZ19NJWuJ8SAGA1UiY-V__VoQU-cMHarpW3i9Yx675rw=w442-h562-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/AP1GczMV1WCWss3C-eREAefzPr4sAHgfnQuxfkEt_16LZUcswLmcrPX55_-28RJPQNxdMXfMqwmRVanQoAzq0sgk3BpAWsXZJYEpjLJNWVwx8yamE4eP7AnbpCuydR0LWVr0NuBzm4mclCsMkEdNyp0cGfQ5yQ=w473-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV86XxaHwyd33lhKW1ktNtwynjwkVLFmzeVUc-7zkHnOSINUYMnEBMJBYwg9UXPMsBe4UCN_pFQ9wMnESLFa_RLxJ9kC50M7YoIyTaQi5VoYU7hLPJcn17QUtyrvZqui4UV3frQsVQewAQtAV78HC7tC2zg=w476-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV87m23jA-wqzMNqIE6bBo4oQspIPkYPyBCYyUAUnt6jhtM1ChQtUZ8rTuodgOvWlg3or7GbkbTBtPPAD_GVl37-RHNLs76aMtwlkLmlnSXX98hqOjk4yeP03y_IcxXAxEHU2QTga4T555MSjXw7mF_kDiA=w470-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV84H7szVRCEFyyQjz6BDctLr1EMxy7zTK55-BLcygSj4svpVwx_BAJ_jT73vQnb33GB1w4WsvXPn7aKtjw1C8NuMqkmEgx6yA7xHmWvMiawWafOJpzkhGpTfQcYRyvge7DA_3Ab9ehs36rtOzylABzjhag=w476-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV85ZiVLrMC19PeAz6vLwdLgaL0HGiX-POpV5T5ZCtFQmtJWISLMvCMDuKT_ArordWjO_kEoabgLE9lhcVgn4OuTMHPghsXkabcBa5jOFjzCsBcNjEZS5C9VGedMXYTN5-8zXRbLDKEdQLLwagPboFl1dkg=w490-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/AP1GczM9B6t8ejwfTu2UZI9vboR5owR6QoDZTs8geIrDLYBL4fxv_D-4C65Ys6K4nAoY34HNxhrj6dx6ipHLZ4vODJb94iMD-FYTgOuFO9CjeNVyA7FJ4S6Tkhzh3HG9MWEUzT_qgvKt4767M9pUTjUGUmNtAA=w492-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV86TX-vLQesAu5-Y1Ol10PhY7EQV6prLUP2qi7PJOpBxSSxSmT0x-X_Sp-uUWaVryfBkPS1gXToEf8TGlhcuMhnuOD808vV7CJt8BGjsE84x4efQDBk8YDLEHYLSKZDIKHulFToVNZKZHiFkaFyvS15pZw=w538-h607-s-no-gm?authuser=0", "https://lh3.googleusercontent.com/pw/ABLVV84JINFsIr8f9Rf1Uejqv8YzSOV1iPZ5zpfDBelI4qZjPQYtpnyTaqnFaXAC4jDXbJVlcm6PnXOX4qZPIMLN7FBwbvTvlRqUq_TNaGqAMkzEiv_ein9855rtw_JSZOFkXXb-ODokf3qLlgp0OYvBshAbrw=w460-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/AP1GczP8QzfTWHX0kzahcY1RK-FUu7YOrH2wYQ7d1sCrMJ5z1_TiKSJRc0SO5uzK2nTyLgiMq_3MRPvFKwcICA0J1miHJHTE_L8bs83vfAHt1n7qOD0Hmd35WVx1lt7Q5-0GP-af8fpv2GGgwGI-1b96_iEIVg=w468-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV87CZ-FhJ7ZxFR0Aexg24zy2AVvTQxVwq9gr8zNqp2fNp8lHuGpTO4zkpQ9y8tFhqVNE6gf2-WXeN6G0Mp6hu38-DX6vw38w_KuZNI6uM6-Aj2kzI4YdYRWqJaA1S4rHw_cA4ol0MDkXIxD-_ntN2vccCQ=w474-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV867hyJ9jLAem2nRCnxtfC6vsCAkO4H8VQh1hXanYGz7wO6R8U_zP9omyBYLEJp3yjbYUWSu7c5-6mnoNK_MqZ52pgNy7ejky2gc8LKgjU7l3SbMTvffCPB2yjGRFxAX6EkMgCb0JcI1N211Ya2JmWb2UQ=w452-h552-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV84PeBnama3JSE9A-1RwDTBuJPPijBxKrF5Q9U5uAHSEYWljL3n-nb0_d-dFPaBpixlxxNpWoCSuFJIXcv2Y9LZmycRZ_KJLKfI99vYlf1oo-jsX4njELEV7UanGAhX27par5B1RMBESywQ1v7mLjgh-6A=w479-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV85bONhFhHkn3F3HjaUZRnBDO8OAIO1fUk22YPquY7BM81Z5Hj8u9-e5KBO15dwBBzB7dvDg1q4zHnCWwL41NpBQxdjayZX60f7TBKgboM719j3v6U3z3jfajqtzxpfJyeJc1EqQGD3akx1zVDrGcLdTog=w462-h607-s-no-gm?authuser=0", "https://lh3.googleusercontent.com/pw/AP1GczOOrVbcqDQKIEphrmCOUwsWOtmnTVdsk3hU5WtuHZpw_vi4ObG_3BQLGvIuh8T4O_XCuHnkYTLkF6oLOH96hIxHkTPOl85Sc5LwmiXQVFfkuVT7ndmusmdDoUfHGloI2M0tcFjs2zSJqB7zl68zpwYE_A=w474-h607-s-no-gm?authuser=0", "https://lh3.googleusercontent.com/pw/AP1GczNTcwI4AvOYKyGUHph_j8Uxi57eLMAijLNiaGY5SINTGgqe6y_KvZWnIJvG8QR9TtQgg0yKiZHulkoOpoCUjASxxNAcjAhG3y5LRyNG7vGJrM-e0VbGUVIf-asgKZ_8gQ5OJVUo5wdtN92oJCLV8sa-gw=w469-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV84Jeqhsn3Lf3DBfRDXFhjsiZMeBeoEJ3r6AcH2bWZCfxMqCbdCyPsmbPEJaKyazJxainvU7GQvmDn-Nn3p9w2fYFptgFi_ragfNbJuztiA_AhAaCD4MQDtDMJeZRd8Ggwr_D2y8T_t9FPp-39sqZGSAIA=w504-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/AP1GczNqPn1DZ9XcNRr98ZXbmRyf9dZYg4xirF8whOi-G5I5UWTR84ssk0kwn6tITirTNHcwkp1wmBQ5uNPRNz0_rnrANunrMI7YZeuwVy4Mw48XJAfhZ-WTetPy3kRWtRYaYeYrGZLn_yNIptpahEeO4H_FpA=w527-h648-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/AP1GczOdv8Ni7depzbc-GieUPvkE-Y2_9rkC2gqO4rQE74WumL_hP7mmkG5O2PAnpBiRt1wRXnqqFTDWaacuhcbnLL_gF_QUMmJQSo5SPxZHFbdXJBOLsV_ooMiLtbE_6Dk27ubXMg7BomNJegT7d2jWa30VXw=w481-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV84Uut3svJg8vaDPXilNy7UGG7Poulz_SkG_RgmpCLgmOrQEEuSFXFWL8HfKroSjJwuGyuWfdAU9f6ANWFI6z_yt4H-YjlaZCvlvmIRxZKc_jpMvL_aU4rlFY2_0H18kCLekQbHC1fE1jsXy_Pp7089w2A=w477-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV870hMcu9xqKcJECyuBYuX36_-QCl77YuPLDKmCVZA32gxJXNKyvLKdrOydotRU6OjPCxkw8lczqc2uiQWbziBn2L_a7mkaJ-m3Mv0J0vZZkt6TDsv2hDi3T8VDQ_0uGMFoVrql3EUYa_bQvXQy0judmYA=w478-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV85CVHGgyl5e8riA1hrErFwsMUYoMPDGHeFwntSz65sHw2tSLSDitC9rlhTUntVg7JATga3DxsBR08_1xBd2YUeLH-0TEHKe2AIhgJX0Z1pBZQdFOy9p5y7_plXv3yIqdj7555i7oioWWolLcwUGneoirA=w482-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/ABLVV85k2Eotrfs-V3mcbhad6HH648pFvvJlVATPKJtFM2x5qiIunBtDAXKjyemRvPzc22AkVWyq1qFOZeePTM6k0z2Pw1hXl9ESlcBRq2UQW5qW-H-M-GsKFrhQnOPTIsFC_jdsqD-jSxaMSopIyuiPQoIUVA=w477-h607-s-no-gm?authuser=0",
-        "https://lh3.googleusercontent.com/pw/AP1GczOk3OwXMcFvNO8JD6ccwWvIyHCaTrf2-qCc-4aS-lBmH7_oIplF8MK61JFGyqMKRTOo-L7fgMBFOmp7yzc2GhZkta4up0_hZIvNdPnF6pp1itdxZSm8DCSjdRnTF6QnWORgOrdWD84AL_N6Jmi1PPnW3g=w454-h607-s-no-gm?authuser=0", "https://lh3.googleusercontent.com/pw/AP1GczNv_AYghx_tkBud8ywzGRm9APXAQnyItMh6lgI2kx8oCs2MQVsZnpsLJXNK3FAf8ugdKA5Xjc5QGL0t8ZgYNWoE24hWSm0pv06Fje2_3_m28D2KD1_ZqbkgAhA5eRO2o9A63og-uLklXaGJiwJiWhf8cA=w491-h607-s-no-gm?authuser=0", "https://lh3.googleusercontent.com/pw/AP1GczMUcBmrfGgkuDKaDXzEyA9420OXWzTqEo6f7yn7tadkVF-GWDivXs7r8wK4LFvUxm7VlSUcfT0rLFtOlfLN0Koawn8jwLmRcHYmr9tGOZRVjc8o9hAqzhldoQIcLOvlOHDgxFN5SC7L8_0dgFTdW-Vafw=w713-h505-s-no-gm?authuser=0", "https://lh3.googleusercontent.com/pw/AP1GczMYG6oaYEkLeKvN0uhwfV14REGQRFPEeShPNqnpF8x1xiMVfdeMUuqGEnflXDzL317ar0k_brbPJIOijmmZGV7V7njb2fP3DQgycXNvJBc95ShP663Ik8XXlxDosegTZshwEVfqMbyN_rL1ymaSUgUxAA=w481-h607-s-no-gm?authuser=0",
-      ];
+      var popupUrls = [];
       var photoDescriptions = [
-        "SETIAJIT SH<br><a class='whatsapp-btn' href='https://wa.me/6281385184481' target='_blank'>WhatsApp</a>",
-        "ENDANG SUPRIYADI <br><a class='whatsapp-btn' href='https://wa.me/6282117843738' target='_blank'>WhatsApp</a>",
-        "ABAS HAERUDIN <br><a class='whatsapp-btn' href='https://wa.me/62877608111390' target='_blank'>WhatsApp</a>",
-        "SUGENG RUSWANDI <br><a class='whatsapp-btn' href='https://wa.me/6282197690022' target='_blank'>WhatsApp</a>",
-        "DUDUNG KURNIA <br><a class='whatsapp-btn' href='https://wa.me/6282127488001' target='_blank'>WhatsApp</a>",
-        "PURWANTO<br><a class='whatsapp-btn' href='https://wa.me/6285215647890' target='_blank'>WhatsApp</a>",
-        "SAEFUL BAHRI<br><a class='whatsapp-btn' href='https://wa.me/6282184572561' target='_blank'>WhatsApp</a>",
-        "ANO S <br><a class='whatsapp-btn' href='https://wa.me/6287760502864' target='_blank'>WhatsApp</a>",
-        "PETER PANJAITAN<br><a class='whatsapp-btn' href='https://wa.me/6281286698584' target='_blank'>WhatsApp</a>",
-        "ADE HERMAWAN<br><a class='whatsapp-btn' href='https://wa.me/1234567890' target='_blank'>WhatsApp</a>",
-        "DEDY HIDAYAT<br><a class='whatsapp-btn' href='https://wa.me/6281386064979' target='_blank'>WhatsApp</a>",
-        "UNANG<br><a class='whatsapp-btn' href='https://wa.me/6285283994824' target='_blank'>WhatsApp</a>",
-        "IYUS<br><a class='whatsapp-btn' href='https://wa.me/6281285980104' target='_blank'>WhatsApp</a>",
-        "HENDRA MALIK<br><a class='whatsapp-btn' href='https://wa.me/6282280852461' target='_blank'>WhatsApp</a>",
-        "KIDI DARYONO<br><a class='whatsapp-btn' href='https://wa.me/6281299558831' target='_blank'>WhatsApp</a>",
-        "IMAN<br><a class='whatsapp-btn' href='https://wa.me/6283820533582' target='_blank'>WhatsApp</a>",
-        "ENDANG B<br><a class='whatsapp-btn' href='https://wa.me/62881024586607' target='_blank'>WhatsApp</a>",
-        "AANG SASTRADIJAYA<br> <a class='whatsapp-btn' href='https://wa.me/6282121714848' target='_blank'>WhatsApp</a>",
-        "ARIS SUKANDAR<br> <a class='whatsapp-btn' href='https://wa.me/6285693264954' target='_blank'>WhatsApp</a>",
-        "YANDY <br> <a class='whatsapp-btn' href='https://wa.me/6285603273172' target='_blank'>WhatsApp</a>",
-        "ARIS SUHENDI<br><a class='whatsapp-btn' href='https://wa.me/6287788669869' target='_blank'>WhatsApp</a>",
-        "KOPRAL<br><a class='whatsapp-btn' href='https://wa.me/6283191003420' target='_blank'>WhatsApp</a>",
-        "GANDUL<br> <a class='whatsapp-btn' href='https://wa.me/6282219367490' target='_blank'>WhatsApp</a>",
-        "MAWARDY<br> <a class='whatsapp-btn' href='https://wa.me/6281210890629' target='_blank'>WhatsApp</a>",
-        "YUDY<br> <a class='whatsapp-btn' href='https://wa.me/6281935722262' target='_blank'>WhatsApp</a>",
-        "RADIAN<br> <a class='whatsapp-btn' href='https://wa.me/6285295573960' target='_blank'>WhatsApp</a>",
-        "HERY<br> <a class='whatsapp-btn' href='https://wa.me/6283165799679' target='_blank'>WhatsApp</a>",
+        "SETIAJIT SH<br>",
+        "ENDANG SUPRIYADI",
+        "ABAS HAERUDIN",
+        "ROHMAT",
+        "SUGENG RUSWANDI",
+        "WAGIO",
+        "DUDUNG KURNIA",
+        "PURWANTO",
+        "SAIFUL BAHRI",
+        "ANO SUMARNO",
+        "PETER PANJAITAN",
+        "ADE HERMAWAN",
+        "DEDY HIDAYAT",
+        "UNANG",
+        "LIYUS HIDAYAT",
+        "HENDRA MALIK",
+        "KIDI DARYONO",
+        "DARKIMAN",
+        "ENDANG",
+        "AANG SASTRADIJAYA",
+        "ARIS SUKANDAR",
+        "YANDY",
+        "ARIS SUHENDI",
+        "UDIN",
+        "GANDUL",
+        "MAWARDY",
+        "YUDI MULYADI",
+        "RADIAN",
+        "HERY PURWANTO",
         "PRADIKA",
         "SAFEI",
+        "AGUS",
         "OTONG",
       ];
       for (let i = 0; i < photoUrls.length; i++) {
@@ -234,25 +169,6 @@
       `);
       }
     </script>
-
-    <div class="popup" id="popup">
-      <a href="#" class="close-btn" onclick="closePopup()">&times;</a>
-      <img id="popup-img" src="" alt="Popup Photo">
-    </div>
-
-    <script>
-      function openPopup(photoNumber) {
-        var popup = document.getElementById("popup");
-        var popupImg = document.getElementById("popup-img");
-        popupImg.src = popupUrls[photoNumber];
-        popup.style.display = "flex";
-      }
-
-      function closePopup() {
-        document.getElementById("popup").style.display = "none";
-      }
-    </script>
-  </div>
 
 </body>
 
