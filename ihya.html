@@ -368,9 +368,9 @@
         const preloadPrev = new Image();
         preloadPrev.src = `assets/ihya/${pad(n-1)}.webp`;
       }
-      // Auto-fit if scale is 1
+      // Auto-fit to max zoom for initial display
       if (scale === 1) {
-        fitToScreen();
+        fitToMaxZoom();
       }
       // Animate new page growing in from small
       wrapper.style.animation = 'growIn 0.8s ease-out forwards';
@@ -379,7 +379,7 @@
       }, 800);
     }
 
-    function fitToScreen() {
+    function fitToMaxZoom() {
       // Wait for image to load to calculate dimensions
       img.onload = () => {
         const viewerRect = document.querySelector('.viewer').getBoundingClientRect();
@@ -387,7 +387,8 @@
         const imgHeight = img.naturalHeight;
         const scaleX = viewerRect.width / imgWidth;
         const scaleY = viewerRect.height / imgHeight;
-        scale = Math.min(scaleX, scaleY, 1); // Fit without exceeding original size
+        scale = Math.max(scaleX, scaleY); // Max scale to fill screen (zoom in if needed)
+        scale = Math.min(scale, 7); // Cap at max zoom limit
         translateX = 0;
         translateY = 0;
         updateTransform();
@@ -516,7 +517,7 @@
       e.preventDefault();
       const delta = e.deltaY * -0.01;
       scale += delta;
-      scale = Math.max(1, Math.min(scale, 5));
+      scale = Math.max(1, Math.min(scale, 7));
       updateTransform();
       savePosition();
       showUI();
