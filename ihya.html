@@ -403,8 +403,8 @@
         const imgHeight = img.naturalHeight;
         const scaleX = viewerRect.width / imgWidth;
         const scaleY = viewerRect.height / imgHeight;
-        scale = Math.max(scaleX, scaleY) * 1.5; // Amplify zoom by 1.5x untuk lebih besar dari ukuran saat ini
-        scale = Math.min(scale, 10); // Batas maksimal zoom ditingkatkan ke 10
+        scale = Math.max(scaleX, scaleY) * 2.5; // Amplify zoom by 1.5x untuk lebih besar dari ukuran saat ini
+        scale = Math.min(scale, 20); // Batas maksimal zoom ditingkatkan ke 10
         translateX = 0;
         translateY = 0;
         updateTransform();
