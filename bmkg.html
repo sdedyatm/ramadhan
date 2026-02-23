@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000810">
+  <title>Marine Info — Selat Sunda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000810;
+      --surface: #040f1c;
+      --border: #0d2035;
+      --accent: #0080ff;
+      --accent2: #00c8ff;
+      --text: #e8f4ff;
+      --muted: #3a5a7a;
+      --safe: #00e676;
+      --warn: #ffb300;
+      --danger: #ff3d3d;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 40px;
+      overflow-x: hidden;
+    }
+
+    /* Animated ocean background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 120%, rgba(0, 100, 200, 0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 10% 60%, rgba(0, 50, 120, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* TSUNAMI ALERT */
+    .tsunami-alert {
+      display: none;
+      animation: pulse-red 1s infinite;
+      border-radius: 16px;
+      padding: 14px 20px;
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      border: 1px solid #ff4444;
+    }
+
+    @keyframes pulse-red {
+
+      0%,
+      100% {
+        background: rgba(127, 29, 29, 0.8);
+      }
+
+      50% {
+        background: rgba(220, 38, 38, 0.9);
+      }
+    }
+
+    /* HEADER */
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px;
+      letter-spacing: 0.05em;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .brand span {
+      color: var(--accent2);
+    }
+
+    .sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* LOCATION BAR */
+    .location-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+    }
+
+    .location-bar .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--safe);
+      box-shadow: 0 0 6px var(--safe);
+      animation: blink 2s infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.2;
+      }
+    }
+
+    /* MAIN CARD */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 128, 255, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* TEMP DISPLAY */
+    .temp-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .temp-group {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .temp-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 96px;
+      line-height: 0.9;
+      color: var(--text);
+      letter-spacing: -2px;
+    }
+
+    .temp-unit {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      color: var(--accent2);
+      padding-top: 10px;
+      margin-left: 4px;
+    }
+
+    .weather-icon {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+    }
+
+    .weather-icon-placeholder {
+      width: 72px;
+      height: 72px;
+      background: rgba(0, 128, 255, 0.06);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .condition {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    /* GRID STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+      margin-top: 4px;
+    }
+
+    .stat-box {
+      background: rgba(0, 128, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+    }
+
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* STATUS BADGE */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 16px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .status-badge .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .badge-safe {
+      background: rgba(0, 230, 118, 0.1);
+      color: var(--safe);
+      border: 1px solid rgba(0, 230, 118, 0.3);
+    }
+
+    .badge-warn {
+      background: rgba(255, 179, 0, 0.1);
+      color: var(--warn);
+      border: 1px solid rgba(255, 179, 0, 0.3);
+    }
+
+    .badge-danger {
+      background: rgba(255, 61, 61, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(255, 61, 61, 0.3);
+    }
+
+    /* EXTRA INFO */
+    .extra-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .mini-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .mini-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 7px;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .mini-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      color: var(--text);
+    }
+
+    .mini-unit {
+      font-family: 'DM Mono', monospace;
+      font-size: 7px;
+      color: var(--muted);
+    }
+
+    /* BUTTON */
+    .refresh-btn {
+      width: 100%;
+      margin-top: 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 24px rgba(0, 128, 255, 0.25);
+    }
+
+    .refresh-btn:hover {
+      background: #0070ee;
+      transform: translateY(-1px);
+    }
+
+    .refresh-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* TIMESTAMP */
+    .timestamp {
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      color: var(--muted);
+      margin-top: 10px;
+      letter-spacing: 0.15em;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      margin-top: 28px;
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      color: #1a3050;
+      letter-spacing: 0.2em;
+      line-height: 2;
+    }
+
+    /* LOADING */
+    .loading {
+      animation: shimmer 1.2s infinite;
+    }
+
+    @keyframes shimmer {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.35;
+      }
+    }
+
+    /* WAVE ANIMATION DECORATION */
+    .wave-decor {
+      position: absolute;
+      bottom: -30px;
+      left: -20px;
+      right: -20px;
+      height: 60px;
+      opacity: 0.04;
+      overflow: hidden;
+    }
+
+    .wave-svg {
+      width: 200%;
+      animation: wave-move 6s linear infinite;
+    }
+
+    @keyframes wave-move {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="wrap">
+
+    <!-- TSUNAMI ALERT -->
+    <div id="tsunami" class="tsunami-alert">
+      ⚠️ PERINGATAN TSUNAMI AKTIF — JAUHI AREA PANTAI ⚠️
+    </div>
+
+    <!-- HEADER -->
+    <header>
+      <div class="brand">MARINE<span>INFO</span></div>
+      <div class="sub">Penyeberangan Bojonegara ↔ Bakauheni</div>
+    </header>
+
+    <!-- LOCATION -->
+    <div class="location-bar">
+      <div class="dot"></div>
+      <span>SELAT SUNDA — 5.97°S 106.02°E — REALTIME</span>
+    </div>
+
+    <!-- MAIN CARD -->
+    <div class="card">
+      <div class="wave-decor">
+        <svg class="wave-svg" viewBox="0 0 1200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 30C150 10 300 50 450 30C600 10 750 50 900 30C1050 10 1200 50 1350 30C1500 10 1650 50 1800 30V60H0V30Z" fill="#0080ff" />
+        </svg>
+      </div>
+
+      <div class="temp-row">
+        <div>
+          <div class="condition" id="condition">MEMUAT DATA…</div>
+          <div class="temp-group">
+            <div class="temp-val" id="temp">--</div>
+            <div class="temp-unit">°C</div>
+          </div>
+        </div>
+        <div id="iconWrap">
+          <div class="weather-icon-placeholder" id="iconPlaceholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0080ff" stroke-width="1.5">
+              <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z" />
+              <circle cx="12" cy="9" r="2.5" />
+            </svg>
+          </div>
+          <img id="weatherIcon" src="" class="weather-icon" style="display:none" alt="">
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">🌊 Tinggi Gelombang</div>
+          <div class="stat-value" id="waveHeight" style="color:var(--accent2)">--</div>
+          <div class="stat-sub" id="waveStatus" style="color:var(--muted)">--</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">💨 Kecepatan Angin</div>
+          <div class="stat-value" id="windSpeed" style="color:var(--text)">--</div>
+          <div class="stat-sub" id="windDir" style="color:var(--accent2)">--</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">🌡 Kelembaban</div>
+          <div class="stat-value" id="humidity" style="color:var(--text)">--</div>
+          <div class="stat-sub" style="color:var(--muted)">PERSEN</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">👁 Visibilitas</div>
+          <div class="stat-value" id="visibility" style="color:var(--text)">--</div>
+          <div class="stat-sub" style="color:var(--muted)">KM</div>
+        </div>
+      </div>
+
+      <div id="statusBadge" class="status-badge badge-safe">
+        <div class="badge-dot" style="background:var(--safe)"></div>
+        <span id="statusText">MEMUAT STATUS PENYEBERANGAN…</span>
+      </div>
+    </div>
+
+    <!-- EXTRA MINI STATS -->
+    <div class="extra-row">
+      <div class="mini-stat">
+        <div class="mini-label">Periode Gelombang</div>
+        <div class="mini-val" id="wavePeriod">--</div>
+        <div class="mini-unit">DETIK</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-label">Arah Gelombang</div>
+        <div class="mini-val" id="waveDir">--</div>
+        <div class="mini-unit">DEG</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-label">Tutupan Awan</div>
+        <div class="mini-val" id="cloudCover">--</div>
+        <div class="mini-unit">%</div>
+      </div>
+    </div>
+
+    <button class="refresh-btn" onclick="App.fetchAll()">↻ Perbarui Data Realtime</button>
+    <div class="timestamp" id="timestamp">--</div>
+
+    <footer>
+      SUMBER: OPEN-METEO MARINE API + BMKG TEWS<br>
+      KOORDINAT BOJONEGARA: 5.97°S 106.02°E<br>
+      DATA DIPERBARUI TIAP AKSES
+    </footer>
+  </div>
+
+  <script>
+    const App = {
+      // Koordinat Selat Sunda - Bojonegara, Banten (benar)
+      lat: -5.97,
+      lon: 106.02,
+      get weatherUrl() {
+        return `https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,cloud_cover,visibility&wind_speed_unit=kmh&timezone=Asia%2FJakarta`;
+      },
+      get marineUrl() {
+        return `https://marine-api.open-meteo.com/v1/marine?latitude=${this.lat}&longitude=${this.lon}&current=wave_height,wave_direction,wave_period,swell_wave_height&timezone=Asia%2FJakarta`;
+      },
+      tsunamiUrl: 'https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json',
+      proxy: 'https://api.allorigins.win/raw?url=',
+      WMO: {
+        0: 'Cerah',
+        1: 'Terang',
+        2: 'Berawan Sebagian',
+        3: 'Berawan',
+        45: 'Berkabut',
+        48: 'Kabut Es',
+        51: 'Gerimis Ringan',
+        53: 'Gerimis',
+        55: 'Gerimis Lebat',
+        61: 'Hujan Ringan',
+        63: 'Hujan Sedang',
+        65: 'Hujan Lebat',
+        80: 'Hujan Lokal',
+        81: 'Hujan Deras',
+        82: 'Hujan Sangat Deras',
+        95: 'Hujan + Badai',
+        96: 'Badai Petir',
+        99: 'Badai Petir Parah'
+      },
+      windDegToDir(deg) {
+        const dirs = ['U', 'TL', 'T', 'TG', 'S', 'BD', 'B', 'BL', 'U'];
+        return dirs[Math.round(deg / 45) % 8];
+      },
+      getWaveStatus(h) {
+        if (h >= 2.5) return {
+          text: 'BERBAHAYA — STOP KAPAL',
+          cls: 'badge-danger',
+          color: 'var(--danger)',
+          dot: 'var(--danger)'
+        };
+        if (h >= 1.25) return {
+          text: 'WASPADA — HATI-HATI',
+          cls: 'badge-warn',
+          color: 'var(--warn)',
+          dot: 'var(--warn)'
+        };
+        if (h >= 0.5) return {
+          text: 'SEDANG — PERHATIKAN',
+          cls: 'badge-warn',
+          color: 'var(--warn)',
+          dot: 'var(--warn)'
+        };
+        return {
+          text: 'AMAN BERLAYAR',
+          cls: 'badge-safe',
+          color: 'var(--safe)',
+          dot: 'var(--safe)'
+        };
+      },
+      setLoading(on) {
+        const c = document.getElementById('condition');
+        if (on) {
+          c.textContent = 'MEMUAT…';
+          c.classList.add('loading');
+        } else c.classList.remove('loading');
+      },
+      async fetchAll() {
+        this.setLoading(true);
+        try {
+          const [weather, marine] = await Promise.all([
+            fetch(this.weatherUrl).then(r => r.json()),
+            fetch(this.marineUrl).then(r => r.json())
+          ]);
+          this.render(weather.current, marine.current);
+        } catch (e) {
+          console.error(e);
+          document.getElementById('condition').textContent = 'GAGAL MEMUAT';
+        } finally {
+          this.setLoading(false);
+        }
+        this.checkTsunami();
+      },
+      render(w, m) {
+        // Weather
+        const desc = this.WMO[w.weather_code] || `Kode ${w.weather_code}`;
+        document.getElementById('condition').textContent = desc.toUpperCase();
+        document.getElementById('temp').textContent = Math.round(w.temperature_2m);
+        document.getElementById('windSpeed').textContent = `${Math.round(w.wind_speed_10m)} km/j`;
+        document.getElementById('windDir').textContent = `DARI ${this.windDegToDir(w.wind_direction_10m)} (${Math.round(w.wind_direction_10m)}°)`;
+        document.getElementById('humidity').textContent = `${w.relative_humidity_2m}%`;
+        document.getElementById('visibility').textContent = Math.round((w.visibility || 0) / 1000);
+        document.getElementById('cloudCover').textContent = w.cloud_cover ?? '--';
+        // Marine — DATA NYATA dari Marine API
+        const wh = m.wave_height ?? 0;
+        const wp = m.wave_period ?? '--';
+        const wd = m.wave_direction ?? '--';
+        document.getElementById('waveHeight').textContent = wh.toFixed(1) + ' m';
+        document.getElementById('wavePeriod').textContent = typeof wp === 'number' ? wp.toFixed(1) : '--';
+        document.getElementById('waveDir').textContent = typeof wd === 'number' ? Math.round(wd) : '--';
+        const status = this.getWaveStatus(wh);
+        const waveEl = document.getElementById('waveHeight');
+        waveEl.style.color = status.color;
+        document.getElementById('waveStatus').textContent = this.waveCategory(wh);
+        document.getElementById('waveStatus').style.color = status.color;
+        const badge = document.getElementById('statusBadge');
+        badge.className = `status-badge ${status.cls}`;
+        badge.querySelector('.badge-dot').style.background = status.dot;
+        document.getElementById('statusText').textContent = status.text;
+        // Timestamp
+        document.getElementById('timestamp').textContent =
+          'Diperbarui: ' + new Date().toLocaleString('id-ID', {
+            timeZone: 'Asia/Jakarta',
+            hour12: false
+          });
+      },
+      waveCategory(h) {
+        if (h < 0.1) return 'TENANG';
+        if (h < 0.5) return 'RIAK';
+        if (h < 1.25) return 'BEROMBAK SEDANG';
+        if (h < 2.5) return 'BEROMBAK TINGGI';
+        if (h < 4.0) return 'SANGAT TINGGI';
+        return 'EKSTREM';
+      },
+      async checkTsunami() {
+        try {
+          const res = await fetch(this.proxy + encodeURIComponent(this.tsunamiUrl));
+          const data = await res.json();
+          const potensi = data?.Infogempa?.gempa?.Potensi || '';
+          if (potensi.toLowerCase().includes('tsunami')) {
+            document.getElementById('tsunami').style.display = 'block';
+          }
+        } catch (e) {
+          /* silent */ }
+      },
+      init() {
+        this.fetchAll();
+      }
+    };
+    document.addEventListener('DOMContentLoaded', () => App.init());
+  </script>
+</body>
+
+</html>
