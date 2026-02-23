@@ -281,6 +281,7 @@
     <button onclick="nextPage()">&#9654;</button> <!-- Right arrow -->
     <button onclick="toggleNightMode()">🌙</button> <!-- Night mode -->
     <button onclick="showJumpModal()">🔍</button> <!-- Jump to page -->
+    <button onclick="toggleZoomLock()">🔒</button> <!-- New lock zoom button -->
   </div>
   <!-- Progress bar -->
   <div class="progress" id="progress">
@@ -312,6 +313,11 @@
     let scale = parseFloat(localStorage.getItem("ihya-scale")) || 1;
     let translateX = parseFloat(localStorage.getItem("ihya-translateX")) || 0;
     let translateY = parseFloat(localStorage.getItem("ihya-translateY")) || 0;
+    // New: Zoom lock feature
+    let isZoomLocked = localStorage.getItem("ihya-zoom-locked") === 'true';
+    let lockedScale = parseFloat(localStorage.getItem("ihya-locked-scale")) || 1;
+    let lockedTranslateX = 0;
+    let lockedTranslateY = 0;
     // Swipe & mouse
     let startX = 0;
     let startY = 0;
@@ -341,6 +347,10 @@
       localStorage.setItem("ihya-scale", scale);
       localStorage.setItem("ihya-translateX", translateX);
       localStorage.setItem("ihya-translateY", translateY);
+      localStorage.setItem("ihya-zoom-locked", isZoomLocked);
+      if (isZoomLocked) {
+        localStorage.setItem("ihya-locked-scale", lockedScale);
+      }
     }
 
     function updatePageInfo() {
@@ -348,14 +358,20 @@
       progressBar.style.width = `${((currentPage + 1) / TOTAL_PAGES) * 100}%`;
       updateBookmarkIcon();
     }
-
+    // Fungsi untuk memuat halaman dengan zoom persist (tidak reset setiap ganti halaman)
     function loadPage(n, resetZoom = false) {
       if (resetZoom) {
         scale = 1;
         translateX = 0;
         translateY = 0;
       }
-      // Apply persistent zoom and translation
+      // Jika zoom locked, apply locked zoom
+      if (isZoomLocked) {
+        scale = lockedScale;
+        translateX = lockedTranslateX;
+        translateY = lockedTranslateY;
+      }
+      // Apply zoom and translation
       updateTransform();
       img.src = `assets/ihya/${pad(n)}.webp`;
       savePosition();
@@ -368,8 +384,8 @@
         const preloadPrev = new Image();
         preloadPrev.src = `assets/ihya/${pad(n-1)}.webp`;
       }
-      // Auto-fit to max zoom for initial display
-      if (scale === 1) {
+      // Auto-fit to max zoom only if scale is default (1) and not locked
+      if (scale === 1 && !isZoomLocked) {
         fitToMaxZoom();
       }
       // Animate new page growing in from small
@@ -378,7 +394,7 @@
         wrapper.style.animation = '';
       }, 800);
     }
-
+    // Fungsi untuk memperbesar tampilan awal hingga batas maksimal (ditingkatkan ke 10 untuk lebih besar)
     function fitToMaxZoom() {
       // Wait for image to load to calculate dimensions
       img.onload = () => {
@@ -387,20 +403,33 @@
         const imgHeight = img.naturalHeight;
         const scaleX = viewerRect.width / imgWidth;
         const scaleY = viewerRect.height / imgHeight;
-        scale = Math.max(scaleX, scaleY); // Max scale to fill screen (zoom in if needed)
-        scale = Math.min(scale, 7); // Cap at max zoom limit
+        scale = Math.max(scaleX, scaleY) * 1.5; // Amplify zoom by 1.5x untuk lebih besar dari ukuran saat ini
+        scale = Math.min(scale, 10); // Batas maksimal zoom ditingkatkan ke 10
         translateX = 0;
         translateY = 0;
         updateTransform();
         savePosition();
       };
     }
+    // New: Toggle zoom lock
+    function toggleZoomLock() {
+      isZoomLocked = !isZoomLocked;
+      if (isZoomLocked) {
+        lockedScale = scale;
+        lockedTranslateX = translateX;
+        lockedTranslateY = translateY;
+      }
+      savePosition();
+      // Optional: Update button style or icon if needed
+      const lockBtn = document.querySelector('button[onclick="toggleZoomLock()"]');
+      lockBtn.textContent = isZoomLocked ? '🔒' : '🔓';
+    }
 
     function nextPage() {
       if (currentPage < TOTAL_PAGES - 1) {
         animateShrink('next', () => {
           currentPage++;
-          loadPage(currentPage); // Persistent zoom
+          loadPage(currentPage, false); // Jangan reset zoom
           wrapper.style.transition = "none";
           wrapper.style.transform = "translateY(0) scale(1)";
           wrapper.style.opacity = 1;
@@ -412,7 +441,7 @@
       if (currentPage > 0) {
         animateShrink('prev', () => {
           currentPage--;
-          loadPage(currentPage); // Persistent zoom
+          loadPage(currentPage, false); // Jangan reset zoom
           wrapper.style.transition = "none";
           wrapper.style.transform = "translateY(0) scale(1)";
           wrapper.style.opacity = 1;
@@ -517,7 +546,7 @@
       e.preventDefault();
       const delta = e.deltaY * -0.01;
       scale += delta;
-      scale = Math.max(1, Math.min(scale, 7));
+      scale = Math.max(1, Math.min(scale, 5));
       updateTransform();
       savePosition();
       showUI();
@@ -569,7 +598,7 @@
       let page = parseInt(jumpInput.value) - 1;
       if (page >= 0 && page < TOTAL_PAGES) {
         currentPage = page;
-        loadPage(currentPage);
+        loadPage(currentPage, false); // Jangan reset zoom saat jump
       }
       closeModal();
     }
@@ -601,6 +630,9 @@
     // Initial hide after load
     window.addEventListener('load', () => {
       scheduleHideUI();
+      // Initial lock button state
+      const lockBtn = document.querySelector('button[onclick="toggleZoomLock()"]');
+      lockBtn.textContent = isZoomLocked ? '🔒' : '🔓';
     });
     // Show on mouse move or touch
     document.addEventListener('mousemove', showUI);
