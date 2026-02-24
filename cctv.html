@@ -8,27 +8,20 @@
   <title>CCTV Traffic Pro Dashboard</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- HLS.js versi terbaru yang lebih stabil -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
 
   <style>
     .video-wrapper {
       position: relative;
       width: 100%;
-      /* Ukuran ditingkatkan dari 500px ke 850px agar lebih besar */
-      max-width: 850px;
+      max-width: 500px;
       aspect-ratio: 16 / 9;
       background: #000;
-      border-radius: 24px;
+      border-radius: 16px;
       overflow: hidden;
-      /* Efek shadow ditingkatkan dengan glow biru tipis sesuai tema CSS modern */
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 20px rgba(59, 130, 246, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: transform 0.3s ease;
-    }
-
-    .video-wrapper:hover {
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9), 0 0 30px rgba(59, 130, 246, 0.25);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .custom-scroll::-webkit-scrollbar {
@@ -63,20 +56,6 @@
     #error-overlay {
       display: none;
     }
-
-    /* Animasi ringan untuk efek scanline */
-    .video-container::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-      background-size: 100% 2px, 3px 100%;
-      pointer-events: none;
-      z-index: 5;
-    }
   </style>
 </head>
 
@@ -99,14 +78,16 @@
 
   <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
 
-    <section class="p-4 md:p-10 flex flex-col items-center bg-slate-950 md:flex-1 justify-center border-b md:border-b-0 md:border-r border-slate-900 overflow-y-auto">
+    <section class="p-6 flex flex-col items-center bg-slate-950 md:flex-1 justify-center border-b md:border-b-0 md:border-r border-slate-900">
       <div class="video-wrapper group" id="video-box">
         <div class="absolute top-3 right-3 z-30 opacity-40 hover:opacity-100 transition-opacity">
           <img src="https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0" class="w-8 h-8 grayscale shadow-lg">
         </div>
 
+        <!-- Video element: hapus crossorigin agar tidak memicu preflight CORS yang gagal -->
         <video id="main-video" class="w-full h-full" playsinline autoplay muted></video>
 
+        <!-- Error Overlay -->
         <div id="error-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/95 z-50 gap-4">
           <div class="text-3xl">⚠️</div>
           <p class="text-[10px] font-mono text-red-400 uppercase tracking-widest">Stream Tidak Tersedia</p>
@@ -116,14 +97,14 @@
           </button>
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/80 to-transparent z-10">
-          <h2 id="display-title" class="text-sm font-bold text-blue-400">STANDBY</h2>
-          <p id="display-sub" class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Pilih saluran untuk memantau</p>
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/70 to-transparent z-10">
+          <h2 id="display-title" class="text-xs font-bold text-blue-400">STANDBY</h2>
+          <p id="display-sub" class="text-[9px] text-slate-400 mt-1 uppercase tracking-widest">Pilih saluran untuk memantau</p>
         </div>
 
         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-          <button onclick="app.toggleFS()" class="pointer-events-auto p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full hover:scale-110 transition-transform shadow-2xl">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button onclick="app.toggleFS()" class="pointer-events-auto p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full hover:scale-110 transition-transform shadow-2xl">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-width="2" />
             </svg>
           </button>
@@ -131,16 +112,16 @@
 
         <div id="loader" class="absolute inset-0 flex items-center justify-center bg-slate-900/90 hidden z-40">
           <div class="flex flex-col items-center gap-3">
-            <div class="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <span class="text-[10px] font-mono tracking-[0.3em] text-blue-400">STREAMING_SYNC</span>
+            <div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-[9px] font-mono tracking-[0.3em] text-blue-400">STREAMING_SYNC</span>
           </div>
         </div>
       </div>
 
-      <div class="mt-6 max-w-[850px] w-full p-4 bg-blue-950/20 border border-blue-800/20 rounded-2xl">
-        <p class="text-[10px] text-blue-400/80 font-mono leading-relaxed flex items-center gap-2">
-          <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
-          Jika pemutaran gagal, hal ini biasanya disebabkan oleh pembatasan CORS dari server penyedia CCTV atau kamera sedang luring (offline).
+      <!-- Info box CORS -->
+      <div class="mt-4 max-w-[500px] w-full p-3 bg-yellow-950/40 border border-yellow-800/30 rounded-xl">
+        <p class="text-[9px] text-yellow-600/80 font-mono leading-relaxed">
+          ⚠️ Jika layar Loading terus, coba channel lain kemungkinan CCTV sedang offline.
         </p>
       </div>
     </section>
@@ -161,6 +142,10 @@
         name: 'CIKAMPEK',
         icon: '🛣️',
         subs: [{
+            name: 'CIKOPO',
+            url: 'https://jmlive.jasamarga.com/hls/5/f814d831-ade3-4b3e-957a-174281129457/index.m3u8'
+          },
+          {
             name: 'Gerbang Utama',
             url: 'https://jmlive.jasamarga.com/hls/5/71eddb82-0986-464a-b121-1317b4513685/index.m3u8'
           },
@@ -255,8 +240,8 @@
             url: 'https://cctv.astratol.co.id/hls/serang.m3u8'
           },
           {
-            name: 'Cilegon Barat',
-            url: 'https://cctv.astratol.co.id/hls/cilegon.m3u8'
+            name: 'Cilegon Timur',
+            url: 'https://cctv.mms-corp.id/ciltim-exit/index.m3u8'
           }
         ]
       },
@@ -347,12 +332,12 @@
             url: 'https://cctv.jasamarga.com/hls/plumbon.m3u8'
           },
           {
-            name: 'Kanci',
-            url: 'https://cctv.jasamarga.com/hls/kanci.m3u8'
+            name: 'GT Kanci',
+            url: 'https://jmlive.jasamarga.com/hls/12/70e13673-18fb-48bf-8758-a911437c9b11/index.m3u8'
           },
           {
-            name: 'Palimanan',
-            url: 'https://cctv.jasamarga.com/hls/palimanan.m3u8'
+            name: 'GT Palimanan',
+            url: 'https://jmlive.jasamarga.com/hls/12/4697c8c2-014c-4bf1-a3c9-9770c53c9dd6/index.m3u8'
           },
           {
             name: 'Plered',
@@ -533,8 +518,8 @@
             url: 'https://cctv.jasamarga.com/hls/belawan.m3u8'
           },
           {
-            name: 'Tanjung Morawa',
-            url: 'https://cctv.jasamarga.com/hls/tamora.m3u8'
+            name: 'GT TJ Morawa',
+            url: 'https://jmlive.jasamarga.com/hls/24/a4776165-5356-4edf-ac12-2a1f1fc0fb00/index.m3u8'
           },
           {
             name: 'Maimun',
@@ -639,6 +624,7 @@
           if (Hls.isSupported()) {
             this.loadWithHls(url);
           } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Safari native HLS
             this.loadNative(url);
           } else {
             this.showError('Browser tidak mendukung HLS playback.');
@@ -656,9 +642,13 @@
           maxMaxBufferLength: 60,
           maxBufferSize: 20 * 1000 * 1000,
           maxBufferHole: 0.5,
+          // Perbaikan utama: jangan set crossOrigin agar tidak memicu preflight CORS
+          // xhrSetup di sini tidak mengeset header custom untuk menghindari preflight
           xhrSetup: function(xhr, url) {
+            // Tidak set withCredentials true agar tidak ada preflight yang gagal
             xhr.withCredentials = false;
           },
+          // Retry settings
           manifestLoadingTimeOut: 15000,
           manifestLoadingMaxRetry: 2,
           manifestLoadingRetryDelay: 1000,
@@ -676,23 +666,27 @@
           this.hideLoader();
           this.errorOverlay.style.display = 'none';
           this.video.play().catch(err => {
+            // Autoplay diblokir, tampilkan tombol play
             console.warn('Autoplay blocked:', err);
           });
         });
         hls.on(Hls.Events.ERROR, (event, data) => {
+          console.warn('HLS Error:', data.type, data.details, data.fatal);
           if (data.fatal) {
             this.fatalErrorCount++;
             switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
                 if (this.fatalErrorCount <= 2) {
+                  console.log('Fatal network error, trying to recover...');
                   hls.startLoad();
                 } else {
-                  this.showError('Network Error: Stream tidak dapat diakses. URL: ' + url.split('/').pop());
+                  this.showError('Network Error: Stream tidak dapat diakses. Kemungkinan CORS atau stream offline.\nURL: ' + url.split('/').pop());
                   hls.destroy();
                 }
                 break;
               case Hls.ErrorTypes.MEDIA_ERROR:
                 if (this.fatalErrorCount <= 2) {
+                  console.log('Fatal media error, trying to recover...');
                   hls.recoverMediaError();
                 } else {
                   this.showError('Media Error: Format stream tidak didukung.');
@@ -708,6 +702,7 @@
         });
       }
       loadNative(url) {
+        // Untuk Safari yang support HLS secara native
         this.video.src = url;
         this.video.addEventListener('loadedmetadata', () => {
           this.hideLoader();
@@ -720,6 +715,7 @@
         }, {
           once: true
         });
+        // Timeout jika tidak ada respons
         setTimeout(() => {
           if (this.loader && !this.loader.classList.contains('hidden')) {
             this.showError('Timeout: Stream tidak merespons dalam 15 detik.');
