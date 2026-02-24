@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <title>CCTV Traffic Pro Dashboard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
+
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlRyYWZmaWMgTW9uaXRvciIsCiAgInNob3J0X25hbWUiOiAiVHJhZmZpY1BXQSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYxNzJhIiwKICAidGhlbWVfY29sb3ciOiAiIzBmMTcyYSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vaW1nLmljb25zOC5jb20vYm9sa29vbi81MTIvY2N0di1jYW1lcmEucG5nIiwKICAiIHNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
+
+  <style>
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 10px;
+    }
+
+    .submenu-container {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+    }
+
+    .submenu-container.open {
+      max-height: 800px;
+      opacity: 1;
+      margin-top: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .active-btn {
+      border-left: 4px solid #3b82f6 !important;
+      background: rgba(59, 130, 246, 0.15) !important;
+      color: #60a5fa !important;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden font-sans">
+
+  <header class="p-4 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 flex justify-between items-center z-30">
+    <div class="flex items-center gap-3">
+      <div class="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-900/20">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-width="2" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-sm font-black tracking-tighter uppercase">Traffic Insight <span class="text-blue-500">PRO</span></h1>
+        <p id="status-bar" class="text-[9px] text-slate-500 font-mono tracking-widest uppercase">Initializing System...</p>
+      </div>
+    </div>
+    <div id="connection-dot" class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
+  </header>
+
+  <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+
+    <section class="p-6 flex flex-col items-center bg-slate-950 md:flex-1 justify-center border-b md:border-b-0 md:border-r border-slate-900">
+      <div class="video-wrapper group" id="video-box">
+        <div class="absolute top-3 right-3 z-30 opacity-40 hover:opacity-100 transition-opacity">
+          <img src="https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0" class="w-5 h-5 grayscale shadow-lg">
+        </div>
+
+        <video id="main-video" class="w-full h-full" playsinline crossorigin="anonymous"></video>
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/70 to-transparent">
+          <h2 id="display-title" class="text-xs font-bold text-blue-400">STANDBY</h2>
+          <p id="display-sub" class="text-[9px] text-slate-400 mt-1 uppercase tracking-widest">Pilih saluran untuk memantau</p>
+        </div>
+
+        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          <button onclick="app.toggleFS()" class="pointer-events-auto p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full hover:scale-110 transition-transform shadow-2xl">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-width="2" />
+            </svg>
+          </button>
+        </div>
+
+        <div id="loader" class="absolute inset-0 flex items-center justify-center bg-slate-900/90 hidden z-40">
+          <div class="flex flex-col items-center gap-3">
+            <div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-[9px] font-mono tracking-[0.3em] text-blue-400">STREAMING_SYNC</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="w-full md:w-96 bg-slate-900/40 flex flex-col overflow-hidden border-l border-slate-900">
+      <div class="p-4 bg-slate-900/80 border-b border-slate-800 backdrop-blur-sm">
+        <input type="text" id="cctv-search" placeholder="Cari ruas jalan atau kota..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-[11px] focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-600">
+      </div>
+
+      <div id="menu-container" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3">
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    /**
+     * DATA CONFIGURATION
+     * Masukkan URL .m3u8 yang valid ke masing-masing item.
+     */
+    const categories = [{
+        id: 'cikampek',
+        name: 'CIKAMPEK',
+        icon: '🛣️',
+        subs: [{
+            name: 'Gerbang Utama',
+            url: 'https://jmlive.jasamarga.com/hls/5/71eddb82-0986-464a-b121-1317b4513685/index.m3u8'
+          },
+          {
+            name: 'Klari Krwg',
+            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-09/index.m3u8'
+          },
+          {
+            name: 'Simpang Dawuan',
+            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-10/index.m3u8'
+          },
+          {
+            name: 'Cikampek Utama',
+            url: 'https://cctv.jasamarga.com/hls/cikatama.m3u8'
+          },
+          {
+            name: 'Flyover Martadinata',
+            url: 'https://cctv.jasamarga.com/hls/martadinata.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'bandung',
+        name: 'BANDUNG',
+        icon: '🏙️',
+        subs: [{
+            name: 'Pasteur',
+            url: 'https://cctv.jasamarga.com/hls/pasteur.m3u8'
+          },
+          {
+            name: 'Cileunyi',
+            url: 'https://cctv.jasamarga.com/hls/cileunyi.m3u8'
+          },
+          {
+            name: 'Pasupati',
+            url: 'https://cctv.bandung.go.id/hls/pasupati.m3u8'
+          },
+          {
+            name: 'Gedebage',
+            url: 'https://cctv.jasamarga.com/hls/gedebage.m3u8'
+          },
+          {
+            name: 'Buah Batu',
+            url: 'https://cctv.jasamarga.com/hls/buahbatu.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'japek',
+        name: 'TOL JAPEK',
+        icon: '🛣️',
+        subs: [{
+            name: 'KM 10 Cikunir',
+            url: 'https://cctv.jasamarga.com/hls/km10.m3u8'
+          },
+          {
+            name: 'KM 21 Tambun',
+            url: 'https://cctv.jasamarga.com/hls/km21.m3u8'
+          },
+          {
+            name: 'KM 31 Cikarang',
+            url: 'https://cctv.jasamarga.com/hls/km31.m3u8'
+          },
+          {
+            name: 'KM 47 Karawang',
+            url: 'https://cctv.jasamarga.com/hls/km47.m3u8'
+          },
+          {
+            name: 'Layang MBZ',
+            url: 'https://cctv.jasamarga.com/hls/mbz.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'tangmer',
+        name: 'TOL TANGERANG MERAK',
+        icon: '🚚',
+        subs: [{
+            name: 'Bitung',
+            url: 'https://cctv.astratol.co.id/hls/bitung.m3u8'
+          },
+          {
+            name: 'Balaraja Barat',
+            url: 'https://cctv.mms-corp.id/balbar-exit/index.m3u8'
+          },
+          {
+            name: 'Exit Merak',
+            url: 'https://cctv.mms-corp.id/merak-exit/index.m3u8'
+          },
+          {
+            name: 'Serang Timur',
+            url: 'https://cctv.astratol.co.id/hls/serang.m3u8'
+          },
+          {
+            name: 'Cilegon Barat',
+            url: 'https://cctv.astratol.co.id/hls/cilegon.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'merak',
+        name: 'MERAK',
+        icon: '🚢',
+        subs: [{
+            name: 'Dermaga Eksekutif',
+            url: 'https://stream.asdp.id/hls/merak-eksekutif.m3u8'
+          },
+          {
+            name: 'Dermaga 1',
+            url: 'https://stream.asdp.id/hls/merak1.m3u8'
+          },
+          {
+            name: 'Dermaga 2',
+            url: 'https://stream.asdp.id/hls/merak2.m3u8'
+          },
+          {
+            name: 'Pintu Masuk Port',
+            url: 'https://stream.asdp.id/hls/gate-merak.m3u8'
+          },
+          {
+            name: 'Area Parkir',
+            url: 'https://stream.asdp.id/hls/parkir-merak.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'bojonegara',
+        name: 'BOJONEGARA',
+        icon: '⚓',
+        subs: [{
+            name: 'Gate Utama',
+            url: 'https://cctv.pelindo.co.id/bojonegara1.m3u8'
+          },
+          {
+            name: 'Area Logistik',
+            url: 'https://cctv.pelindo.co.id/bojonegara2.m3u8'
+          },
+          {
+            name: 'Dermaga',
+            url: 'https://cctv.pelindo.co.id/bojonegara3.m3u8'
+          },
+          {
+            name: 'Jalur Akses',
+            url: 'https://cctv.pelindo.co.id/bojonegara4.m3u8'
+          },
+          {
+            name: 'Pergudangan',
+            url: 'https://cctv.pelindo.co.id/bojonegara5.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'indramayu',
+        name: 'INDRAMAYU',
+        icon: '🌾',
+        subs: [{
+            name: 'Pantura Lohbener',
+            url: 'https://dishub.indramayukab.go.id/lohbener.m3u8'
+          },
+          {
+            name: 'Jatibarang',
+            url: 'https://dishub.indramayukab.go.id/jatibarang.m3u8'
+          },
+          {
+            name: 'Karangampel',
+            url: 'https://dishub.indramayukab.go.id/karangampel.m3u8'
+          },
+          {
+            name: 'Eretan',
+            url: 'https://dishub.indramayukab.go.id/eretan.m3u8'
+          },
+          {
+            name: 'Losarang',
+            url: 'https://dishub.indramayukab.go.id/losarang.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'cirebon',
+        name: 'CIREBON',
+        icon: '🏯',
+        subs: [{
+            name: 'Plumbon',
+            url: 'https://cctv.jasamarga.com/hls/plumbon.m3u8'
+          },
+          {
+            name: 'Kanci',
+            url: 'https://cctv.jasamarga.com/hls/kanci.m3u8'
+          },
+          {
+            name: 'Palimanan',
+            url: 'https://cctv.jasamarga.com/hls/palimanan.m3u8'
+          },
+          {
+            name: 'Plered',
+            url: 'https://dishub.cirebonkota.go.id/plered.m3u8'
+          },
+          {
+            name: 'Harjamukti',
+            url: 'https://dishub.cirebonkota.go.id/harjamukti.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'semarang',
+        name: 'SEMARANG',
+        icon: '🏛️',
+        subs: [{
+            name: 'Simpang Lima',
+            url: 'https://cctv.semarangkota.go.id/simpang5.m3u8'
+          },
+          {
+            name: 'Kaligawe',
+            url: 'https://cctv.semarangkota.go.id/kaligawe.m3u8'
+          },
+          {
+            name: 'Krapyak',
+            url: 'https://cctv.jasamarga.com/hls/krapyak.m3u8'
+          },
+          {
+            name: 'Jatingaleh',
+            url: 'https://cctv.jasamarga.com/hls/jatingaleh.m3u8'
+          },
+          {
+            name: 'Banyumanik',
+            url: 'https://cctv.jasamarga.com/hls/banyumanik.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'surabaya',
+        name: 'SURABAYA',
+        icon: '🦈',
+        subs: [{
+            name: 'Waru',
+            url: 'https://cctv.jasamarga.com/hls/waru.m3u8'
+          },
+          {
+            name: 'Gunung Sari',
+            url: 'https://cctv.jasamarga.com/hls/gunungsari.m3u8'
+          },
+          {
+            name: 'Dupak',
+            url: 'https://cctv.jasamarga.com/hls/dupak.m3u8'
+          },
+          {
+            name: 'Suramadu',
+            url: 'https://dishub.surabaya.go.id/suramadu.m3u8'
+          },
+          {
+            name: 'Perak',
+            url: 'https://dishub.surabaya.go.id/perak.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'lampung',
+        name: 'LAMPUNG',
+        icon: '🐘',
+        subs: [{
+            name: 'Bakauheni Port',
+            url: 'https://stream.asdp.id/hls/bakauheni.m3u8'
+          },
+          {
+            name: 'Kalianda',
+            url: 'https://cctv.tol-lampung.com/v1/kalianda.m3u8'
+          },
+          {
+            name: 'Terbanggi Besar',
+            url: 'https://cctv.tol-lampung.com/v1/terbanggi.m3u8'
+          },
+          {
+            name: 'Tegineneng',
+            url: 'https://cctv.tol-lampung.com/v1/tegineneng.m3u8'
+          },
+          {
+            name: 'Mesuji',
+            url: 'https://cctv.tol-lampung.com/v1/mesuji.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'palembang',
+        name: 'PALEMBANG',
+        icon: '🌉',
+        subs: [{
+            name: 'Ampera',
+            url: 'https://dishub.palembang.go.id/ampera.m3u8'
+          },
+          {
+            name: 'Jakabaring',
+            url: 'https://dishub.palembang.go.id/jakabaring.m3u8'
+          },
+          {
+            name: 'KM 12',
+            url: 'https://cctv.hutamakarya.com/palembang12.m3u8'
+          },
+          {
+            name: 'Kramasan',
+            url: 'https://cctv.hutamakarya.com/kramasan.m3u8'
+          },
+          {
+            name: 'Indralaya',
+            url: 'https://cctv.hutamakarya.com/indralaya.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'jambi',
+        name: 'JAMBI',
+        icon: '🐅',
+        subs: [{
+            name: 'Simpang Rimbo',
+            url: 'https://dishub.jambikota.go.id/rimbo.m3u8'
+          },
+          {
+            name: 'Aur Duri',
+            url: 'https://dishub.jambikota.go.id/aurduri.m3u8'
+          },
+          {
+            name: 'Muara Bulian',
+            url: 'https://dishub.jambikota.go.id/bulian.m3u8'
+          },
+          {
+            name: 'Tugu Juang',
+            url: 'https://dishub.jambikota.go.id/juang.m3u8'
+          },
+          {
+            name: 'Sipin',
+            url: 'https://dishub.jambikota.go.id/sipin.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'pekanbaru',
+        name: 'PEKANBARU',
+        icon: '🛢️',
+        subs: [{
+            name: 'Simpang Bingung',
+            url: 'https://dishub.pekanbaru.go.id/bingung.m3u8'
+          },
+          {
+            name: 'Panam',
+            url: 'https://dishub.pekanbaru.go.id/panam.m3u8'
+          },
+          {
+            name: 'Rumbai',
+            url: 'https://dishub.pekanbaru.go.id/rumbai.m3u8'
+          },
+          {
+            name: 'Tol Permai',
+            url: 'https://cctv.hutamakarya.com/permai.m3u8'
+          },
+          {
+            name: 'Arengka',
+            url: 'https://dishub.pekanbaru.go.id/arengka.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'medan',
+        name: 'MEDAN',
+        icon: '🏢',
+        subs: [{
+            name: 'Amplas',
+            url: 'https://atcs.medan.id/hls/amplas.m3u8'
+          },
+          {
+            name: 'Belawan',
+            url: 'https://cctv.jasamarga.com/hls/belawan.m3u8'
+          },
+          {
+            name: 'Tanjung Morawa',
+            url: 'https://cctv.jasamarga.com/hls/tamora.m3u8'
+          },
+          {
+            name: 'Maimun',
+            url: 'https://atcs.medan.id/hls/maimun.m3u8'
+          },
+          {
+            name: 'Simpang Pos',
+            url: 'https://atcs.medan.id/hls/simpangpos.m3u8'
+          }
+        ]
+      }
+    ];
+    class TrafficApp {
+      constructor() {
+        this.video = document.getElementById('main-video');
+        this.loader = document.getElementById('loader');
+        this.hls = null;
+        this.init();
+      }
+      init() {
+        this.renderMenu();
+        this.setupSearch();
+        this.initSW();
+        document.getElementById('status-bar').innerText = 'System Operational // 2026';
+      }
+      renderMenu() {
+        const container = document.getElementById('menu-container');
+        container.innerHTML = categories.map(cat => `
+                    <div class="category-group">
+                        <button onclick="app.toggleSub('${cat.id}')" 
+                                class="w-full p-4 bg-slate-800/40 border border-slate-800 rounded-2xl flex items-center justify-between hover:bg-slate-800 hover:border-blue-500/30 transition-all group">
+                            <span class="font-bold text-[11px] tracking-widest flex items-center gap-3">
+                                <span class="text-lg opacity-80 group-hover:scale-110 transition-transform">${cat.icon}</span> 
+                                ${cat.name}
+                            </span>
+                            <svg class="w-4 h-4 text-slate-600 group-hover:text-blue-400 transition-transform duration-300" id="icon-${cat.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <div id="sub-${cat.id}" class="submenu-container grid grid-cols-1 gap-1.5">
+                            ${cat.subs.map(sub => `
+                                <button onclick="app.play('${cat.name}', '${sub.name}', '${sub.url}', this)" 
+                                        class="p-3 bg-slate-900/60 border border-slate-800/50 rounded-xl text-[10px] text-left hover:border-blue-500/50 hover:text-blue-400 transition-all font-mono uppercase pl-6 relative overflow-hidden group">
+                                    <span class="absolute left-2 top-1/2 -translate-y-1/2 w-1 h-1 bg-slate-700 rounded-full group-hover:bg-blue-500"></span>
+                                    ${sub.name}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+      }
+      toggleSub(id) {
+        const el = document.getElementById(`sub-${id}`);
+        const icon = document.getElementById(`icon-${id}`);
+        const isOpen = el.classList.contains('open');
+        document.querySelectorAll('.submenu-container').forEach(m => m.classList.remove('open'));
+        document.querySelectorAll('svg[id^="icon-"]').forEach(i => i.style.transform = 'rotate(0deg)');
+        if (!isOpen) {
+          el.classList.add('open');
+          icon.style.transform = 'rotate(180deg)';
+        }
+      }
+      async play(cat, sub, url, btn) {
+        try {
+          this.loader.classList.remove('hidden');
+          document.querySelectorAll('.submenu-container button').forEach(b => b.classList.remove('active-btn'));
+          btn.classList.add('active-btn');
+          document.getElementById('display-title').innerText = `${cat} - ${sub}`;
+          document.getElementById('display-sub').innerText = `Syncing: ${url.split('/').pop()}`;
+          const hlsConfig = {
+            enableWorker: true,
+            xhrSetup: (xhr) => {
+              xhr.withCredentials = false;
+            }
+          };
+          if (Hls.isSupported()) {
+            if (this.hls) this.hls.destroy();
+            this.hls = new Hls(hlsConfig);
+            this.hls.loadSource(url);
+            this.hls.attachMedia(this.video);
+            this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              this.video.play().catch(() => {});
+              this.loader.classList.add('hidden');
+            });
+            this.hls.on(Hls.Events.ERROR, (e, data) => {
+              if (data.fatal) this.handleStreamError();
+            });
+          } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
+            this.video.src = url;
+            this.video.addEventListener('loadedmetadata', () => {
+              this.video.play();
+              this.loader.classList.add('hidden');
+            });
+          }
+        } catch (e) {
+          this.handleStreamError();
+        }
+      }
+      handleStreamError() {
+        this.loader.classList.add('hidden');
+        document.getElementById('display-title').innerText = "⚠️ STREAM OFFLINE";
+        document.getElementById('display-sub').innerText = "Cek URL atau Koneksi Jaringan";
+      }
+      setupSearch() {
+        document.getElementById('cctv-search').addEventListener('input', (e) => {
+          const term = e.target.value.toLowerCase();
+          document.querySelectorAll('.category-group').forEach(group => {
+            const text = group.innerText.toLowerCase();
+            group.style.display = text.includes(term) ? 'block' : 'none';
+          });
+        });
+      }
+      toggleFS() {
+        const box = document.getElementById('video-box');
+        if (!document.fullscreenElement) box.requestFullscreen();
+        else document.exitFullscreen();
+      }
+      initSW() {
+        if ('serviceWorker' in navigator) {
+          const sw = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
+          const b = new Blob([sw], {
+            type: 'application/javascript'
+          });
+          navigator.serviceWorker.register(URL.createObjectURL(b));
+        }
+      }
+    }
+    const app = new TrafficApp();
+  </script>
+</body>
+
+</html>
