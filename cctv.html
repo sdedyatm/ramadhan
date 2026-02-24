@@ -3,152 +3,140 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0f172a">
   <title>CCTV Traffic Pro Dashboard</title>
 
-  <!-- Tailwind CSS (WAJIB untuk tampilan rapi) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js"></script>
-
-  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlRyYWZmaWMgTW9uaXRvciIsCiAgInNob3J0X25hbWUiOiAiVHJhZmZpY1BXQSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYxNzJhIiwKICAidGhlbWVfY29sb3IiOiAiIzBmMTcyYSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vaW1nLmljb25zOC5jb20vYm9sa29vbi81MTIvY2N0di1jYW1lcmEucG5nIiwKICAiIHNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
+  <!-- HLS.js versi terbaru yang lebih stabil -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-    body {
-      font-family: 'Inter', system_ui, sans-serif;
-    }
-
     .video-wrapper {
       position: relative;
       width: 100%;
-      max-width: 100%;
+      max-width: 500px;
       aspect-ratio: 16 / 9;
       background: #000;
-      border-radius: 20px;
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .custom-scroll::-webkit-scrollbar {
-      width: 5px;
+      width: 4px;
     }
 
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: #475569;
-      border-radius: 20px;
+      background: #1e293b;
+      border-radius: 10px;
     }
 
     .submenu-container {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       max-height: 0;
       overflow: hidden;
       opacity: 0;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .submenu-container.open {
-      max-height: 1200px;
+      max-height: 800px;
       opacity: 1;
+      margin-top: 0.75rem;
+      margin-bottom: 0.75rem;
     }
 
-    .live-badge {
-      animation: pulse 2s infinite;
+    .active-btn {
+      border-left: 4px solid #3b82f6 !important;
+      background: rgba(59, 130, 246, 0.15) !important;
+      color: #60a5fa !important;
     }
 
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: 0.7;
-      }
+    #error-overlay {
+      display: none;
     }
   </style>
 </head>
 
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col overflow-hidden">
-  <!-- HEADER -->
-  <header class="px-4 py-4 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between z-50">
+<body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden font-sans">
+
+  <header class="p-4 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 flex justify-between items-center z-30">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-          <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+      <div class="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-900/20">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-width="2" />
         </svg>
       </div>
       <div>
-        <h1 class="text-2xl font-bold tracking-tighter">CCTV<span class="text-blue-500">ATM</span></h1>
-        <p id="status-bar" class="text-xs font-mono text-emerald-400">CCTV LIVE SYSTEM </p>
+        <h1 class="text-sm font-black tracking-tighter uppercase">Cctv<span class="text-blue-500">ATM</span></h1>
+        <p id="status-bar" class="text-[9px] text-slate-500 font-mono tracking-widest uppercase">Initializing System...</p>
       </div>
     </div>
-    <div class="flex items-center gap-2 text-emerald-400 text-sm font-medium">
-      <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
-      ONLINE
-    </div>
+    <div id="connection-dot" class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
   </header>
 
-  <main class="flex-1 flex flex-col lg:flex-row overflow-hidden">
-    <!-- VIDEO AREA (lebih besar & rapi di HP) -->
-    <section class="flex-1 flex items-center justify-center bg-slate-950 p-4 lg:p-8">
-      <div class="video-wrapper w-full max-w-4xl mx-auto group" id="video-box">
-        <!-- Logo lebih besar -->
-        <div class="absolute top-4 right-4 z-40">
-          <img src="https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0" class="w-10 h-10 grayscale opacity-75 hover:opacity-100 transition-all" alt="Logo">
+  <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+
+    <section class="p-6 flex flex-col items-center bg-slate-950 md:flex-1 justify-center border-b md:border-b-0 md:border-r border-slate-900">
+      <div class="video-wrapper group" id="video-box">
+        <div class="absolute top-3 right-3 z-30 opacity-40 hover:opacity-100 transition-opacity">
+          <img src="https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0" class="w-8 h-8 grayscale shadow-lg">
         </div>
 
-        <!-- LIVE Badge -->
-        <div id="live-badge" class="hidden absolute top-4 left-4 z-40 px-4 py-1.5 bg-red-600/90 backdrop-blur-md rounded-full flex items-center gap-2 text-xs font-bold text-white shadow-xl live-badge">
-          <div class="w-2 h-2 bg-white rounded-full animate-ping"></div>
-          LIVE
+        <!-- Video element: hapus crossorigin agar tidak memicu preflight CORS yang gagal -->
+        <video id="main-video" class="w-full h-full" playsinline autoplay muted></video>
+
+        <!-- Error Overlay -->
+        <div id="error-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/95 z-50 gap-4">
+          <div class="text-3xl">⚠️</div>
+          <p class="text-[10px] font-mono text-red-400 uppercase tracking-widest">Stream Tidak Tersedia</p>
+          <p id="error-detail" class="text-[9px] text-slate-500 text-center px-6">CORS atau stream offline. Coba channel lain.</p>
+          <button id="retry-btn" onclick="app.retryStream()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-colors">
+            ↺ Coba Lagi
+          </button>
         </div>
 
-        <video id="main-video" class="w-full h-full object-cover" playsinline autoplay muted crossorigin="anonymous"></video>
-
-        <!-- Overlay Bawah -->
-        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
-          <h2 id="display-title" class="text-lg font-semibold text-white">STANDBY MODE</h2>
-          <p id="display-sub" class="text-xs text-slate-400 mt-1 font-mono">Pilih kamera di sebelah kanan</p>
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/70 to-transparent z-10">
+          <h2 id="display-title" class="text-xs font-bold text-blue-400">STANDBY</h2>
+          <p id="display-sub" class="text-[9px] text-slate-400 mt-1 uppercase tracking-widest">Pilih saluran untuk memantau</p>
         </div>
 
-        <!-- Fullscreen Button -->
-        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
-          <button onclick="app.toggleFS()" class="pointer-events-auto p-5 bg-white/10 hover:bg-white/20 backdrop-blur-3xl border border-white/30 rounded-3xl transition-all">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-width="2.5" />
+        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+          <button onclick="app.toggleFS()" class="pointer-events-auto p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full hover:scale-110 transition-transform shadow-2xl">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-width="2" />
             </svg>
           </button>
         </div>
 
-        <!-- Loader -->
-        <div id="loader" class="absolute inset-0 hidden flex items-center justify-center bg-black/80 z-50">
-          <div class="text-center">
-            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p class="text-xs font-mono text-blue-400 mt-4 tracking-widest">SYNCING STREAM...</p>
+        <div id="loader" class="absolute inset-0 flex items-center justify-center bg-slate-900/90 hidden z-40">
+          <div class="flex flex-col items-center gap-3">
+            <div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-[9px] font-mono tracking-[0.3em] text-blue-400">STREAMING_SYNC</span>
           </div>
         </div>
       </div>
+
+      <!-- Info box CORS -->
+      <div class="mt-4 max-w-[500px] w-full p-3 bg-yellow-950/40 border border-yellow-800/30 rounded-xl">
+        <p class="text-[9px] text-yellow-600/80 font-mono leading-relaxed">
+          ⚠️ Jika layar Loading terus, coba channel lain kemungkinan CCTV sedang offline.
+        </p>
+      </div>
     </section>
 
-    <!-- SIDEBAR MENU -->
-    <aside class="w-full lg:w-96 bg-slate-900 border-l border-slate-800 flex flex-col h-full max-h-screen overflow-hidden">
-      <div class="p-5 border-b border-slate-800">
-        <div class="relative">
-          <input type="text" id="cctv-search" placeholder="Cari ruas jalan atau kota..." class="w-full bg-slate-800 border border-slate-700 focus:border-blue-500 rounded-2xl px-5 py-4 text-sm outline-none">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500 absolute right-5 top-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 01-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
+    <aside class="w-full md:w-96 bg-slate-900/40 flex flex-col overflow-hidden border-l border-slate-900">
+      <div class="p-4 bg-slate-900/80 border-b border-slate-800 backdrop-blur-sm">
+        <input type="text" id="cctv-search" placeholder="Cari ruas jalan atau kota..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-[11px] focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-600">
       </div>
 
-      <div id="menu-container" class="flex-1 overflow-y-auto custom-scroll p-5 space-y-5"></div>
+      <div id="menu-container" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3">
+      </div>
     </aside>
   </main>
 
   <script>
-    // === DATA KATEGORI (LENGKAP 100%) ===
     const categories = [{
         id: 'cikampek',
         name: 'CIKAMPEK',
@@ -188,7 +176,7 @@
             url: 'https://cctv.jasamarga.com/hls/cileunyi.m3u8'
           },
           {
-            name: 'SARIROTI',
+            name: 'SARI ROTI',
             url: 'https://cctv.bandung.go.id/hls/pasupati.m3u8'
           },
           {
@@ -196,7 +184,7 @@
             url: 'https://cctv.jasamarga.com/hls/gedebage.m3u8'
           },
           {
-            name: 'HINO',
+            name: 'HINO HMMI',
             url: 'https://cctv.jasamarga.com/hls/buahbatu.m3u8'
           }
         ]
@@ -544,33 +532,39 @@
       constructor() {
         this.video = document.getElementById('main-video');
         this.loader = document.getElementById('loader');
-        this.liveBadge = document.getElementById('live-badge');
+        this.errorOverlay = document.getElementById('error-overlay');
         this.hls = null;
+        this.currentUrl = null;
+        this.currentCat = null;
+        this.currentSub = null;
+        this.fatalErrorCount = 0;
         this.init();
       }
       init() {
         this.renderMenu();
         this.setupSearch();
-        document.getElementById('status-bar').innerText = 'SYSTEM LIVE • ALL CAMERAS READY';
+        this.initSW();
+        document.getElementById('status-bar').innerText = 'Traffic Insight pro';
       }
       renderMenu() {
         const container = document.getElementById('menu-container');
         container.innerHTML = categories.map(cat => `
-          <div class="category-group rounded-3xl bg-slate-900/50 border border-slate-800 overflow-hidden">
-            <button onclick="app.toggleSub('${cat.id}')" class="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-800 transition-colors">
-              <div class="flex items-center gap-4 text-lg">
-                <span>${cat.icon}</span>
-                <span class="font-semibold">${cat.name}</span>
-              </div>
-              <svg id="icon-${cat.id}" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/>
+          <div class="category-group">
+            <button onclick="app.toggleSub('${cat.id}')"
+                    class="w-full p-4 bg-slate-800/40 border border-slate-800 rounded-2xl flex items-center justify-between hover:bg-slate-800 hover:border-blue-500/30 transition-all group">
+              <span class="font-bold text-[11px] tracking-widest flex items-center gap-3">
+                <span class="text-lg opacity-80 group-hover:scale-110 transition-transform">${cat.icon}</span>
+                ${cat.name}
+              </span>
+              <svg class="w-4 h-4 text-slate-600 group-hover:text-blue-400 transition-transform duration-300" id="icon-${cat.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <div id="sub-${cat.id}" class="submenu-container px-3 pb-4 space-y-1">
+            <div id="sub-${cat.id}" class="submenu-container grid grid-cols-1 gap-1.5">
               ${cat.subs.map(sub => `
-                <button onclick="app.play('${cat.name}', '${sub.name}', '${sub.url}', this)" 
-                        class="w-full text-left px-6 py-4 text-sm hover:bg-slate-800 rounded-2xl flex items-center gap-3 transition-all">
-                  <span class="w-2 h-2 bg-slate-600 rounded-full"></span>
+                <button onclick="app.play('${cat.name}', '${sub.name}', '${sub.url}', this)"
+                        class="p-3 bg-slate-900/60 border border-slate-800/50 rounded-xl text-[10px] text-left hover:border-blue-500/50 hover:text-blue-400 transition-all font-mono uppercase pl-6 relative overflow-hidden group">
+                  <span class="absolute left-2 top-1/2 -translate-y-1/2 w-1 h-1 bg-slate-700 rounded-full group-hover:bg-blue-500"></span>
                   ${sub.name}
                 </button>
               `).join('')}
@@ -579,57 +573,194 @@
         `).join('');
       }
       toggleSub(id) {
-        const sub = document.getElementById(`sub-${id}`);
+        const el = document.getElementById(`sub-${id}`);
         const icon = document.getElementById(`icon-${id}`);
-        const isOpen = sub.classList.contains('open');
-        document.querySelectorAll('.submenu-container').forEach(el => el.classList.remove('open'));
+        const isOpen = el.classList.contains('open');
+        document.querySelectorAll('.submenu-container').forEach(m => m.classList.remove('open'));
         document.querySelectorAll('svg[id^="icon-"]').forEach(i => i.style.transform = 'rotate(0deg)');
         if (!isOpen) {
-          sub.classList.add('open');
+          el.classList.add('open');
           icon.style.transform = 'rotate(180deg)';
         }
       }
-      async play(cat, sub, url, btn) {
+      showLoader() {
         this.loader.classList.remove('hidden');
-        this.liveBadge.classList.add('hidden');
-        document.querySelectorAll('#menu-container button').forEach(b => b.classList.remove('bg-blue-900/30', 'text-blue-400'));
-        btn.classList.add('bg-blue-900/30', 'text-blue-400');
-        document.getElementById('display-title').innerText = `${cat} • ${sub}`;
-        document.getElementById('display-sub').innerText = url.split('/').pop();
-        const config = {
+        this.errorOverlay.style.display = 'none';
+      }
+      hideLoader() {
+        this.loader.classList.add('hidden');
+      }
+      showError(msg) {
+        this.hideLoader();
+        this.errorOverlay.style.display = 'flex';
+        document.getElementById('error-detail').innerText = msg || 'Stream tidak dapat dimuat. CORS atau offline.';
+      }
+      destroyHls() {
+        if (this.hls) {
+          this.hls.destroy();
+          this.hls = null;
+        }
+        this.video.pause();
+        this.video.removeAttribute('src');
+        this.video.load();
+      }
+      async play(cat, sub, url, btn) {
+        this.currentUrl = url;
+        this.currentCat = cat;
+        this.currentSub = sub;
+        this.fatalErrorCount = 0;
+        try {
+          this.showLoader();
+          this.errorOverlay.style.display = 'none';
+          document.querySelectorAll('.submenu-container button').forEach(b => b.classList.remove('active-btn'));
+          btn.classList.add('active-btn');
+          document.getElementById('display-title').innerText = `${cat} — ${sub}`;
+          document.getElementById('display-sub').innerText = `Syncing: ${url.split('/').pop()}`;
+          this.destroyHls();
+          if (Hls.isSupported()) {
+            this.loadWithHls(url);
+          } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Safari native HLS
+            this.loadNative(url);
+          } else {
+            this.showError('Browser tidak mendukung HLS playback.');
+          }
+        } catch (e) {
+          this.showError('Kesalahan tidak terduga: ' + e.message);
+        }
+      }
+      loadWithHls(url) {
+        const hlsConfig = {
           enableWorker: true,
-          capLevelToPlayerSize: true,
-          lowLatencyMode: true
+          lowLatencyMode: false,
+          backBufferLength: 30,
+          maxBufferLength: 30,
+          maxMaxBufferLength: 60,
+          maxBufferSize: 20 * 1000 * 1000,
+          maxBufferHole: 0.5,
+          // Perbaikan utama: jangan set crossOrigin agar tidak memicu preflight CORS
+          // xhrSetup di sini tidak mengeset header custom untuk menghindari preflight
+          xhrSetup: function(xhr, url) {
+            // Tidak set withCredentials true agar tidak ada preflight yang gagal
+            xhr.withCredentials = false;
+          },
+          // Retry settings
+          manifestLoadingTimeOut: 15000,
+          manifestLoadingMaxRetry: 2,
+          manifestLoadingRetryDelay: 1000,
+          levelLoadingTimeOut: 15000,
+          levelLoadingMaxRetry: 2,
+          fragLoadingTimeOut: 20000,
+          fragLoadingMaxRetry: 3,
+          fragLoadingRetryDelay: 1000,
         };
-        if (this.hls) this.hls.destroy();
-        if (Hls.isSupported()) {
-          this.hls = new Hls(config);
-          this.hls.loadSource(url);
-          this.hls.attachMedia(this.video);
-          this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            this.video.play();
-            this.loader.classList.add('hidden');
-            this.liveBadge.classList.remove('hidden');
+        const hls = new Hls(hlsConfig);
+        this.hls = hls;
+        hls.loadSource(url);
+        hls.attachMedia(this.video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          this.hideLoader();
+          this.errorOverlay.style.display = 'none';
+          this.video.play().catch(err => {
+            // Autoplay diblokir, tampilkan tombol play
+            console.warn('Autoplay blocked:', err);
           });
-        } else {
-          this.video.src = url;
-          this.video.play();
-          this.loader.classList.add('hidden');
-          this.liveBadge.classList.remove('hidden');
+        });
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          console.warn('HLS Error:', data.type, data.details, data.fatal);
+          if (data.fatal) {
+            this.fatalErrorCount++;
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                if (this.fatalErrorCount <= 2) {
+                  console.log('Fatal network error, trying to recover...');
+                  hls.startLoad();
+                } else {
+                  this.showError('Network Error: Stream tidak dapat diakses. Kemungkinan CORS atau stream offline.\nURL: ' + url.split('/').pop());
+                  hls.destroy();
+                }
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                if (this.fatalErrorCount <= 2) {
+                  console.log('Fatal media error, trying to recover...');
+                  hls.recoverMediaError();
+                } else {
+                  this.showError('Media Error: Format stream tidak didukung.');
+                  hls.destroy();
+                }
+                break;
+              default:
+                this.showError('Fatal Error: ' + data.details);
+                hls.destroy();
+                break;
+            }
+          }
+        });
+      }
+      loadNative(url) {
+        // Untuk Safari yang support HLS secara native
+        this.video.src = url;
+        this.video.addEventListener('loadedmetadata', () => {
+          this.hideLoader();
+          this.video.play().catch(() => {});
+        }, {
+          once: true
+        });
+        this.video.addEventListener('error', () => {
+          this.showError('Native playback error. Stream mungkin offline atau CORS diblokir.');
+        }, {
+          once: true
+        });
+        // Timeout jika tidak ada respons
+        setTimeout(() => {
+          if (this.loader && !this.loader.classList.contains('hidden')) {
+            this.showError('Timeout: Stream tidak merespons dalam 15 detik.');
+          }
+        }, 15000);
+      }
+      retryStream() {
+        if (this.currentUrl) {
+          this.showLoader();
+          this.fatalErrorCount = 0;
+          this.destroyHls();
+          setTimeout(() => {
+            if (Hls.isSupported()) {
+              this.loadWithHls(this.currentUrl);
+            } else {
+              this.loadNative(this.currentUrl);
+            }
+          }, 500);
         }
       }
       setupSearch() {
-        document.getElementById('cctv-search').addEventListener('input', e => {
+        document.getElementById('cctv-search').addEventListener('input', (e) => {
           const term = e.target.value.toLowerCase();
-          document.querySelectorAll('.category-group').forEach(g => {
-            g.style.display = g.textContent.toLowerCase().includes(term) ? 'block' : 'none';
+          document.querySelectorAll('.category-group').forEach(group => {
+            const text = group.innerText.toLowerCase();
+            group.style.display = text.includes(term) ? 'block' : 'none';
           });
         });
       }
       toggleFS() {
         const box = document.getElementById('video-box');
-        if (!document.fullscreenElement) box.requestFullscreen();
-        else document.exitFullscreen();
+        if (!document.fullscreenElement) {
+          box.requestFullscreen().catch(err => console.warn('Fullscreen error:', err));
+        } else {
+          document.exitFullscreen();
+        }
+      }
+      initSW() {
+        if ('serviceWorker' in navigator) {
+          try {
+            const sw = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
+            const b = new Blob([sw], {
+              type: 'application/javascript'
+            });
+            navigator.serviceWorker.register(URL.createObjectURL(b));
+          } catch (e) {
+            console.warn('ServiceWorker registration failed:', e);
+          }
+        }
       }
     }
     const app = new TrafficApp();
