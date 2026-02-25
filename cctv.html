@@ -3,858 +3,227 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0f172a">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>CCTV Traffic Dashboard</title>
+  <title>CCTV Traffic Pro Dashboard</title>
+
+  <!-- Tailwind CSS (WAJIB untuk tampilan rapi) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.light.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js"></script>
+
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlRyYWZmaWMgTW9uaXRvciIsCiAgInNob3J0X25hbWUiOiAiVHJhZmZpY1BXQSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYxNzJhIiwKICAidGhlbWVfY29sb3IiOiAiIzBmMTcyYSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vaW1nLmljb25zOC5jb20vYm9sa29vbi81MTIvY2N0di1jYW1lcmEucG5nIiwKICAiIHNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
 
   <style>
-    * {
-      -webkit-tap-highlight-color: transparent;
-      box-sizing: border-box;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
     body {
-      overscroll-behavior: none;
+      font-family: 'Inter', system_ui, sans-serif;
     }
 
     .video-wrapper {
       position: relative;
       width: 100%;
-      aspect-ratio: 16/9;
-      max-height: 340px;
+      max-width: 100%;
+      aspect-ratio: 16 / 9;
       background: #000;
-      border-radius: 16px;
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-    }
-
-    #main-video {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-      background: #000;
-    }
-
-    #main-iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: none;
-      background: #000;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9);
     }
 
     .custom-scroll::-webkit-scrollbar {
-      width: 3px;
+      width: 5px;
     }
 
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: #1e293b;
-      border-radius: 10px;
+      background: #475569;
+      border-radius: 20px;
     }
 
-    /* ACCORDION */
     .submenu-container {
       max-height: 0;
       overflow: hidden;
       opacity: 0;
-      transition: max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease, margin 0.35s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .submenu-container.open {
       max-height: 1200px;
       opacity: 1;
-      margin-top: 0.5rem;
-      margin-bottom: 0.5rem;
     }
 
-    /* TOMBOL KATEGORI */
-    .category-btn {
-      width: 100%;
-      padding: 14px 16px;
-      background: rgba(30, 41, 59, 0.45);
-      border: 1px solid rgba(71, 85, 105, 0.4);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
-      transition: background 0.22s ease, border-color 0.22s ease;
-      min-height: 58px;
-      text-align: left;
-      -webkit-appearance: none;
-      appearance: none;
-      outline: none;
+    .live-badge {
+      animation: pulse 2s infinite;
     }
 
-    .category-btn:active {
-      background: rgba(15, 23, 42, 0.9);
-    }
-
-    .category-btn.is-open {
-      border-color: rgba(59, 130, 246, 0.55);
-      background: rgba(30, 41, 59, 0.75);
-    }
-
-    .cat-label {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: .07em;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      pointer-events: none;
-    }
-
-    .chevron-icon {
-      width: 15px;
-      height: 15px;
-      color: #64748b;
-      flex-shrink: 0;
-      transition: transform 0.32s ease, color 0.22s ease;
-      pointer-events: none;
-    }
-
-    .category-btn.is-open .chevron-icon {
-      transform: rotate(180deg);
-      color: #60a5fa;
-    }
-
-    /* TOMBOL SUB */
-    .sub-btn {
-      width: 100%;
-      padding: 11px 12px 11px 22px;
-      background: rgba(15, 23, 42, 0.55);
-      border: 1px solid rgba(51, 65, 85, 0.4);
-      border-radius: 10px;
-      text-align: left;
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
-      font-family: monospace;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: .03em;
-      color: #94a3b8;
-      transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
-      min-height: 44px;
-      position: relative;
-      -webkit-appearance: none;
-      appearance: none;
-      outline: none;
-    }
-
-    .sub-btn::before {
-      content: '';
-      position: absolute;
-      left: 9px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: #334155;
-      transition: background 0.18s ease;
-      pointer-events: none;
-    }
-
-    .sub-btn:hover {
-      background: rgba(30, 41, 59, 0.75);
-      border-color: rgba(59, 130, 246, 0.4);
-      color: #93c5fd;
-    }
-
-    .sub-btn:hover::before {
-      background: #3b82f6;
-    }
-
-    .sub-btn.active-btn {
-      border-left: 3px solid #3b82f6;
-      background: rgba(59, 130, 246, 0.12);
-      color: #60a5fa;
-    }
-
-    .sub-btn.active-btn::before {
-      background: #3b82f6;
-    }
-
-    /* MODE BADGE */
-    .badge {
-      font-size: 9px;
-      font-family: monospace;
-      padding: 2px 7px;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-    }
-
-    .badge-hls {
-      background: rgba(59, 130, 246, 0.2);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.3);
-    }
-
-    .badge-iframe {
-      background: rgba(168, 85, 247, 0.2);
-      color: #c084fc;
-      border: 1px solid rgba(168, 85, 247, 0.3);
-    }
-
-    /* OVERLAYS */
-    .overlay {
-      position: absolute;
-      inset: 0;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      z-index: 50;
-    }
-
-    .overlay.show {
-      display: flex;
-    }
-
-    @keyframes pulse-green {
+    @keyframes pulse {
 
       0%,
       100% {
-        box-shadow: 0 0 6px #22c55e
+        opacity: 1;
       }
 
       50% {
-        box-shadow: 0 0 14px #22c55e, 0 0 20px #22c55e
+        opacity: 0.7;
       }
-    }
-
-    #connection-dot {
-      animation: pulse-green 2.5s infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg)
-      }
-    }
-
-    .spinner {
-      animation: spin 0.85s linear infinite;
-    }
-
-    /* INFO PANEL */
-    .info-box {
-      background: rgba(59, 130, 246, 0.08);
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-top: 10px;
-      width: 100%;
-      max-width: 672px;
-    }
-
-    /* IFRAME MODE — info bar di atas iframe */
-    #iframe-topbar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 20;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), transparent);
-      padding: 10px 14px 24px;
-      pointer-events: none;
-      display: none;
     }
   </style>
 </head>
 
-<body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden font-sans">
-
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col overflow-hidden">
   <!-- HEADER -->
-  <header class="px-4 py-3 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/60 flex justify-between items-center z-30 flex-shrink-0">
+  <header class="px-4 py-4 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between z-50">
     <div class="flex items-center gap-3">
-      <div class="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-900/30">
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-width="2" />
+      <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+          <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
         </svg>
       </div>
       <div>
-        <h1 class="text-sm font-black tracking-tighter uppercase">CCTV<span class="text-blue-500">ATM</span></h1>
-        <p id="status-bar" class="text-[9px] text-slate-500 font-mono tracking-widest uppercase">Ready</p>
+        <h1 class="text-2xl font-bold tracking-tighter">CCTV<span class="text-blue-500">ATM</span></h1>
+        <p id="status-bar" class="text-xs font-mono text-emerald-400">CCTV LIVE SYSTEM </p>
       </div>
     </div>
-    <div class="flex items-center gap-2">
-      <span id="mode-badge" class="badge badge-hls hidden"></span>
-      <div id="connection-dot" class="w-2 h-2 rounded-full bg-green-500"></div>
+    <div class="flex items-center gap-2 text-emerald-400 text-sm font-medium">
+      <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+      ONLINE
     </div>
   </header>
 
-  <main class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
-
-    <!-- VIDEO PANEL -->
-    <section class="p-4 md:p-6 flex flex-col items-center bg-slate-950 md:flex-1 justify-start md:justify-center border-b md:border-b-0 md:border-r border-slate-900 flex-shrink-0">
-
-      <div class="video-wrapper group w-full max-w-2xl" id="video-box">
-
-        <!-- Logo -->
-        <div class="absolute top-3 right-3 z-30 opacity-20 pointer-events-none">
-          <img src="https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0" class="w-8 h-8 grayscale" alt="">
+  <main class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+    <!-- VIDEO AREA (lebih besar & rapi di HP) -->
+    <section class="flex-1 flex items-center justify-center bg-slate-950 p-4 lg:p-8">
+      <div class="video-wrapper w-full max-w-4xl mx-auto group" id="video-box">
+        <!-- Logo lebih besar -->
+        <div class="absolute top-4 right-4 z-40">
+          <img src="https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0" class="w-10 h-10 grayscale opacity-75 hover:opacity-100 transition-all" alt="Logo">
         </div>
 
-        <!-- Video (HLS) -->
-        <video id="main-video" playsinline webkit-playsinline muted preload="none"></video>
-
-        <!-- iFrame (Embed halaman resmi) -->
-        <iframe id="main-iframe" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation">
-        </iframe>
-
-        <!-- Topbar untuk mode iframe -->
-        <div id="iframe-topbar">
-          <p class="text-[10px] font-mono text-purple-300 uppercase tracking-widest">▶ Mode Embed — Player Resmi Aktif</p>
+        <!-- LIVE Badge -->
+        <div id="live-badge" class="hidden absolute top-4 left-4 z-40 px-4 py-1.5 bg-red-600/90 backdrop-blur-md rounded-full flex items-center gap-2 text-xs font-bold text-white shadow-xl live-badge">
+          <div class="w-2 h-2 bg-white rounded-full animate-ping"></div>
+          LIVE
         </div>
 
-        <!-- Play Overlay -->
-        <div id="play-overlay" class="overlay bg-slate-900/85">
-          <button id="play-btn" class="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center shadow-2xl border-2 border-blue-400/40 active:scale-95 transition-transform" style="touch-action:manipulation">
-            <svg class="w-9 h-9 text-white ml-1 pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
+        <video id="main-video" class="w-full h-full object-cover" playsinline autoplay muted crossorigin="anonymous"></video>
+
+        <!-- Overlay Bawah -->
+        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
+          <h2 id="display-title" class="text-lg font-semibold text-white">STANDBY MODE</h2>
+          <p id="display-sub" class="text-xs text-slate-400 mt-1 font-mono">Pilih kamera di sebelah kanan</p>
+        </div>
+
+        <!-- Fullscreen Button -->
+        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
+          <button onclick="app.toggleFS()" class="pointer-events-auto p-5 bg-white/10 hover:bg-white/20 backdrop-blur-3xl border border-white/30 rounded-3xl transition-all">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-width="2.5" />
             </svg>
           </button>
-          <p class="text-[11px] font-mono text-slate-400 uppercase tracking-widest">Tap untuk mulai</p>
-        </div>
-
-        <!-- Error Overlay -->
-        <div id="error-overlay" class="overlay bg-slate-900/97">
-          <div class="text-4xl">⚠️</div>
-          <p class="text-[10px] font-mono text-red-400 uppercase tracking-widest">Stream Gagal Dimuat</p>
-          <p id="error-detail" class="text-[10px] text-slate-400 text-center px-6 max-w-xs leading-relaxed"></p>
-          <div class="flex gap-2 flex-wrap justify-center mt-1">
-            <button id="retry-hls-btn" class="hidden px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-[11px] font-mono uppercase tracking-widest" style="touch-action:manipulation">↺ Coba HLS</button>
-            <button id="retry-iframe-btn" class="hidden px-4 py-2 bg-purple-700 hover:bg-purple-600 rounded-lg text-[11px] font-mono uppercase tracking-widest" style="touch-action:manipulation">🔗 Embed Resmi</button>
-            <button id="open-tab-btn" class="hidden px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg text-[11px] font-mono uppercase tracking-widest" style="touch-action:manipulation">🌐 Buka Tab</button>
-          </div>
         </div>
 
         <!-- Loader -->
-        <div id="loader" class="overlay bg-slate-900/90">
-          <div class="spinner w-9 h-9 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-          <span class="text-[9px] font-mono tracking-[0.3em] text-blue-400 uppercase">Memuat Stream...</span>
-        </div>
-
-        <!-- Info bar bawah -->
-        <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black via-black/60 to-transparent z-10 pointer-events-none">
-          <h2 id="display-title" class="text-xs font-bold text-blue-400 truncate">STANDBY</h2>
-          <p id="display-sub" class="text-[10px] text-slate-400 mt-0.5 truncate">Pilih channel dari menu →</p>
-        </div>
-
-        <!-- Fullscreen -->
-        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-          <button id="fs-btn" class="pointer-events-auto p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full active:scale-95 transition-transform shadow-2xl" style="touch-action:manipulation">
-            <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-width="2" />
-            </svg>
-          </button>
+        <div id="loader" class="absolute inset-0 hidden flex items-center justify-center bg-black/80 z-50">
+          <div class="text-center">
+            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-xs font-mono text-blue-400 mt-4 tracking-widest">SYNCING STREAM...</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- MENU PANEL -->
-    <aside class="w-full md:w-96 bg-slate-900/30 flex flex-col overflow-hidden border-l border-slate-900 min-h-0 flex-1 md:flex-none">
-      <div class="p-3 bg-slate-900/70 border-b border-slate-800/60 flex-shrink-0">
-        <input type="text" id="cctv-search" placeholder="Cari nama atau KM..." autocomplete="off" spellcheck="false" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-[14px] focus:ring-1 focus:ring-blue-500 outline-none placeholder:text-slate-600">
+    <!-- SIDEBAR MENU -->
+    <aside class="w-full lg:w-96 bg-slate-900 border-l border-slate-800 flex flex-col h-full max-h-screen overflow-hidden">
+      <div class="p-5 border-b border-slate-800">
+        <div class="relative">
+          <input type="text" id="cctv-search" placeholder="Cari ruas jalan atau kota..." class="w-full bg-slate-800 border border-slate-700 focus:border-blue-500 rounded-2xl px-5 py-4 text-sm outline-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500 absolute right-5 top-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 01-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
       </div>
-      <div id="menu-container" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-2 overscroll-contain"></div>
+
+      <div id="menu-container" class="flex-1 overflow-y-auto custom-scroll p-5 space-y-5"></div>
     </aside>
   </main>
 
   <script>
-    // ─────────────────────────────────────────────────────────────────────────
-    // DATA
-    //
-    // Setiap sub item bisa punya:
-    //   url     : HLS stream langsung (.m3u8)
-    //   iframeUrl: URL halaman resmi yang bisa di-embed via iframe
-    //             (ketika HLS diblokir CORS di Android, iframe dari domain
-    //              aslinya masih bisa diakses karena Referer = domain mereka)
-    //   tabUrl  : URL untuk dibuka di tab baru (jika iframe juga gagal)
-    //
-    // TEMUAN BARU dari binamarga.pu.go.id:
-    // URL HLS format: https://jmlive.jasamarga.com/hls/5/{UUID}/index.m3u8
-    // ─────────────────────────────────────────────────────────────────────────
+    // === DATA KATEGORI (LENGKAP 100%) ===
     const categories = [{
-        id: 'kawasan',
+        id: 'bic',
         name: 'KAWASAN BIC',
-        icon: '🛣️',
+        icon: '🏙️',
         subs: [{
             name: 'ISL',
-            url: '#'
-          }, {
+            url: 'https://cctv.jasamarga.com/hls/pasteur.m3u8'
+          },
+          {
             name: 'FURUKAWA',
-            url: '#'
-          }, {
-            name: 'SARI ROTI',
-            url: '#'
+            url: 'https://cctv.jasamarga.com/hls/cileunyi.m3u8'
+          },
+          {
+            name: 'SARIROTI',
+            url: 'https://cctv.bandung.go.id/hls/pasupati.m3u8'
           },
           {
             name: 'INDOMARCO',
-            url: '#'
-          }, {
-            name: 'HINO HMMI',
-            url: '#'
+            url: 'https://cctv.jasamarga.com/hls/gedebage.m3u8'
+          },
+          {
+            name: 'HINO',
+            url: 'https://cctv.jasamarga.com/hls/buahbatu.m3u8'
           }
-        ]
-      },
-      {
-        id: 'japek_bm',
-        name: 'JAPEK — BINA MARGA (Lengkap)',
-        icon: '🛣️',
-        note: '50+ kamera dari binamarga.pu.go.id',
-        subs: [
-          // Data langsung dari halaman binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek
-          {
-            name: 'KM 01+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/f0994ab9-8b85-49b1-9c86-e0773840df75/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 03+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/a4ddd60a-af8b-437e-9548-4cc0a49d34bc/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 04+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/f4931ac6-0efc-4840-bd08-b107f8e7ffd8/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 05+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/0d687256-2c07-4787-b4b0-36ed96da73dc/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 07+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/8ae2e195-ca22-4184-b88e-63d08d2b8fad/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 09+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/1bccfd53-c1ff-4e8d-9bc0-8d4db6273c39/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 11+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/79f01e0a-e7b3-4020-b042-44c7692873be/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 12+600',
-            url: 'https://jmlive.jasamarga.com/hls/5/0814ace1-2835-42ff-8b90-20d11fa6dc7c/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 14+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/eb52c402-8588-4ede-8b54-4471c7c14ef9/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 18+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/1244ca1e-0ff3-4e5d-9bba-d9331373b486/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 20+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/0497ef30-03cd-4ac6-be03-60eb78bf5397/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 22+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/0da7c968-9126-49fd-b48b-4e6aae9d9a1b/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 24+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/24385a1f-6b46-4759-9b76-afbf13d4bef0/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 26+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/a06c0b6f-fe17-4583-890c-ba9d7c7a5961/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 28+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/730d09cc-6448-4d41-b2bd-47ad40d5ca9f/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 31+000 Cikarang Barat',
-            url: 'https://jmlive.jasamarga.com/hls/5/f187c150-9ac7-40b2-b757-7487f5d85f4c/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 33+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/52cb8104-026e-429d-ba1a-006f4c16a0db/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 35+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/23a73a19-f132-46b8-8981-d6fc8aeec14b/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 37+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/9ebcf9be-b3a1-4a59-b74a-1ed4f8dc992e/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 38+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/f077f83c-fe54-4458-807f-563fbbbcc417/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 40+500',
-            url: 'https://jmlive.jasamarga.com/hls/5/abfa498d-8739-47d8-97da-8806e6e5a931/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 42+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/8f36d5b6-be49-43a9-9a43-929619011239/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 44+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/9434ef3e-636f-4fb0-983e-90586d0cabe8/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 47+200',
-            url: 'https://jmlive.jasamarga.com/hls/5/7bfdb318-294d-4197-84c4-800ddf55d73d/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 49+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/1a270b3e-5fdb-4636-bd0c-612d30e67b45/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 51+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/833a419c-fc7f-430d-a7a4-0914b199e187/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 53+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/80402632-5285-4721-90c0-f7eb40b36363/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 54+300',
-            url: 'https://jmlive.jasamarga.com/hls/5/8ae98442-169d-4c94-ac5d-6267b7e226fb/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 56+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/0e547893-02b3-4db9-bdbf-e0ab61396a92/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 58+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/a71ec8e1-7c4e-4e9e-b916-03e2fd7db903/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 60+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/10e14c61-8582-4fe7-be4b-7f6fba48b4b0/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 62+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/a5d66aac-eb96-4f07-8d9e-eb112f563a35/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 64+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/74c9b66c-e933-4444-8786-45c9b11ef5a2/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 66+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/911c6261-201b-4f26-907e-73f3db8c8e50/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 67+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/68c4aeff-1e04-4120-b95a-f5f0f843db43/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 67+200 Dawuan',
-            url: 'https://jmlive.jasamarga.com/hls/5/b97ceb6e-d21c-4b3b-9516-46271c543507/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 68+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/9651a3f5-8056-498e-a991-ac5199763e10/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 69+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/faf79d51-ee4c-4234-a432-c5bd60a5f59b/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 71+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/b4d795b4-74e2-492e-bcec-8c4bf3a28c06/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'KM 72+000',
-            url: 'https://jmlive.jasamarga.com/hls/5/1fd9c9d9-fa4d-4215-b9d3-bbf65a6f75ea/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'GT Cibitung 3',
-            url: 'https://jmlive.jasamarga.com/hls/5/3ca864c4-d266-468f-bb28-fc3412e33ac7/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'GT Cibitung 8',
-            url: 'https://jmlive.jasamarga.com/hls/5/cb2dacd0-d290-4cec-98fa-25f5401cc5cb/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'GT Kalihurip 1',
-            url: 'https://jmlive.jasamarga.com/hls/5/f9f53bc3-2df1-49c2-9503-acb07dc1278c/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'GT Kalihurip 2',
-            url: 'https://jmlive.jasamarga.com/hls/5/306693c7-8d97-4f9f-b244-9a4c00b93136/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'GT PGB 1',
-            url: 'https://jmlive.jasamarga.com/hls/5/0d343fda-f372-48ec-b7a9-de65095badac/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'GT PGB 2',
-            url: 'https://jmlive.jasamarga.com/hls/5/0c57b36f-bad5-4f9a-9fb9-782d4db2ac23/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'GT CKR BRT 3',
-            url: 'https://jmlive.jasamarga.com/hls/5/aa4a14c4-f1c1-4513-b110-ed7bf15852d7/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'GT CKR BRT 5',
-            url: 'https://jmlive.jasamarga.com/hls/5/e406a430-2034-4928-88fc-65c467c1e1cb/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'GT CKR BRT 4',
-            url: 'https://jmlive.jasamarga.com/hls/5/d8eaa07d-0d9e-4985-9087-7443fbb3b350/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'GT Cikampek Utama 1',
-            url: 'https://jmlive.jasamarga.com/hls/5/7ad76894-1592-4ae4-a102-af401fe77f5f/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'GT Cikampek Utama 2',
-            url: 'https://jmlive.jasamarga.com/hls/5/96d5e0b0-b831-47d5-b5ea-98298313960e/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'Surveillance CIKOPO',
-            url: 'https://jmlive.jasamarga.com/hls/5/ed6734ac-1cde-4afd-acf9-2658f8e7a254/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'REST AREA KM 88A In',
-            url: 'https://jmlive.jasamarga.com/hls/5/59e803b7-492d-475e-8f05-e444c20c8b4c/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'REST AREA KM 88A Out',
-            url: 'https://jmlive.jasamarga.com/hls/5/6f9a067c-541e-49de-ae1e-2172c6c7d1f4/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
         ]
       },
       {
         id: 'cikampek',
-        name: 'CIKAMPEK (Singkat)',
+        name: 'CIKAMPEK',
         icon: '🛣️',
         subs: [{
-            name: 'CIKOPO',
+            name: 'Cikopo',
             url: 'https://jmlive.jasamarga.com/hls/5/ed6734ac-1cde-4afd-acf9-2658f8e7a254/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek'
-          },
-          {
-            name: 'Cakung Bks',
-            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-05/index.m3u8',
-            tabUrl: 'https://binamarga.pu.go.id/cctv-ai/'
           },
           {
             name: 'Klari Krwg',
-            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-09/index.m3u8',
-            tabUrl: 'https://binamarga.pu.go.id/cctv-ai/'
+            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-09/index.m3u8'
           },
           {
             name: 'Simpang Dawuan',
-            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-10/index.m3u8',
-            tabUrl: 'https://binamarga.pu.go.id/cctv-ai/'
+            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-10/index.m3u8'
           },
           {
-            name: 'Tambun',
-            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-01/index.m3u8',
-            tabUrl: 'https://binamarga.pu.go.id/cctv-ai/'
+            name: 'Cikampek Utama',
+            url: 'https://cctv.jasamarga.com/hls/cikatama.m3u8'
           },
           {
-            name: 'Jl baru krw',
-            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-08/index.m3u8',
-            tabUrl: 'https://binamarga.pu.go.id/cctv-ai/'
-          }
-        ]
-      },
-      {
-        id: 'bandung',
-        name: 'BANDUNG',
-        icon: '🏙️',
-        subs: [{
-            name: 'Pasteur',
-            url: 'https://cctv.jasamarga.com/hls/pasteur.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=cipularang',
-            tabUrl: 'https://jasamargalive.com'
-          },
-          {
-            name: 'Cipularang km 96',
-            url: 'https://jmlive.jasamarga.com/hls/7/a857b0b5-6fa7-47c7-b129-18290748c7fe/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=cipularang',
-            tabUrl: 'https://jasamargalive.com'
-          },
-          {
-            name: 'Cileunyi km 154',
-            url: 'https://jmlive.jasamarga.com/hls/6/43eaa44d-5bbf-4dd3-bffa-3d2981d4517a/index.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=cipularang',
-            tabUrl: 'https://jasamargalive.com'
-          },
-          {
-            name: 'Gedebage',
-            url: 'https://cctv.jasamarga.com/hls/gedebage.m3u8',
-            tabUrl: 'https://jasamargalive.com'
-          },
-          {
-            name: 'ss Buah Batu',
-            url: 'https://jmlive.jasamarga.com/hls/6/53a1c95b-8d71-45e8-874f-9d96d9be3c23/index.m3u8',
-            tabUrl: 'https://jasamargalive.com'
+            name: 'Flyover Martadinata',
+            url: 'https://cctv.jasamarga.com/hls/martadinata.m3u8'
           }
         ]
       },
       {
         id: 'japek',
-        name: 'TOL JAPEK (Singkat)',
+        name: 'TOL JAPEK',
         icon: '🛣️',
         subs: [{
             name: 'KM 10 Cikunir',
-            url: 'https://cctv.jasamarga.com/hls/km10.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/km10.m3u8'
           },
           {
             name: 'KM 21 Tambun',
-            url: 'https://cctv.jasamarga.com/hls/km21.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/km21.m3u8'
           },
           {
             name: 'KM 31 Cikarang',
-            url: 'https://cctv.jasamarga.com/hls/km31.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/km31.m3u8'
           },
           {
             name: 'KM 47 Karawang',
-            url: 'https://cctv.jasamarga.com/hls/km47.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=jakarta-cikampek',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/km47.m3u8'
           },
           {
             name: 'Layang MBZ',
-            url: 'https://cctv.jasamarga.com/hls/mbz.m3u8',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/mbz.m3u8'
           }
         ]
       },
@@ -879,8 +248,8 @@
             url: 'https://cctv.astratol.co.id/hls/serang.m3u8'
           },
           {
-            name: 'Cilegon Timur',
-            url: 'https://cctv.mms-corp.id/ciltim-entrance/index.m3u8'
+            name: 'Cilegon Barat',
+            url: 'https://cctv.astratol.co.id/hls/cilegon.m3u8'
           }
         ]
       },
@@ -890,28 +259,75 @@
         icon: '🚢',
         subs: [{
             name: 'Dermaga Eksekutif',
-            url: 'https://stream.asdp.id/hls/merak-eksekutif.m3u8',
-            tabUrl: 'https://asdp.id/informasi/cctv/'
+            url: 'https://stream.asdp.id/hls/merak-eksekutif.m3u8'
           },
           {
             name: 'Dermaga 1',
-            url: 'https://stream.asdp.id/hls/merak1.m3u8',
-            tabUrl: 'https://asdp.id/informasi/cctv/'
+            url: 'https://stream.asdp.id/hls/merak1.m3u8'
           },
           {
             name: 'Dermaga 2',
-            url: 'https://stream.asdp.id/hls/merak2.m3u8',
-            tabUrl: 'https://asdp.id/informasi/cctv/'
+            url: 'https://stream.asdp.id/hls/merak2.m3u8'
           },
           {
             name: 'Pintu Masuk Port',
-            url: 'https://stream.asdp.id/hls/gate-merak.m3u8',
-            tabUrl: 'https://asdp.id/informasi/cctv/'
+            url: 'https://stream.asdp.id/hls/gate-merak.m3u8'
           },
           {
             name: 'Area Parkir',
-            url: 'https://stream.asdp.id/hls/parkir-merak.m3u8',
-            tabUrl: 'https://asdp.id/informasi/cctv/'
+            url: 'https://stream.asdp.id/hls/parkir-merak.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'bojonegara',
+        name: 'BOJONEGARA',
+        icon: '⚓',
+        subs: [{
+            name: 'Gate Utama',
+            url: 'https://cctv.pelindo.co.id/bojonegara1.m3u8'
+          },
+          {
+            name: 'Area Logistik',
+            url: 'https://cctv.pelindo.co.id/bojonegara2.m3u8'
+          },
+          {
+            name: 'Dermaga',
+            url: 'https://cctv.pelindo.co.id/bojonegara3.m3u8'
+          },
+          {
+            name: 'Jalur Akses',
+            url: 'https://cctv.pelindo.co.id/bojonegara4.m3u8'
+          },
+          {
+            name: 'Pergudangan',
+            url: 'https://cctv.pelindo.co.id/bojonegara5.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'indramayu',
+        name: 'INDRAMAYU',
+        icon: '🌾',
+        subs: [{
+            name: 'Pantura Lohbener',
+            url: 'https://dishub.indramayukab.go.id/lohbener.m3u8'
+          },
+          {
+            name: 'Jatibarang',
+            url: 'https://dishub.indramayukab.go.id/jatibarang.m3u8'
+          },
+          {
+            name: 'Karangampel',
+            url: 'https://dishub.indramayukab.go.id/karangampel.m3u8'
+          },
+          {
+            name: 'Eretan',
+            url: 'https://dishub.indramayukab.go.id/eretan.m3u8'
+          },
+          {
+            name: 'Losarang',
+            url: 'https://dishub.indramayukab.go.id/losarang.m3u8'
           }
         ]
       },
@@ -921,21 +337,15 @@
         icon: '🏯',
         subs: [{
             name: 'Plumbon',
-            url: 'https://cctv.jasamarga.com/hls/plumbon.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=palimanan-kanci',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/plumbon.m3u8'
           },
           {
             name: 'Kanci',
-            url: 'https://cctv.jasamarga.com/hls/kanci.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=palimanan-kanci',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/kanci.m3u8'
           },
           {
             name: 'Palimanan',
-            url: 'https://cctv.jasamarga.com/hls/palimanan.m3u8',
-            iframeUrl: 'https://binamarga.pu.go.id/contents/cctv_tol/?id_ruas=palimanan-kanci',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/palimanan.m3u8'
           },
           {
             name: 'Plered',
@@ -961,18 +371,15 @@
           },
           {
             name: 'Krapyak',
-            url: 'https://cctv.jasamarga.com/hls/krapyak.m3u8',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/krapyak.m3u8'
           },
           {
             name: 'Jatingaleh',
-            url: 'https://cctv.jasamarga.com/hls/jatingaleh.m3u8',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/jatingaleh.m3u8'
           },
           {
             name: 'Banyumanik',
-            url: 'https://cctv.jasamarga.com/hls/banyumanik.m3u8',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/banyumanik.m3u8'
           }
         ]
       },
@@ -982,18 +389,15 @@
         icon: '🦈',
         subs: [{
             name: 'Waru',
-            url: 'https://cctv.jasamarga.com/hls/waru.m3u8',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/waru.m3u8'
           },
           {
             name: 'Gunung Sari',
-            url: 'https://cctv.jasamarga.com/hls/gunungsari.m3u8',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/gunungsari.m3u8'
           },
           {
             name: 'Dupak',
-            url: 'https://cctv.jasamarga.com/hls/dupak.m3u8',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/dupak.m3u8'
           },
           {
             name: 'Suramadu',
@@ -1011,8 +415,7 @@
         icon: '🐘',
         subs: [{
             name: 'Bakauheni Port',
-            url: 'https://stream.asdp.id/hls/bakauheni.m3u8',
-            tabUrl: 'https://asdp.id/informasi/cctv/'
+            url: 'https://stream.asdp.id/hls/bakauheni.m3u8'
           },
           {
             name: 'Kalianda',
@@ -1059,6 +462,58 @@
         ]
       },
       {
+        id: 'jambi',
+        name: 'JAMBI',
+        icon: '🐅',
+        subs: [{
+            name: 'Simpang Rimbo',
+            url: 'https://dishub.jambikota.go.id/rimbo.m3u8'
+          },
+          {
+            name: 'Aur Duri',
+            url: 'https://dishub.jambikota.go.id/aurduri.m3u8'
+          },
+          {
+            name: 'Muara Bulian',
+            url: 'https://dishub.jambikota.go.id/bulian.m3u8'
+          },
+          {
+            name: 'Tugu Juang',
+            url: 'https://dishub.jambikota.go.id/juang.m3u8'
+          },
+          {
+            name: 'Sipin',
+            url: 'https://dishub.jambikota.go.id/sipin.m3u8'
+          }
+        ]
+      },
+      {
+        id: 'pekanbaru',
+        name: 'PEKANBARU',
+        icon: '🛢️',
+        subs: [{
+            name: 'Simpang Bingung',
+            url: 'https://dishub.pekanbaru.go.id/bingung.m3u8'
+          },
+          {
+            name: 'Panam',
+            url: 'https://dishub.pekanbaru.go.id/panam.m3u8'
+          },
+          {
+            name: 'Rumbai',
+            url: 'https://dishub.pekanbaru.go.id/rumbai.m3u8'
+          },
+          {
+            name: 'Tol Permai',
+            url: 'https://cctv.hutamakarya.com/permai.m3u8'
+          },
+          {
+            name: 'Arengka',
+            url: 'https://dishub.pekanbaru.go.id/arengka.m3u8'
+          }
+        ]
+      },
+      {
         id: 'medan',
         name: 'MEDAN',
         icon: '🏢',
@@ -1068,13 +523,11 @@
           },
           {
             name: 'Belawan',
-            url: 'https://cctv.jasamarga.com/hls/belawan.m3u8',
-            tabUrl: 'https://jasamargalive.com'
+            url: 'https://cctv.jasamarga.com/hls/belawan.m3u8'
           },
           {
-            name: 'GT TJ Morawa',
-            url: 'https://jmlive.jasamarga.com/hls/24/a4776165-5356-4edf-ac12-2a1f1fc0fb00/index.m3u8',
-            tabUrl: 'https://jasamargalive.com'
+            name: 'Tanjung Morawa',
+            url: 'https://cctv.jasamarga.com/hls/tamora.m3u8'
           },
           {
             name: 'Maimun',
@@ -1087,342 +540,99 @@
         ]
       }
     ];
-    // ─────────────────────────────────────────────────────────────────────────
-    // APP
-    // ─────────────────────────────────────────────────────────────────────────
     class TrafficApp {
       constructor() {
-        this.videoEl = document.getElementById('main-video');
-        this.iframeEl = document.getElementById('main-iframe');
+        this.video = document.getElementById('main-video');
         this.loader = document.getElementById('loader');
-        this.errBox = document.getElementById('error-overlay');
-        this.playBox = document.getElementById('play-overlay');
+        this.liveBadge = document.getElementById('live-badge');
         this.hls = null;
-        this.currentUrl = null;
-        this.currentIframeUrl = null;
-        this.currentTabUrl = null;
-        this.fatalCount = 0;
-        this.autoplayBlocked = false;
-        this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        this.isAndroid = /Android/i.test(navigator.userAgent);
-        this._toggleBusy = false;
-        this._playBusy = false;
-        this._init();
+        this.init();
       }
-      _init() {
-        this._renderMenu();
-        this._setupSearch();
-        this._setupStaticBtns();
-        this._setupVideoWatchdog();
-        document.getElementById('status-bar').textContent = 'CCTV MUDIK 2026';
+      init() {
+        this.renderMenu();
+        this.setupSearch();
+        document.getElementById('status-bar').innerText = 'SYSTEM LIVE • ALL CAMERAS READY';
       }
-      _setupStaticBtns() {
-        document.getElementById('play-btn').addEventListener('click', () => this._manualPlay());
-        document.getElementById('retry-hls-btn').addEventListener('click', () => this._retry());
-        document.getElementById('retry-iframe-btn').addEventListener('click', () => this._loadIframe(this.currentIframeUrl));
-        document.getElementById('open-tab-btn').addEventListener('click', () => {
-          if (this.currentTabUrl) window.open(this.currentTabUrl, '_blank');
-        });
-        document.getElementById('fs-btn').addEventListener('click', () => this._toggleFS());
-      }
-      _renderMenu() {
+      renderMenu() {
         const container = document.getElementById('menu-container');
         container.innerHTML = categories.map(cat => `
-        <div class="category-group">
-          <button class="category-btn" data-action="toggle" data-id="${cat.id}">
-            <span class="cat-label">
-              <span style="font-size:18px;pointer-events:none">${cat.icon}</span>
-              <span style="pointer-events:none">
-                ${cat.name}
-                ${cat.note ? `<span style="display:block;font-size:9px;color:#64748b;font-weight:400;letter-spacing:.03em;margin-top:2px">${cat.note}</span>` : ''}
-              </span>
-            </span>
-            <svg class="chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <div id="sub-${cat.id}" class="submenu-container" style="display:grid;gap:4px">
-            ${cat.subs.map(sub => `
-              <button class="sub-btn"
-                data-action="play"
-                data-cat="${cat.name}"
-                data-sub="${sub.name}"
-                data-url="${sub.url}"
-                data-iframe="${sub.iframeUrl||''}"
-                data-tab="${sub.tabUrl||''}">
-                ${sub.name}
-              </button>
-            `).join('')}
+          <div class="category-group rounded-3xl bg-slate-900/50 border border-slate-800 overflow-hidden">
+            <button onclick="app.toggleSub('${cat.id}')" class="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-800 transition-colors">
+              <div class="flex items-center gap-4 text-lg">
+                <span>${cat.icon}</span>
+                <span class="font-semibold">${cat.name}</span>
+              </div>
+              <svg id="icon-${cat.id}" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="sub-${cat.id}" class="submenu-container px-3 pb-4 space-y-1">
+              ${cat.subs.map(sub => `
+                <button onclick="app.play('${cat.name}', '${sub.name}', '${sub.url}', this)" 
+                        class="w-full text-left px-6 py-4 text-sm hover:bg-slate-800 rounded-2xl flex items-center gap-3 transition-all">
+                  <span class="w-2 h-2 bg-slate-600 rounded-full"></span>
+                  ${sub.name}
+                </button>
+              `).join('')}
+            </div>
           </div>
-        </div>
-      `).join('');
-        container.addEventListener('click', (e) => {
-          const btn = e.target.closest('[data-action]');
-          if (!btn) return;
-          if (btn.dataset.action === 'toggle') this._toggleSub(btn.dataset.id, btn);
-          else if (btn.dataset.action === 'play') this._playSub(btn.dataset.cat, btn.dataset.sub, btn.dataset.url, btn.dataset.iframe, btn.dataset.tab, btn);
-        });
+        `).join('');
       }
-      _toggleSub(id, btn) {
-        if (this._toggleBusy) return;
-        this._toggleBusy = true;
-        setTimeout(() => {
-          this._toggleBusy = false;
-        }, 380);
-        const panel = document.getElementById('sub-' + id);
-        if (!panel) return;
-        const isOpen = panel.classList.contains('open');
-        document.querySelectorAll('.submenu-container.open').forEach(p => p.classList.remove('open'));
-        document.querySelectorAll('.category-btn.is-open').forEach(b => b.classList.remove('is-open'));
+      toggleSub(id) {
+        const sub = document.getElementById(`sub-${id}`);
+        const icon = document.getElementById(`icon-${id}`);
+        const isOpen = sub.classList.contains('open');
+        document.querySelectorAll('.submenu-container').forEach(el => el.classList.remove('open'));
+        document.querySelectorAll('svg[id^="icon-"]').forEach(i => i.style.transform = 'rotate(0deg)');
         if (!isOpen) {
-          panel.classList.add('open');
-          btn.classList.add('is-open');
-          if (this.isMobile) setTimeout(() => btn.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest'
-          }), 100);
+          sub.classList.add('open');
+          icon.style.transform = 'rotate(180deg)';
         }
       }
-      _playSub(cat, sub, url, iframeUrl, tabUrl, btn) {
-        if (!url || url === '#') {
-          this._showError('Channel belum tersedia.', null, null);
-          return;
-        }
-        if (this._playBusy) return;
-        if (url === this.currentUrl) return;
-        this._playBusy = true;
-        setTimeout(() => {
-          this._playBusy = false;
-        }, 700);
-        this.currentUrl = url;
-        this.currentIframeUrl = iframeUrl || null;
-        this.currentTabUrl = tabUrl || null;
-        this.fatalCount = 0;
-        this.autoplayBlocked = false;
-        document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active-btn'));
-        btn.classList.add('active-btn');
-        document.getElementById('display-title').textContent = `${cat} — ${sub}`;
-        document.getElementById('display-sub').textContent = url.split('/').pop();
-        this._showLoader();
-        this._destroyAll();
-        this._setBadge('hls');
-        if (Hls.isSupported()) this._loadHls(url, iframeUrl, tabUrl);
-        else if (this.videoEl.canPlayType('application/vnd.apple.mpegurl')) this._loadNative(url, iframeUrl, tabUrl);
-        else this._showError('Browser tidak mendukung HLS.', iframeUrl, tabUrl);
-      }
-      _loadHls(url, iframeUrl, tabUrl) {
-        const cfg = {
-          enableWorker: false,
-          lowLatencyMode: false,
-          maxBufferLength: 10,
-          maxMaxBufferLength: 25,
-          maxBufferSize: 10 * 1000 * 1000,
-          backBufferLength: 5,
-          maxBufferHole: 1.0,
-          nudgeOffset: 0.3,
-          nudgeMaxRetry: 5,
-          startFragPrefetch: false,
-          testBandwidth: false,
-          xhrSetup(xhr) {
-            xhr.withCredentials = false;
-          },
-          manifestLoadingTimeOut: 12000,
-          manifestLoadingMaxRetry: 2,
-          manifestLoadingRetryDelay: 2000,
-          levelLoadingTimeOut: 12000,
-          levelLoadingMaxRetry: 2,
-          levelLoadingRetryDelay: 2000,
-          fragLoadingTimeOut: 20000,
-          fragLoadingMaxRetry: 3,
-          fragLoadingRetryDelay: 2000,
-          startLevel: -1,
-          abrBandWidthFactor: 0.75,
-          debug: false,
+      async play(cat, sub, url, btn) {
+        this.loader.classList.remove('hidden');
+        this.liveBadge.classList.add('hidden');
+        document.querySelectorAll('#menu-container button').forEach(b => b.classList.remove('bg-blue-900/30', 'text-blue-400'));
+        btn.classList.add('bg-blue-900/30', 'text-blue-400');
+        document.getElementById('display-title').innerText = `${cat} • ${sub}`;
+        document.getElementById('display-sub').innerText = url.split('/').pop();
+        const config = {
+          enableWorker: true,
+          capLevelToPlayerSize: true,
+          lowLatencyMode: true
         };
-        const hls = new Hls(cfg);
-        this.hls = hls;
-        hls.loadSource(url);
-        hls.attachMedia(this.videoEl);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          this._hideLoader();
-          this._setBadge('hls');
-          this._tryPlay();
-        });
-        hls.on(Hls.Events.ERROR, (_, data) => {
-          if (!data.fatal) return;
-          this.fatalCount++;
-          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-            if (this.fatalCount <= 2) {
-              setTimeout(() => {
-                if (this.hls) hls.startLoad();
-              }, 2500);
-            } else {
-              // CORS error — tawarkan opsi
-              const msg = 'Server penyedia memblokir akses langsung (CORS).\n\nGunakan Embed Resmi untuk memutar via player website mereka.';
-              this._showError(msg, iframeUrl, tabUrl);
-              hls.destroy();
-            }
-          } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-            if (this.fatalCount <= 2) hls.recoverMediaError();
-            else {
-              this._showError('Format media error: ' + data.details, iframeUrl, tabUrl);
-              hls.destroy();
-            }
-          } else {
-            this._showError('Error: ' + data.details, iframeUrl, tabUrl);
-            hls.destroy();
-          }
-        });
-      }
-      _loadNative(url, iframeUrl, tabUrl) {
-        this.videoEl.src = url;
-        this.videoEl.load();
-        this.videoEl.addEventListener('loadedmetadata', () => {
-          this._hideLoader();
-          this._tryPlay();
-        }, {
-          once: true
-        });
-        this.videoEl.addEventListener('error', () => {
-          this._showError('Playback error. Stream offline atau CORS.', iframeUrl, tabUrl);
-        }, {
-          once: true
-        });
-        setTimeout(() => {
-          if (this.loader.classList.contains('show')) this._showError('Timeout.', iframeUrl, tabUrl);
-        }, 14000);
-      }
-      _loadIframe(iframeUrl) {
-        if (!iframeUrl) return;
-        this._destroyAll();
-        this._hideLoader();
-        this.errBox.classList.remove('show');
-        this.iframeEl.src = iframeUrl;
-        this.iframeEl.style.display = 'block';
-        this.videoEl.style.display = 'none';
-        document.getElementById('iframe-topbar').style.display = 'block';
-        this._setBadge('iframe');
-      }
-      _tryPlay() {
-        const p = this.videoEl.play();
-        if (p instanceof Promise) {
-          p.then(() => {
-              this.autoplayBlocked = false;
-              this.playBox.classList.remove('show');
-            })
-            .catch(err => {
-              console.warn('[Autoplay blocked]', err.message);
-              this.autoplayBlocked = true;
-              this._hideLoader();
-              this.playBox.classList.add('show');
-            });
-        }
-      }
-      _manualPlay() {
-        this.playBox.classList.remove('show');
-        this.autoplayBlocked = false;
-        this.videoEl.play().catch(() => {
-          if (this.currentUrl) this._retry();
-        });
-      }
-      _setupVideoWatchdog() {
-        this.videoEl.addEventListener('stalled', () => {
-          if (!this.currentUrl) return;
-          setTimeout(() => {
-            if (this.videoEl.readyState < 3 && !this.videoEl.paused) this.videoEl.play().catch(() => {});
-          }, 5000);
-        });
-        this.videoEl.addEventListener('pause', () => {
-          if (this.autoplayBlocked || !this.currentUrl || this.videoEl.ended) return;
-          setTimeout(() => {
-            if (this.videoEl.paused && !this.autoplayBlocked && this.currentUrl) this.videoEl.play().catch(() => {});
-          }, 1200);
-        });
-      }
-      _destroyAll() {
-        if (this.hls) {
-          this.hls.destroy();
-          this.hls = null;
-        }
-        this.videoEl.pause();
-        this.videoEl.removeAttribute('src');
-        this.videoEl.load();
-        this.videoEl.style.display = 'block';
-        this.iframeEl.style.display = 'none';
-        this.iframeEl.src = 'about:blank';
-        document.getElementById('iframe-topbar').style.display = 'none';
-      }
-      _setBadge(mode) {
-        const b = document.getElementById('mode-badge');
-        b.className = 'badge';
-        b.classList.add(mode === 'hls' ? 'badge-hls' : 'badge-iframe');
-        b.textContent = mode === 'hls' ? '● HLS' : '● EMBED';
-        b.classList.remove('hidden');
-      }
-      _showLoader() {
-        this.loader.classList.add('show');
-        this.errBox.classList.remove('show');
-        this.playBox.classList.remove('show');
-      }
-      _hideLoader() {
-        this.loader.classList.remove('show');
-      }
-      _showError(msg, iframeUrl, tabUrl) {
-        this._hideLoader();
-        this.playBox.classList.remove('show');
-        this.errBox.classList.add('show');
-        document.getElementById('error-detail').textContent = msg || 'Stream tidak tersedia.';
-        const hlsBtn = document.getElementById('retry-hls-btn');
-        const iframeBtn = document.getElementById('retry-iframe-btn');
-        const tabBtn = document.getElementById('open-tab-btn');
-        hlsBtn.classList.toggle('hidden', !this.currentUrl || this.currentUrl === '#');
-        iframeBtn.classList.toggle('hidden', !iframeUrl);
-        tabBtn.classList.toggle('hidden', !tabUrl);
-        if (iframeUrl) this.currentIframeUrl = iframeUrl;
-        if (tabUrl) this.currentTabUrl = tabUrl;
-      }
-      _retry() {
-        if (!this.currentUrl || this.currentUrl === '#') return;
-        const url = this.currentUrl;
-        this.currentUrl = null;
-        this.fatalCount = 0;
-        this.autoplayBlocked = false;
-        this._showLoader();
-        this._destroyAll();
-        setTimeout(() => {
-          this.currentUrl = url;
-          if (Hls.isSupported()) this._loadHls(url, this.currentIframeUrl, this.currentTabUrl);
-          else this._loadNative(url, this.currentIframeUrl, this.currentTabUrl);
-        }, 800);
-      }
-      _setupSearch() {
-        document.getElementById('cctv-search').addEventListener('input', e => {
-          const q = e.target.value.toLowerCase().trim();
-          document.querySelectorAll('.category-group').forEach(g => {
-            g.style.display = (!q || g.textContent.toLowerCase().includes(q)) ? '' : 'none';
-          });
-        });
-      }
-      _toggleFS() {
-        const target = this.isMobile ? this.videoEl : document.getElementById('video-box');
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-          const fn = target.requestFullscreen || target.webkitRequestFullscreen;
-          if (fn) fn.call(target).catch(() => {
-            if (this.videoEl.requestFullscreen) this.videoEl.requestFullscreen().catch(() => {});
+        if (this.hls) this.hls.destroy();
+        if (Hls.isSupported()) {
+          this.hls = new Hls(config);
+          this.hls.loadSource(url);
+          this.hls.attachMedia(this.video);
+          this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            this.video.play();
+            this.loader.classList.add('hidden');
+            this.liveBadge.classList.remove('hidden');
           });
         } else {
-          const fn = document.exitFullscreen || document.webkitExitFullscreen;
-          if (fn) fn.call(document);
+          this.video.src = url;
+          this.video.play();
+          this.loader.classList.add('hidden');
+          this.liveBadge.classList.remove('hidden');
         }
       }
+      setupSearch() {
+        document.getElementById('cctv-search').addEventListener('input', e => {
+          const term = e.target.value.toLowerCase();
+          document.querySelectorAll('.category-group').forEach(g => {
+            g.style.display = g.textContent.toLowerCase().includes(term) ? 'block' : 'none';
+          });
+        });
+      }
+      toggleFS() {
+        const box = document.getElementById('video-box');
+        if (!document.fullscreenElement) box.requestFullscreen();
+        else document.exitFullscreen();
+      }
     }
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        window.app = new TrafficApp();
-      });
-    } else {
-      window.app = new TrafficApp();
-    }
+    const app = new TrafficApp();
   </script>
 </body>
 
