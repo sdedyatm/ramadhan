@@ -66,7 +66,10 @@
       color: #60a5fa !important;
     }
 
-    #error-overlay,
+    #error-overlay {
+      display: none;
+    }
+
     #play-overlay {
       display: none;
     }
@@ -87,6 +90,18 @@
       animation: pulse-green 2s infinite;
     }
 
+    #proxy-banner {
+      padding: 5px 12px;
+      background: rgba(34, 197, 94, 0.1);
+      border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+      font-size: 9px;
+      font-family: monospace;
+      color: #16a34a;
+      text-align: center;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
     @media (max-width: 768px) {
       .submenu-container button {
         min-height: 48px;
@@ -95,25 +110,6 @@
       .category-group>button {
         min-height: 56px;
       }
-    }
-
-    /* Banner proxy status */
-    #proxy-banner {
-      display: none;
-      padding: 6px 12px;
-      background: rgba(234, 179, 8, 0.15);
-      border-bottom: 1px solid rgba(234, 179, 8, 0.3);
-      font-size: 10px;
-      font-family: monospace;
-      color: #ca8a04;
-      text-align: center;
-      letter-spacing: 0.05em;
-    }
-
-    #proxy-banner.active {
-      background: rgba(34, 197, 94, 0.1);
-      border-color: rgba(34, 197, 94, 0.3);
-      color: #16a34a;
     }
   </style>
 </head>
@@ -133,18 +129,15 @@
       </div>
     </div>
     <div class="flex items-center gap-3">
-      <!-- Toggle proxy button -->
-      <button onclick="app.toggleProxy()" id="proxy-toggle-btn" class="px-2 py-1 rounded text-[9px] font-mono uppercase tracking-widest border transition-all
-               border-slate-700 text-slate-500 hover:border-blue-500 hover:text-blue-400" title="Toggle CORS Proxy">
+      <button onclick="app.toggleProxy()" id="proxy-toggle-btn" class="px-2 py-1 rounded text-[9px] font-mono uppercase tracking-widest border transition-all border-slate-700 text-slate-500 hover:border-blue-500 hover:text-blue-400" title="Toggle CORS Proxy">
         PROXY: <span id="proxy-status-label">OFF</span>
       </button>
       <div id="connection-dot" class="w-2 h-2 rounded-full bg-green-500"></div>
     </div>
   </header>
 
-  <!-- Banner info proxy -->
   <div id="proxy-banner">
-    ⚡ MODE PROXY AKTIF — Stream dirutekan via CORS proxy untuk Android/GitHub Pages
+
   </div>
 
   <main class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
@@ -158,7 +151,7 @@
 
         <video id="main-video" class="w-full h-full" playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" autoplay muted preload="none"></video>
 
-        <!-- Overlay tombol PLAY manual (Android autoplay blocked) -->
+        <!-- Overlay tombol PLAY manual untuk Android -->
         <div id="play-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/80 z-50 gap-4 cursor-pointer" onclick="app.manualPlay()">
           <div class="w-20 h-20 rounded-full bg-blue-600/90 flex items-center justify-center shadow-2xl border-2 border-blue-400/40 hover:scale-110 transition-transform active:scale-95">
             <svg class="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
@@ -171,10 +164,8 @@
         <!-- Error Overlay -->
         <div id="error-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/95 z-50 gap-3 px-6">
           <div class="text-3xl">⚠️</div>
-          <p class="text-[10px] font-mono text-red-400 uppercase tracking-widest">Stream Tidak Tersedia</p>
+          <p class="text-[10px] font-mono text-red-400 uppercase tracking-widest">CCTV SEDANG GANGGUAN</p>
           <p id="error-detail" class="text-[9px] text-slate-500 text-center leading-relaxed"></p>
-
-          <!-- Tombol retry dengan proxy -->
           <div class="flex gap-2 mt-1">
             <button onclick="app.retryStream()" class="px-3 py-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-colors">
               ↺ Coba Lagi
@@ -183,10 +174,6 @@
               🔀 Coba via Proxy
             </button>
           </div>
-
-          <p id="proxy-hint" class="text-[8px] text-slate-600 text-center mt-1">
-            Jika gagal terus, aktifkan mode PROXY di pojok kanan atas
-          </p>
         </div>
 
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/70 to-transparent z-10 pointer-events-none">
@@ -205,16 +192,11 @@
         <div id="loader" class="absolute inset-0 flex items-center justify-center bg-slate-900/90 hidden z-40">
           <div class="flex flex-col items-center gap-3">
             <div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <span class="text-[9px] font-mono tracking-[0.3em] text-blue-400">STREAMING_SYNC</span>
+            <span class="text-[9px] font-mono tracking-[0.3em] text-blue-400">sedang menghubungkan</span>
           </div>
         </div>
       </div>
 
-      <div class="mt-3 max-w-2xl w-full p-3 bg-yellow-950/40 border border-yellow-800/30 rounded-xl">
-        <p id="info-box-text" class="text-[9px] text-yellow-600/80 font-mono leading-relaxed">
-          ⚠️ Jika video tidak muncul di Android/HP: aktifkan tombol <strong>PROXY</strong> di kanan atas, lalu pilih ulang channel.
-        </p>
-      </div>
     </section>
 
     <aside class="w-full md:w-96 bg-slate-900/40 flex flex-col overflow-hidden border-l border-slate-900 min-h-0 flex-1 md:flex-none">
@@ -227,23 +209,13 @@
 
   <script>
     // ============================================================
-    // ⚙️ KONFIGURASI PROXY
-    // 
-    // Setelah deploy Cloudflare Worker (lihat file worker.js),
-    // ganti URL di bawah ini dengan URL worker Anda.
-    //
-    // Contoh: 'https://cctv-proxy.namakamu.workers.dev'
-    //
-    // Jika belum punya worker, biarkan CORS_PROXY_URL di bawah.
-    // allorigins.win adalah proxy publik gratis (tidak untuk produksi).
+    // URL Cloudflare Worker milik Anda
     // ============================================================
-    const CORS_PROXY_URL = 'https://corsproxy.io/?';
-    // Untuk Cloudflare Worker ganti jadi:
-    // const CORS_PROXY_URL = 'https://nama-worker-anda.workers.dev/?url=';
+    const CORS_PROXY_URL = 'https://cctv.sdedyatm.workers.dev/?url=';
     const categories = [{
         id: 'kawasan',
         name: 'KAWASAN BIC',
-        icon: '🛣️',
+        icon: '🚛',
         subs: [{
             name: 'ISL',
             url: '#'
@@ -269,7 +241,7 @@
       {
         id: 'cikampek',
         name: 'CIKAMPEK',
-        icon: '🛣️',
+        icon: '🟠',
         subs: [{
             name: 'CIKOPO',
             url: 'https://jmlive.jasamarga.com/hls/5/ed6734ac-1cde-4afd-acf9-2658f8e7a254/index.m3u8'
@@ -325,7 +297,7 @@
       {
         id: 'japek',
         name: 'TOL JAPEK',
-        icon: '🛣️',
+        icon: '📍',
         subs: [{
             name: 'KM 10 Cikunir',
             url: 'https://cctv.jasamarga.com/hls/km10.m3u8'
@@ -585,7 +557,7 @@
       {
         id: 'jambi',
         name: 'JAMBI',
-        icon: '🐅',
+        icon: '🔵',
         subs: [{
             name: 'Simpang Rimbo',
             url: 'https://dishub.jambikota.go.id/rimbo.m3u8'
@@ -608,10 +580,36 @@
           }
         ]
       },
+       {
+        id: 'padang',
+        name: 'PADANG',
+        icon: '🟢',
+        subs: [{
+            name: 'padang',
+            url: '#'
+          },
+          {
+            name: 'SITINJAU',
+            url: '#'
+          },
+          {
+            name: 'GUNUNG MEDAN',
+            url: '#'
+          },
+          {
+            name: 'JAMBI',
+            url: '#'
+          },
+          {
+            name: 'JEMBATAN',
+            url: '#'
+          }
+        ]
+      },                 
       {
         id: 'pekanbaru',
         name: 'PEKANBARU',
-        icon: '🛢️',
+        icon: '🟡',
         subs: [{
             name: 'Simpang Bingung',
             url: 'https://dishub.pekanbaru.go.id/bingung.m3u8'
@@ -637,7 +635,7 @@
       {
         id: 'medan',
         name: 'MEDAN',
-        icon: '🏢',
+        icon: '🌎',
         subs: [{
             name: 'Amplas',
             url: 'https://atcs.medan.id/hls/amplas.m3u8'
@@ -668,14 +666,14 @@
         this.errorOverlay = document.getElementById('error-overlay');
         this.playOverlay = document.getElementById('play-overlay');
         this.hls = null;
-        this.currentUrl = null; // URL asli
+        this.currentUrl = null;
         this.currentCat = null;
         this.currentSub = null;
         this.fatalErrorCount = 0;
         this.autoplayBlocked = false;
         this.isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
         this.isAndroid = /Android/i.test(navigator.userAgent);
-        // Mode proxy: auto aktif di Android, off di desktop
+        // Proxy default ON di mobile, OFF di desktop
         this.proxyEnabled = this.isMobile;
         this.init();
       }
@@ -685,26 +683,20 @@
         this.setupVideoEvents();
         this.updateProxyUI();
         document.getElementById('status-bar').innerText = 'CCTV MUDIK 2026';
-        // Auto aktifkan proxy di Android tanpa perlu tap dulu
         if (this.isAndroid) {
           document.getElementById('info-box-text').innerHTML =
-            '📱 Mode Android terdeteksi — PROXY otomatis aktif untuk mengatasi CORS. Pilih channel untuk mulai streaming.';
+            '📱 Android terdeteksi — PROXY otomatis aktif via <strong>cctv.sdedyatm.workers.dev</strong>. Pilih channel untuk streaming.';
         }
       }
-      // Wrapper URL: jika proxy aktif, bungkus URL dengan proxy
-      wrapUrl(originalUrl) {
-        if (!this.proxyEnabled || !originalUrl || originalUrl === '#') {
-          return originalUrl;
-        }
-        return CORS_PROXY_URL + encodeURIComponent(originalUrl);
+      // Bungkus URL dengan proxy jika mode proxy aktif
+      wrapUrl(url) {
+        if (!this.proxyEnabled || !url || url === '#') return url;
+        return CORS_PROXY_URL + encodeURIComponent(url);
       }
       toggleProxy() {
         this.proxyEnabled = !this.proxyEnabled;
         this.updateProxyUI();
-        // Jika sedang ada stream aktif, restart dengan mode baru
-        if (this.currentUrl) {
-          this.retryStream();
-        }
+        if (this.currentUrl) this.retryStream();
       }
       updateProxyUI() {
         const label = document.getElementById('proxy-status-label');
@@ -715,16 +707,15 @@
           btn.classList.remove('border-slate-700', 'text-slate-500');
           btn.classList.add('border-green-600', 'text-green-400', 'bg-green-900/20');
           banner.style.display = 'block';
-          banner.classList.add('active');
         } else {
           label.textContent = 'OFF';
           btn.classList.add('border-slate-700', 'text-slate-500');
           btn.classList.remove('border-green-600', 'text-green-400', 'bg-green-900/20');
           banner.style.display = 'none';
-          banner.classList.remove('active');
         }
       }
       setupVideoEvents() {
+        // Auto-resume jika video stall
         this.video.addEventListener('stalled', () => {
           setTimeout(() => {
             if (!this.video.paused && this.video.readyState < 3) {
@@ -733,6 +724,7 @@
             }
           }, 3000);
         });
+        // Resume jika pause tidak disengaja
         this.video.addEventListener('pause', () => {
           if (!this.autoplayBlocked && this.currentUrl && !this.video.ended) {
             setTimeout(() => {
@@ -748,19 +740,22 @@
         container.innerHTML = categories.map(cat => `
           <div class="category-group">
             <button onclick="app.toggleSub('${cat.id}')"
-                class="w-full p-4 bg-slate-800/40 border border-slate-800 rounded-2xl flex items-center justify-between hover:bg-slate-800 hover:border-blue-500/30 active:bg-slate-700 transition-all group">
+              class="w-full p-4 bg-slate-800/40 border border-slate-800 rounded-2xl flex items-center justify-between hover:bg-slate-800 hover:border-blue-500/30 active:bg-slate-700 transition-all group">
               <span class="font-bold text-[16px] tracking-widest flex items-center gap-3">
                 <span class="text-lg opacity-80">${cat.icon}</span>
                 ${cat.name}
               </span>
-              <svg class="w-4 h-4 text-slate-600 group-hover:text-blue-400 transition-transform duration-300 flex-shrink-0" id="icon-${cat.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-slate-600 group-hover:text-blue-400 transition-transform duration-300 flex-shrink-0"
+                id="icon-${cat.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
             <div id="sub-${cat.id}" class="submenu-container grid grid-cols-1 gap-1.5">
               ${cat.subs.map(sub => `
                 <button onclick="app.play('${cat.name}', '${sub.name}', '${sub.url}', this)"
-                    class="p-3 bg-slate-900/60 border border-slate-800/50 rounded-xl text-[15px] text-left hover:border-blue-500/50 hover:text-blue-400 active:bg-slate-800 transition-all font-mono uppercase pl-6 relative overflow-hidden group">
+                  class="p-3 bg-slate-900/60 border border-slate-800/50 rounded-xl text-[15px] text-left
+                         hover:border-blue-500/50 hover:text-blue-400 active:bg-slate-800 transition-all
+                         font-mono uppercase pl-6 relative overflow-hidden group">
                   <span class="absolute left-2 top-1/2 -translate-y-1/2 w-1 h-1 bg-slate-700 rounded-full group-hover:bg-blue-500 transition-colors"></span>
                   ${sub.name}
                 </button>
@@ -793,8 +788,7 @@
         this.playOverlay.style.display = 'none';
         this.errorOverlay.style.display = 'flex';
         document.getElementById('error-detail').innerText = msg || 'Stream tidak dapat dimuat.';
-        // Tampilkan hint proxy jika proxy belum aktif
-        document.getElementById('proxy-hint').style.display = this.proxyEnabled ? 'none' : 'block';
+        // Sembunyikan tombol proxy-retry jika proxy sudah aktif
         document.getElementById('proxy-retry-btn').style.display = this.proxyEnabled ? 'none' : 'inline-flex';
       }
       showPlayButton() {
@@ -820,52 +814,45 @@
         this.video.load();
         this.autoplayBlocked = false;
       }
-      async play(cat, sub, url, btn) {
+      play(cat, sub, url, btn) {
         if (!url || url === '#') {
           this.showError('Stream untuk channel ini belum tersedia.');
           return;
         }
-        this.currentUrl = url; // Simpan URL asli
+        this.currentUrl = url; // simpan URL asli, bukan yang sudah di-wrap
         this.currentCat = cat;
         this.currentSub = sub;
         this.fatalErrorCount = 0;
-        try {
-          this.showLoader();
-          document.querySelectorAll('.submenu-container button').forEach(b => b.classList.remove('active-btn'));
-          btn.classList.add('active-btn');
-          document.getElementById('display-title').innerText = `${cat} — ${sub}`;
-          const proxyLabel = this.proxyEnabled ? ' [PROXY]' : '';
-          document.getElementById('display-sub').innerText = `Syncing${proxyLabel}: ${url.split('/').pop()}`;
-          this.destroyHls();
-          this.startStream(url);
-        } catch (e) {
-          this.showError('Kesalahan tidak terduga: ' + e.message);
-        }
+        this.showLoader();
+        document.querySelectorAll('.submenu-container button').forEach(b => b.classList.remove('active-btn'));
+        btn.classList.add('active-btn');
+        document.getElementById('display-title').innerText = `${cat} — ${sub}`;
+        document.getElementById('display-sub').innerText =
+          `Syncing${this.proxyEnabled ? ' [PROXY]' : ''}: ${url.split('/').pop()}`;
+        this.destroyHls();
+        this.startStream(url);
       }
       startStream(originalUrl) {
-        // Putuskan apakah pakai proxy atau tidak
         const streamUrl = this.wrapUrl(originalUrl);
         if (Hls.isSupported()) {
-          this.loadWithHls(streamUrl, originalUrl);
+          this.loadWithHls(streamUrl);
         } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
           this.loadNative(streamUrl);
         } else {
           this.showError('Browser tidak mendukung HLS playback.');
         }
       }
-      loadWithHls(streamUrl, originalUrl) {
+      loadWithHls(streamUrl) {
         const hlsConfig = {
           enableWorker: !this.isMobile,
           lowLatencyMode: false,
           backBufferLength: this.isMobile ? 10 : 30,
           maxBufferLength: this.isMobile ? 15 : 30,
           maxMaxBufferLength: this.isMobile ? 30 : 60,
-          maxBufferSize: this.isMobile ? (10 * 1000 * 1000) : (20 * 1000 * 1000),
+          maxBufferSize: this.isMobile ? 10 * 1000 * 1000 : 20 * 1000 * 1000,
           maxBufferHole: 0.5,
           startFragPrefetch: false,
           testBandwidth: false,
-          // KRITIS: Tidak ada withCredentials=true, tidak ada custom header
-          // agar tidak memicu CORS preflight
           xhrSetup: (xhr) => {
             xhr.withCredentials = false;
           },
@@ -885,46 +872,39 @@
         hls.attachMedia(this.video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           this.hideLoader();
-          const playPromise = this.video.play();
-          if (playPromise !== undefined) {
-            playPromise
-              .then(() => {
-                this.playOverlay.style.display = 'none';
-              })
-              .catch(err => {
-                console.warn('Autoplay blocked:', err.name);
-                this.showPlayButton();
-              });
+          const p = this.video.play();
+          if (p !== undefined) {
+            p.then(() => {
+              this.playOverlay.style.display = 'none';
+            }).catch(err => {
+              console.warn('Autoplay blocked:', err.name);
+              this.showPlayButton();
+            });
           }
         });
         hls.on(Hls.Events.ERROR, (event, data) => {
-          if (data.fatal) {
-            this.fatalErrorCount++;
-            switch (data.type) {
-              case Hls.ErrorTypes.NETWORK_ERROR:
-                if (this.fatalErrorCount <= 2) {
-                  setTimeout(() => hls.startLoad(), 1000);
-                } else {
-                  const proxyTip = this.proxyEnabled ?
-                    'Proxy aktif tapi stream tetap gagal. Server mungkin offline.' :
-                    'Coba aktifkan PROXY di kanan atas lalu pilih ulang channel.';
-                  this.showError(`Network Error: ${data.details}\n${proxyTip}`);
-                  hls.destroy();
-                }
-                break;
-              case Hls.ErrorTypes.MEDIA_ERROR:
-                if (this.fatalErrorCount <= 2) {
-                  hls.recoverMediaError();
-                } else {
-                  this.showError('Media Error: Format video tidak kompatibel.');
-                  hls.destroy();
-                }
-                break;
-              default:
-                this.showError(`Error: ${data.details}`);
-                hls.destroy();
-                break;
+          if (!data.fatal) return;
+          this.fatalErrorCount++;
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+            if (this.fatalErrorCount <= 2) {
+              setTimeout(() => hls.startLoad(), 1000);
+            } else {
+              const tip = this.proxyEnabled ?
+                'Proxy aktif tapi stream tetap gagal.\nServer mungkin sedang offline.' :
+                'Aktifkan PROXY (kanan atas) lalu pilih ulang channel.';
+              this.showError(`Network Error: ${data.details}\n${tip}`);
+              hls.destroy();
             }
+          } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+            if (this.fatalErrorCount <= 2) {
+              hls.recoverMediaError();
+            } else {
+              this.showError('Media Error: Format video tidak kompatibel.');
+              hls.destroy();
+            }
+          } else {
+            this.showError(`Fatal Error: ${data.details}`);
+            hls.destroy();
           }
         });
       }
@@ -942,20 +922,22 @@
         }, {
           once: true
         });
-        setTimeout(() => {
+        const tid = setTimeout(() => {
           if (!this.loader.classList.contains('hidden')) {
-            this.showError('Timeout: Stream tidak merespons.');
+            this.showError('Timeout: Stream tidak merespons dalam 15 detik.');
           }
         }, 15000);
+        this.video.addEventListener('loadedmetadata', () => clearTimeout(tid), {
+          once: true
+        });
       }
       retryStream() {
-        if (this.currentUrl && this.currentUrl !== '#') {
-          this.showLoader();
-          this.fatalErrorCount = 0;
-          this.autoplayBlocked = false;
-          this.destroyHls();
-          setTimeout(() => this.startStream(this.currentUrl), 800);
-        }
+        if (!this.currentUrl || this.currentUrl === '#') return;
+        this.showLoader();
+        this.fatalErrorCount = 0;
+        this.autoplayBlocked = false;
+        this.destroyHls();
+        setTimeout(() => this.startStream(this.currentUrl), 800);
       }
       // Aktifkan proxy lalu langsung retry
       retryWithProxy() {
@@ -986,6 +968,7 @@
     }
     const app = new TrafficApp();
   </script>
+
 </body>
 
 </html>
