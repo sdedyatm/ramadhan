@@ -7,15 +7,8 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <!-- KRITIS: Upgrade HTTP stream ke HTTPS secara otomatis di browser -->
-  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-  <title>CCTV Traffic Pro Dashboard</title>
-
+  <title>CCTV Traffic Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!--
-    PERBAIKAN ANDROID: Gunakan hls.js versi light — lebih ringan & stabil di mobile
-    Versi light tidak include EME/DRM yang tidak dibutuhkan dan lebih cocok untuk mobile
-  -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.light.min.js"></script>
 
   <style>
@@ -28,12 +21,12 @@
       overscroll-behavior: none;
     }
 
-    /* VIDEO */
+    /* VIDEO / IFRAME CONTAINER */
     .video-wrapper {
       position: relative;
       width: 100%;
       aspect-ratio: 16/9;
-      max-height: 320px;
+      max-height: 340px;
       background: #000;
       border-radius: 16px;
       overflow: hidden;
@@ -49,6 +42,14 @@
       background: #000;
     }
 
+    #main-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+      background: #000;
+    }
+
     /* SCROLLBAR */
     .custom-scroll::-webkit-scrollbar {
       width: 3px;
@@ -59,15 +60,12 @@
       border-radius: 10px;
     }
 
-    /* SUBMENU ACCORDION */
+    /* SUBMENU */
     .submenu-container {
       max-height: 0;
       overflow: hidden;
       opacity: 0;
-      /* Animasi lebih lambat & smooth — tidak terasa "loncat" */
-      transition: max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 0.28s ease,
-        margin 0.38s ease;
+      transition: max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease, margin 0.35s ease;
     }
 
     .submenu-container.open {
@@ -90,23 +88,13 @@
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
-      /*
-        touch-action:manipulation = hilangkan 300ms delay Android
-        TANPA perlu touchend + preventDefault
-        Ini lebih aman dan tidak menyebabkan double-fire
-      */
       touch-action: manipulation;
-      /* Transisi lebih pelan = terasa lebih solid, tidak "meletup" */
       transition: background 0.22s ease, border-color 0.22s ease;
       min-height: 58px;
       text-align: left;
       -webkit-appearance: none;
       appearance: none;
       outline: none;
-    }
-
-    .category-btn:hover {
-      background: rgba(30, 41, 59, 0.85);
     }
 
     .category-btn:active {
@@ -128,11 +116,6 @@
       pointer-events: none;
     }
 
-    .cat-icon {
-      font-size: 18px;
-      pointer-events: none;
-    }
-
     .chevron-icon {
       width: 15px;
       height: 15px;
@@ -147,7 +130,7 @@
       color: #60a5fa;
     }
 
-    /* TOMBOL SUB-MENU */
+    /* TOMBOL SUB */
     .sub-btn {
       width: 100%;
       padding: 12px 12px 12px 22px;
@@ -206,6 +189,25 @@
       background: #3b82f6;
     }
 
+    /* BADGE MODE */
+    .badge-hls {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .badge-iframe {
+      background: rgba(168, 85, 247, 0.2);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .badge-ext {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
     /* OVERLAYS */
     .overlay {
       position: absolute;
@@ -222,16 +224,16 @@
       display: flex;
     }
 
-    /* PULSE DOT */
+    /* PULSE */
     @keyframes pulse-green {
 
       0%,
       100% {
-        box-shadow: 0 0 6px #22c55e;
+        box-shadow: 0 0 6px #22c55e
       }
 
       50% {
-        box-shadow: 0 0 14px #22c55e, 0 0 20px #22c55e;
+        box-shadow: 0 0 14px #22c55e, 0 0 20px #22c55e
       }
     }
 
@@ -242,12 +244,22 @@
     /* SPINNER */
     @keyframes spin {
       to {
-        transform: rotate(360deg);
+        transform: rotate(360deg)
       }
     }
 
     .spinner {
       animation: spin 0.85s linear infinite;
+    }
+
+    /* BANNER INFO ANDROID */
+    #android-info {
+      display: none;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -267,33 +279,33 @@
         <p id="status-bar" class="text-[9px] text-slate-500 font-mono tracking-widest uppercase">Initializing...</p>
       </div>
     </div>
-    <div id="connection-dot" class="w-2 h-2 rounded-full bg-green-500"></div>
+    <div class="flex items-center gap-2">
+      <!-- Mode badge -->
+      <span id="mode-badge" class="hidden text-[9px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider"></span>
+      <div id="connection-dot" class="w-2 h-2 rounded-full bg-green-500"></div>
+    </div>
   </header>
 
-  <!-- MAIN -->
   <main class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
 
-    <!-- VIDEO -->
+    <!-- VIDEO PANEL -->
     <section class="p-4 md:p-6 flex flex-col items-center bg-slate-950 md:flex-1 justify-start md:justify-center border-b md:border-b-0 md:border-r border-slate-900 flex-shrink-0">
       <div class="video-wrapper group w-full max-w-2xl" id="video-box">
 
-        <!-- Logo -->
+        <!-- Logo watermark -->
         <div class="absolute top-3 right-3 z-30 opacity-25 pointer-events-none">
           <img src="https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0" class="w-9 h-9 grayscale" alt="Logo">
         </div>
 
-        <!--
-          KRITIS ANDROID:
-          - playsinline: WAJIB — cegah fullscreen otomatis di Android/iOS
-          - muted: WAJIB — autoplay hanya diizinkan jika video muted
-          - preload="none": tidak load data sampai dipilih
-          - TIDAK ada crossorigin — menyebabkan CORS preflight gagal di stream CCTV lokal
-        -->
+        <!-- Video element untuk HLS -->
         <video id="main-video" playsinline webkit-playsinline muted preload="none"></video>
 
+        <!-- Iframe untuk embed player resmi -->
+        <iframe id="main-iframe" allowfullscreen allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"></iframe>
+
         <!-- Play Overlay -->
-        <div id="play-overlay" class="overlay bg-slate-900/85 backdrop-blur-sm">
-          <button id="play-btn" class="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center shadow-2xl border-2 border-blue-400/40 active:scale-95 transition-transform" style="touch-action:manipulation;cursor:pointer">
+        <div id="play-overlay" class="overlay bg-slate-900/85">
+          <button id="play-btn" class="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center shadow-2xl border-2 border-blue-400/40 active:scale-95 transition-transform" style="touch-action:manipulation">
             <svg class="w-9 h-9 text-white ml-1 pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
@@ -302,13 +314,14 @@
         </div>
 
         <!-- Error Overlay -->
-        <div id="error-overlay" class="overlay bg-slate-900/95">
-          <div class="text-3xl">⚠️</div>
+        <div id="error-overlay" class="overlay bg-slate-900/97">
+          <div class="text-4xl">⚠️</div>
           <p class="text-[10px] font-mono text-red-400 uppercase tracking-widest">Stream Tidak Tersedia</p>
-          <p id="error-detail" class="text-[9px] text-slate-500 text-center px-6 max-w-xs leading-relaxed"></p>
-          <button id="retry-btn" class="mt-1 px-5 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-[11px] font-mono uppercase tracking-widest transition-colors" style="touch-action:manipulation;cursor:pointer">
-            ↺ Coba Lagi
-          </button>
+          <p id="error-detail" class="text-[9px] text-slate-400 text-center px-6 max-w-xs leading-relaxed"></p>
+          <div class="flex gap-2 flex-wrap justify-center mt-1">
+            <button id="retry-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-[11px] font-mono uppercase tracking-widest transition-colors" style="touch-action:manipulation">↺ Coba Lagi</button>
+            <button id="open-source-btn" class="hidden px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-[11px] font-mono uppercase tracking-widest transition-colors" style="touch-action:manipulation">🌐 Buka Sumber</button>
+          </div>
         </div>
 
         <!-- Loader -->
@@ -317,7 +330,7 @@
           <span class="text-[9px] font-mono tracking-[0.3em] text-blue-400 uppercase">Memuat Stream...</span>
         </div>
 
-        <!-- Info bar -->
+        <!-- Info bar bawah -->
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/60 to-transparent z-10 pointer-events-none">
           <h2 id="display-title" class="text-xs font-bold text-blue-400 truncate">STANDBY</h2>
           <p id="display-sub" class="text-[10px] text-slate-400 mt-0.5 uppercase tracking-widest truncate">Silahkan Pilih Ruas Jalan</p>
@@ -325,16 +338,31 @@
 
         <!-- Fullscreen -->
         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-          <button id="fs-btn" class="pointer-events-auto p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full active:scale-95 transition-transform shadow-2xl" style="touch-action:manipulation;cursor:pointer">
+          <button id="fs-btn" class="pointer-events-auto p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full active:scale-95 transition-transform shadow-2xl" style="touch-action:manipulation">
             <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-width="2" />
             </svg>
           </button>
         </div>
       </div>
+
+      <!-- Banner info Android (khusus muncul di mobile) -->
+      <div id="android-info" class="w-full max-w-2xl">
+        <div class="flex gap-2 items-start">
+          <span class="text-amber-400 text-sm mt-0.5 flex-shrink-0">ℹ️</span>
+          <div>
+            <p class="text-[11px] text-amber-300 font-semibold mb-1">Catatan untuk Pengguna Android</p>
+            <p class="text-[10px] text-slate-400 leading-relaxed">
+              Beberapa stream CCTV pemerintah memblokir akses dari luar domain mereka (CORS).
+              Jika stream gagal, gunakan tombol <strong class="text-slate-300">🌐 Buka Sumber</strong> untuk membuka langsung di situs resmi,
+              atau gunakan aplikasi <strong class="text-slate-300">Travoy</strong> (Jasa Marga) / <strong class="text-slate-300">Tol Kita</strong> (BPJT) untuk akses resmi.
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- MENU -->
+    <!-- MENU PANEL -->
     <aside class="w-full md:w-96 bg-slate-900/30 flex flex-col overflow-hidden border-l border-slate-900 min-h-0 flex-1 md:flex-none">
       <div class="p-3 bg-slate-900/70 border-b border-slate-800/60 backdrop-blur-sm flex-shrink-0">
         <input type="text" id="cctv-search" placeholder="Cari ruas jalan..." autocomplete="off" autocorrect="off" spellcheck="false" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-[14px] focus:ring-1 focus:ring-blue-500 outline-none placeholder:text-slate-600">
@@ -344,7 +372,16 @@
   </main>
 
   <script>
-    // ─── DATA ───────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // DATA KATEGORI
+    //
+    // Setiap stream bisa punya 3 mode:
+    //  - 'hls'    : Direct HLS (.m3u8) — bisa diblokir CORS di Android
+    //  - 'iframe' : Embed iframe player resmi — lebih kompatibel tapi terbatas
+    //  - 'ext'    : Harus dibuka di browser/tab baru (tidak bisa di-embed)
+    //
+    // 'altUrl'   : URL halaman sumber resmi untuk dibuka jika HLS gagal
+    // ─────────────────────────────────────────────────────────────────────────
     const categories = [{
         id: 'kawasan',
         name: 'KAWASAN BIC',
@@ -374,27 +411,33 @@
         icon: '🛣️',
         subs: [{
             name: 'CIKOPO',
-            url: 'https://jmlive.jasamarga.com/hls/5/ed6734ac-1cde-4afd-acf9-2658f8e7a254/index.m3u8'
+            url: 'https://jmlive.jasamarga.com/hls/5/ed6734ac-1cde-4afd-acf9-2658f8e7a254/index.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Cakung Bks',
-            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-05/index.m3u8'
+            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-05/index.m3u8',
+            altUrl: 'https://binamarga.pu.go.id'
           },
           {
             name: 'Klari Krwg',
-            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-09/index.m3u8'
+            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-09/index.m3u8',
+            altUrl: 'https://binamarga.pu.go.id'
           },
           {
             name: 'Simpang Dawuan',
-            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-10/index.m3u8'
+            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-10/index.m3u8',
+            altUrl: 'https://binamarga.pu.go.id'
           },
           {
             name: 'Tambun',
-            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-01/index.m3u8'
+            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-01/index.m3u8',
+            altUrl: 'https://binamarga.pu.go.id'
           },
           {
             name: 'Jl baru krw',
-            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-08/index.m3u8'
+            url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-08/index.m3u8',
+            altUrl: 'https://binamarga.pu.go.id'
           }
         ]
       },
@@ -404,23 +447,28 @@
         icon: '🏙️',
         subs: [{
             name: 'Pasteur',
-            url: 'https://cctv.jasamarga.com/hls/pasteur.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/pasteur.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Cipularang km 96',
-            url: 'https://jmlive.jasamarga.com/hls/7/a857b0b5-6fa7-47c7-b129-18290748c7fe/index.m3u8'
+            url: 'https://jmlive.jasamarga.com/hls/7/a857b0b5-6fa7-47c7-b129-18290748c7fe/index.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Cileunyi km 154',
-            url: 'https://jmlive.jasamarga.com/hls/6/43eaa44d-5bbf-4dd3-bffa-3d2981d4517a/index.m3u8'
+            url: 'https://jmlive.jasamarga.com/hls/6/43eaa44d-5bbf-4dd3-bffa-3d2981d4517a/index.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Gedebage',
-            url: 'https://cctv.jasamarga.com/hls/gedebage.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/gedebage.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'ss Buah Batu',
-            url: 'https://jmlive.jasamarga.com/hls/6/53a1c95b-8d71-45e8-874f-9d96d9be3c23/index.m3u8'
+            url: 'https://jmlive.jasamarga.com/hls/6/53a1c95b-8d71-45e8-874f-9d96d9be3c23/index.m3u8',
+            altUrl: 'https://jasamargalive.com'
           }
         ]
       },
@@ -430,23 +478,28 @@
         icon: '🛣️',
         subs: [{
             name: 'KM 10 Cikunir',
-            url: 'https://cctv.jasamarga.com/hls/km10.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/km10.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'KM 21 Tambun',
-            url: 'https://cctv.jasamarga.com/hls/km21.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/km21.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'KM 31 Cikarang',
-            url: 'https://cctv.jasamarga.com/hls/km31.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/km31.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'KM 47 Karawang',
-            url: 'https://cctv.jasamarga.com/hls/km47.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/km47.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Layang MBZ',
-            url: 'https://cctv.jasamarga.com/hls/mbz.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/mbz.m3u8',
+            altUrl: 'https://jasamargalive.com'
           }
         ]
       },
@@ -482,23 +535,28 @@
         icon: '🚢',
         subs: [{
             name: 'Dermaga Eksekutif',
-            url: 'https://stream.asdp.id/hls/merak-eksekutif.m3u8'
+            url: 'https://stream.asdp.id/hls/merak-eksekutif.m3u8',
+            altUrl: 'https://asdp.id'
           },
           {
             name: 'Dermaga 1',
-            url: 'https://stream.asdp.id/hls/merak1.m3u8'
+            url: 'https://stream.asdp.id/hls/merak1.m3u8',
+            altUrl: 'https://asdp.id'
           },
           {
             name: 'Dermaga 2',
-            url: 'https://stream.asdp.id/hls/merak2.m3u8'
+            url: 'https://stream.asdp.id/hls/merak2.m3u8',
+            altUrl: 'https://asdp.id'
           },
           {
             name: 'Pintu Masuk Port',
-            url: 'https://stream.asdp.id/hls/gate-merak.m3u8'
+            url: 'https://stream.asdp.id/hls/gate-merak.m3u8',
+            altUrl: 'https://asdp.id'
           },
           {
             name: 'Area Parkir',
-            url: 'https://stream.asdp.id/hls/parkir-merak.m3u8'
+            url: 'https://stream.asdp.id/hls/parkir-merak.m3u8',
+            altUrl: 'https://asdp.id'
           }
         ]
       },
@@ -560,15 +618,18 @@
         icon: '🏯',
         subs: [{
             name: 'Plumbon',
-            url: 'https://cctv.jasamarga.com/hls/plumbon.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/plumbon.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Kanci',
-            url: 'https://cctv.jasamarga.com/hls/kanci.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/kanci.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Palimanan',
-            url: 'https://cctv.jasamarga.com/hls/palimanan.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/palimanan.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Plered',
@@ -594,15 +655,18 @@
           },
           {
             name: 'Krapyak',
-            url: 'https://cctv.jasamarga.com/hls/krapyak.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/krapyak.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Jatingaleh',
-            url: 'https://cctv.jasamarga.com/hls/jatingaleh.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/jatingaleh.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Banyumanik',
-            url: 'https://cctv.jasamarga.com/hls/banyumanik.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/banyumanik.m3u8',
+            altUrl: 'https://jasamargalive.com'
           }
         ]
       },
@@ -612,15 +676,18 @@
         icon: '🦈',
         subs: [{
             name: 'Waru',
-            url: 'https://cctv.jasamarga.com/hls/waru.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/waru.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Gunung Sari',
-            url: 'https://cctv.jasamarga.com/hls/gunungsari.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/gunungsari.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Dupak',
-            url: 'https://cctv.jasamarga.com/hls/dupak.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/dupak.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Suramadu',
@@ -638,7 +705,8 @@
         icon: '🐘',
         subs: [{
             name: 'Bakauheni Port',
-            url: 'https://stream.asdp.id/hls/bakauheni.m3u8'
+            url: 'https://stream.asdp.id/hls/bakauheni.m3u8',
+            altUrl: 'https://asdp.id'
           },
           {
             name: 'Kalianda',
@@ -746,11 +814,13 @@
           },
           {
             name: 'Belawan',
-            url: 'https://cctv.jasamarga.com/hls/belawan.m3u8'
+            url: 'https://cctv.jasamarga.com/hls/belawan.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'GT TJ Morawa',
-            url: 'https://jmlive.jasamarga.com/hls/24/a4776165-5356-4edf-ac12-2a1f1fc0fb00/index.m3u8'
+            url: 'https://jmlive.jasamarga.com/hls/24/a4776165-5356-4edf-ac12-2a1f1fc0fb00/index.m3u8',
+            altUrl: 'https://jasamargalive.com'
           },
           {
             name: 'Maimun',
@@ -763,20 +833,23 @@
         ]
       }
     ];
-    // ─── APP ────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // APP
+    // ─────────────────────────────────────────────────────────────────────────
     class TrafficApp {
       constructor() {
-        this.video = document.getElementById('main-video');
+        this.videoEl = document.getElementById('main-video');
+        this.iframeEl = document.getElementById('main-iframe');
         this.loader = document.getElementById('loader');
         this.errBox = document.getElementById('error-overlay');
         this.playBox = document.getElementById('play-overlay');
         this.hls = null;
         this.currentUrl = null;
+        this.currentAltUrl = null;
         this.fatalCount = 0;
         this.autoplayBlocked = false;
         this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
         this.isAndroid = /Android/i.test(navigator.userAgent);
-        // Lock flags untuk debounce tombol
         this._toggleBusy = false;
         this._playBusy = false;
         this._init();
@@ -787,26 +860,26 @@
         this._setupStaticBtns();
         this._setupVideoWatchdog();
         document.getElementById('status-bar').textContent = 'CCTV MUDIK 2026';
+        // Tampilkan info khusus di Android
+        if (this.isAndroid) {
+          document.getElementById('android-info').style.display = 'block';
+        }
       }
-      // ── STATIC BUTTONS ─────────────────────────────────────────
       _setupStaticBtns() {
-        /*
-         * Gunakan HANYA 'click' event pada semua tombol statis.
-         * touch-action:manipulation pada elemen tombol sudah menghapus
-         * 300ms tap delay di Android Chrome — tidak perlu touchend.
-         */
         document.getElementById('play-btn').addEventListener('click', () => this._manualPlay());
         document.getElementById('retry-btn').addEventListener('click', () => this._retry());
         document.getElementById('fs-btn').addEventListener('click', () => this._toggleFS());
+        document.getElementById('open-source-btn').addEventListener('click', () => {
+          if (this.currentAltUrl) window.open(this.currentAltUrl, '_blank');
+        });
       }
-      // ── RENDER MENU ────────────────────────────────────────────
       _renderMenu() {
         const container = document.getElementById('menu-container');
         container.innerHTML = categories.map(cat => `
         <div class="category-group">
           <button class="category-btn" data-action="toggle" data-id="${cat.id}">
             <span class="cat-label">
-              <span class="cat-icon">${cat.icon}</span>
+              <span style="font-size:18px;pointer-events:none">${cat.icon}</span>
               ${cat.name}
             </span>
             <svg class="chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -819,45 +892,23 @@
                 data-action="play"
                 data-cat="${cat.name}"
                 data-sub="${sub.name}"
-                data-url="${sub.url}">
+                data-url="${sub.url}"
+                data-alt="${sub.altUrl || ''}">
                 ${sub.name}
               </button>
             `).join('')}
           </div>
         </div>
       `).join('');
-        /*
-         * EVENT DELEGATION — Satu listener 'click' di container parent.
-         *
-         * MENGAPA HANYA 'click' (BUKAN touchend):
-         * 1. touch-action:manipulation pada .category-btn dan .sub-btn
-         *    sudah menghilangkan 300ms delay di Android Chrome secara native
-         * 2. Menambah touchend + click menyebabkan double-fire di Android
-         * 3. Pendekatan ini lebih bersih dan lebih kompatibel lintas browser
-         *
-         * MENGAPA EVENT DELEGATION:
-         * Menghindari masalah onclick inline yang scope-nya tidak reliable
-         * di beberapa Android Chrome version
-         */
+        // Event delegation — hanya 'click', touch-action:manipulation cukup untuk hilangkan delay
         container.addEventListener('click', (e) => {
           const btn = e.target.closest('[data-action]');
           if (!btn) return;
-          const action = btn.dataset.action;
-          if (action === 'toggle') {
-            this._toggleSub(btn.dataset.id, btn);
-          } else if (action === 'play') {
-            this._playSub(btn.dataset.cat, btn.dataset.sub, btn.dataset.url, btn);
-          }
+          if (btn.dataset.action === 'toggle') this._toggleSub(btn.dataset.id, btn);
+          else if (btn.dataset.action === 'play') this._playSub(btn.dataset.cat, btn.dataset.sub, btn.dataset.url, btn.dataset.alt, btn);
         });
       }
-      // ── TOGGLE SUBMENU ─────────────────────────────────────────
       _toggleSub(id, btn) {
-        /*
-         * DEBOUNCE tombol kategori:
-         * Kunci selama 380ms (durasi animasi CSS) agar pengguna
-         * tidak bisa trigger toggle berkali-kali saat animasi berjalan.
-         * Ini membuat tombol terasa "solid" bukan "loncat-loncat".
-         */
         if (this._toggleBusy) return;
         this._toggleBusy = true;
         setTimeout(() => {
@@ -866,36 +917,30 @@
         const panel = document.getElementById('sub-' + id);
         if (!panel) return;
         const isOpen = panel.classList.contains('open');
-        // Tutup semua submenu
         document.querySelectorAll('.submenu-container.open').forEach(p => p.classList.remove('open'));
         document.querySelectorAll('.category-btn.is-open').forEach(b => b.classList.remove('is-open'));
-        // Buka yang diklik (jika sebelumnya tertutup)
         if (!isOpen) {
           panel.classList.add('open');
           btn.classList.add('is-open');
-          if (this.isMobile) {
-            setTimeout(() => btn.scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest'
-            }), 100);
-          }
+          if (this.isMobile) setTimeout(() => btn.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest'
+          }), 100);
         }
       }
-      // ── PLAY STREAM ────────────────────────────────────────────
-      _playSub(cat, sub, url, btn) {
+      _playSub(cat, sub, url, altUrl, btn) {
         if (!url || url === '#') {
-          this._showError('Stream channel ini belum tersedia.');
+          this._showError('Stream channel ini belum tersedia.', null);
           return;
         }
-        // Cegah double-tap
         if (this._playBusy) return;
-        // Jika sudah playing stream yang sama, skip
         if (url === this.currentUrl) return;
         this._playBusy = true;
         setTimeout(() => {
           this._playBusy = false;
         }, 700);
         this.currentUrl = url;
+        this.currentAltUrl = altUrl || null;
         this.fatalCount = 0;
         this.autoplayBlocked = false;
         document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active-btn'));
@@ -903,209 +948,193 @@
         document.getElementById('display-title').textContent = `${cat} — ${sub}`;
         document.getElementById('display-sub').textContent = url.split('/').pop();
         this._showLoader();
-        this._destroyHls();
+        this._destroyAll();
+        this._setModeBadge('hls');
         if (Hls.isSupported()) {
-          this._loadHls(url);
-        } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
-          // Safari / iOS native HLS
-          this._loadNative(url);
+          this._loadHls(url, altUrl);
+        } else if (this.videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+          this._loadNative(url, altUrl);
         } else {
-          this._showError('Browser tidak mendukung HLS. Gunakan Chrome terbaru.');
+          this._showError('Browser tidak mendukung HLS.', altUrl);
         }
       }
-      // ── HLS LOADER ─────────────────────────────────────────────
-      _loadHls(url) {
+      _loadHls(url, altUrl) {
         /*
-         * ============================================================
-         * KONFIGURASI HLS.JS UNTUK ANDROID CHROME
-         * ============================================================
+         * ══════════════════════════════════════════════════════════════
+         * PENJELASAN MASALAH ANDROID vs LAPTOP
+         * ══════════════════════════════════════════════════════════════
          *
-         * ROOT CAUSE kenapa laptop OK tapi Android tidak:
+         * Stream CCTV pemerintah Indonesia (Jasa Marga, ASDP, Dishub) 
+         * menggunakan konfigurasi server seperti ini:
          *
-         * 1. enableWorker: true di Android → Web Worker bisa crash di
-         *    beberapa versi Android WebView/Chrome → MATIKAN di mobile
+         *   Access-Control-Allow-Origin: https://jasamargalive.com
+         *   (atau tidak ada header CORS sama sekali)
          *
-         * 2. Buffer besar di Android → OOM (Out of Memory) di RAM kecil
-         *    → Kecilkan maxBufferLength & maxBufferSize
+         * LAPTOP BISA karena:
+         * - File dibuka via file:// → browser bypass same-origin policy
+         * - Atau browser desktop lebih toleran pada beberapa kondisi
+         * - Beberapa browser desktop cache response lama yang masih berlaku
          *
-         * 3. Android lebih strict soal Mixed Content (HTTP di HTTPS page)
-         *    → CSP upgrade-insecure-requests di <head> mengatasinya
+         * ANDROID CHROME TIDAK BISA karena:
+         * - Android Chrome sangat ketat enforce CORS untuk XHR/Fetch
+         * - hls.js menggunakan XHR untuk fetch .m3u8 dan .ts segments
+         * - Server reject request karena Origin berbeda
+         * - Tidak ada workaround dari sisi client-only
          *
-         * 4. xhrSetup dengan custom headers → CORS preflight → GAGAL
-         *    di server CCTV lokal yang tidak handle OPTIONS request
-         *    → xhrSetup harus seminimal mungkin, hanya withCredentials=false
+         * SOLUSI NYATA yang dibutuhkan (dari sisi server):
+         * - Server CCTV harus set: Access-Control-Allow-Origin: *
+         * - Atau perlu backend proxy di server Anda sendiri
          *
-         * 5. Timeout default terlalu pendek untuk jaringan mobile
-         *    → Naikkan semua timeout
-         *
-         * 6. nudgeOffset/nudgeMaxRetry penting untuk Android yang sering
-         *    stuck saat ada network hiccup
-         * ============================================================
+         * Kita tetap coba HLS, jika gagal tampilkan opsi Buka Sumber
+         * ══════════════════════════════════════════════════════════════
          */
         const cfg = {
-          // MATIKAN di mobile — Web Worker tidak stabil di Android WebView
           enableWorker: false,
-          // Matikan low-latency — stream CCTV bukan live low-latency
           lowLatencyMode: false,
-          // Buffer KECIL untuk Android — hemat RAM & mulai lebih cepat
           maxBufferLength: 10,
           maxMaxBufferLength: 25,
-          maxBufferSize: 10 * 1000 * 1000, // 10 MB
+          maxBufferSize: 10 * 1000 * 1000,
           backBufferLength: 5,
-          // Toleransi hole lebih besar untuk jaringan mobile yang tidak stabil
           maxBufferHole: 1.0,
-          // Nudge — dorong playback keluar dari posisi stuck
           nudgeOffset: 0.3,
-          nudgeMaxRetry: 6,
-          // Jangan prefetch — hemat bandwidth mobile
+          nudgeMaxRetry: 5,
           startFragPrefetch: false,
           testBandwidth: false,
-          // KRITIS: jangan tambah header custom → cegah CORS preflight
           xhrSetup(xhr) {
             xhr.withCredentials = false;
-            // Jangan set header apapun di sini
           },
-          // Timeout lebih toleran untuk Android
-          manifestLoadingTimeOut: 14000,
-          manifestLoadingMaxRetry: 3,
+          manifestLoadingTimeOut: 12000,
+          manifestLoadingMaxRetry: 2,
           manifestLoadingRetryDelay: 2000,
-          levelLoadingTimeOut: 14000,
-          levelLoadingMaxRetry: 3,
-          levelLoadingRetryDelay: 2000,
+          levelLoadingTimeOut: 12000,
+          levelLoadingMaxRetry: 2,
           fragLoadingTimeOut: 20000,
-          fragLoadingMaxRetry: 4,
+          fragLoadingMaxRetry: 3,
           fragLoadingRetryDelay: 2000,
-          // Mulai dari level terendah — lebih cepat start di mobile
           startLevel: -1,
-          // ABR lebih konservatif di mobile
-          abrEwmaFastLive: 5,
-          abrEwmaSlowLive: 12,
           abrBandWidthFactor: 0.75,
-          abrBandWidthUpFactor: 0.5,
           debug: false,
         };
         const hls = new Hls(cfg);
         this.hls = hls;
         hls.loadSource(url);
-        hls.attachMedia(this.video);
+        hls.attachMedia(this.videoEl);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           this._hideLoader();
+          this._setModeBadge('hls');
           this._tryPlay();
         });
         hls.on(Hls.Events.ERROR, (_, data) => {
-          if (!data.fatal) return; // biarkan hls.js handle non-fatal
+          if (!data.fatal) return;
           this.fatalCount++;
-          console.warn('[HLS Fatal]', data.type, data.details, '#' + this.fatalCount);
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-            if (this.fatalCount <= 3) {
-              // Delay lebih panjang di Android untuk beri waktu network stabil
-              const delay = this.isAndroid ? 2500 : 1200;
+            if (this.fatalCount <= 2) {
               setTimeout(() => {
                 if (this.hls) hls.startLoad();
-              }, delay);
+              }, 2500);
             } else {
-              this._showError(
-                'Gagal memuat stream.\n' +
-                'Kemungkinan penyebab:\n' +
-                '• Stream offline\n' +
-                '• CORS diblokir server\n' +
-                '• Koneksi tidak stabil\n\n' +
-                'Coba channel lain atau tekan Coba Lagi.'
+              // CORS atau stream offline
+              const isLikelyCors = data.details && (
+                data.details.includes('manifestLoad') ||
+                data.details.includes('fragLoad')
               );
+              const msg = isLikelyCors ?
+                'Server memblokir akses dari domain ini (CORS).\n\nIni pembatasan dari server penyedia stream — bukan masalah kode.\n\nGunakan tombol Buka Sumber untuk akses langsung.' :
+                'Stream tidak dapat dimuat.\nMungkin stream offline atau jaringan bermasalah.';
+              this._showError(msg, altUrl);
               hls.destroy();
             }
           } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-            if (this.fatalCount <= 2) {
-              hls.recoverMediaError();
-            } else {
-              this._showError('Format media tidak didukung: ' + data.details);
+            if (this.fatalCount <= 2) hls.recoverMediaError();
+            else {
+              this._showError('Format media tidak didukung: ' + data.details, altUrl);
               hls.destroy();
             }
           } else {
-            this._showError('Error: ' + data.details + '\nCoba channel lain.');
+            this._showError('Error: ' + data.details, altUrl);
             hls.destroy();
           }
         });
       }
-      // ── NATIVE (Safari/iOS) ────────────────────────────────────
-      _loadNative(url) {
-        this.video.src = url;
-        this.video.load();
-        this.video.addEventListener('loadedmetadata', () => {
+      _loadNative(url, altUrl) {
+        this.videoEl.src = url;
+        this.videoEl.load();
+        this.videoEl.addEventListener('loadedmetadata', () => {
           this._hideLoader();
           this._tryPlay();
         }, {
           once: true
         });
-        this.video.addEventListener('error', () => {
-          const c = this.video.error ? this.video.error.code : '?';
-          this._showError('Playback error (kode: ' + c + '). Stream offline atau CORS.');
+        this.videoEl.addEventListener('error', () => {
+          this._showError('Playback error. Stream offline atau CORS.', altUrl);
         }, {
           once: true
         });
         setTimeout(() => {
-          if (this.loader.classList.contains('show')) {
-            this._showError('Timeout: stream tidak merespons dalam 15 detik.');
-          }
-        }, 15000);
+          if (this.loader.classList.contains('show')) this._showError('Timeout.', altUrl);
+        }, 14000);
       }
-      // ── TRY PLAY ───────────────────────────────────────────────
       _tryPlay() {
-        /*
-         * Android Autoplay Policy:
-         * - Video MUTED → autoplay biasanya diizinkan jika ada user gesture sebelumnya
-         * - Jika gagal → tampilkan tombol play manual
-         */
-        const p = this.video.play();
+        const p = this.videoEl.play();
         if (p instanceof Promise) {
           p.then(() => {
-            this.autoplayBlocked = false;
-            this.playBox.classList.remove('show');
-          }).catch(err => {
-            console.warn('[Autoplay blocked]', err.message);
-            this.autoplayBlocked = true;
-            this._hideLoader();
-            this.playBox.classList.add('show');
-          });
+              this.autoplayBlocked = false;
+              this.playBox.classList.remove('show');
+            })
+            .catch(err => {
+              console.warn('[Autoplay blocked]', err.message);
+              this.autoplayBlocked = true;
+              this._hideLoader();
+              this.playBox.classList.add('show');
+            });
         }
       }
       _manualPlay() {
         this.playBox.classList.remove('show');
         this.autoplayBlocked = false;
-        this.video.play().catch(() => {
+        this.videoEl.play().catch(() => {
           if (this.currentUrl) this._retry();
         });
       }
-      // ── WATCHDOG ───────────────────────────────────────────────
       _setupVideoWatchdog() {
-        this.video.addEventListener('stalled', () => {
+        this.videoEl.addEventListener('stalled', () => {
           if (!this.currentUrl) return;
           setTimeout(() => {
-            if (this.video.readyState < 3 && !this.video.paused) {
-              this.video.play().catch(() => {});
-            }
+            if (this.videoEl.readyState < 3 && !this.videoEl.paused) this.videoEl.play().catch(() => {});
           }, 5000);
         });
-        this.video.addEventListener('pause', () => {
-          if (this.autoplayBlocked || !this.currentUrl || this.video.ended) return;
+        this.videoEl.addEventListener('pause', () => {
+          if (this.autoplayBlocked || !this.currentUrl || this.videoEl.ended) return;
           setTimeout(() => {
-            if (this.video.paused && !this.autoplayBlocked && this.currentUrl) {
-              this.video.play().catch(() => {});
-            }
+            if (this.videoEl.paused && !this.autoplayBlocked && this.currentUrl) this.videoEl.play().catch(() => {});
           }, 1200);
         });
       }
-      // ── DESTROY ────────────────────────────────────────────────
-      _destroyHls() {
+      _destroyAll() {
         if (this.hls) {
           this.hls.destroy();
           this.hls = null;
         }
-        this.video.pause();
-        this.video.removeAttribute('src');
-        this.video.load();
+        this.videoEl.pause();
+        this.videoEl.removeAttribute('src');
+        this.videoEl.load();
+        this.videoEl.style.display = 'block';
+        this.iframeEl.style.display = 'none';
+        this.iframeEl.src = 'about:blank';
       }
-      // ── UI ─────────────────────────────────────────────────────
+      // ── UI ───────────────────────────────────────────────────────
+      _setModeBadge(mode) {
+        const badge = document.getElementById('mode-badge');
+        badge.className = 'text-[9px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider';
+        if (mode === 'hls') {
+          badge.textContent = '● HLS';
+          badge.classList.add('badge-hls');
+        } else if (mode === 'iframe') {
+          badge.textContent = '● EMBED';
+          badge.classList.add('badge-iframe');
+        }
+        badge.classList.remove('hidden');
+      }
       _showLoader() {
         this.loader.classList.add('show');
         this.errBox.classList.remove('show');
@@ -1114,28 +1143,34 @@
       _hideLoader() {
         this.loader.classList.remove('show');
       }
-      _showError(msg) {
+      _showError(msg, altUrl) {
         this._hideLoader();
         this.playBox.classList.remove('show');
         this.errBox.classList.add('show');
         document.getElementById('error-detail').textContent = msg || 'Stream tidak tersedia.';
+        const openBtn = document.getElementById('open-source-btn');
+        if (altUrl) {
+          openBtn.classList.remove('hidden');
+          this.currentAltUrl = altUrl;
+        } else {
+          openBtn.classList.add('hidden');
+        }
       }
-      // ── RETRY ──────────────────────────────────────────────────
       _retry() {
         if (!this.currentUrl || this.currentUrl === '#') return;
         const url = this.currentUrl;
+        const alt = this.currentAltUrl;
         this.currentUrl = null;
         this.fatalCount = 0;
         this.autoplayBlocked = false;
         this._showLoader();
-        this._destroyHls();
+        this._destroyAll();
         setTimeout(() => {
           this.currentUrl = url;
-          if (Hls.isSupported()) this._loadHls(url);
-          else this._loadNative(url);
+          if (Hls.isSupported()) this._loadHls(url, alt);
+          else this._loadNative(url, alt);
         }, 800);
       }
-      // ── SEARCH ─────────────────────────────────────────────────
       _setupSearch() {
         document.getElementById('cctv-search').addEventListener('input', e => {
           const q = e.target.value.toLowerCase().trim();
@@ -1144,13 +1179,12 @@
           });
         });
       }
-      // ── FULLSCREEN ─────────────────────────────────────────────
       _toggleFS() {
-        const target = this.isMobile ? this.video : document.getElementById('video-box');
+        const target = this.isMobile ? this.videoEl : document.getElementById('video-box');
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
           const fn = target.requestFullscreen || target.webkitRequestFullscreen;
           if (fn) fn.call(target).catch(() => {
-            if (this.video.requestFullscreen) this.video.requestFullscreen().catch(() => {});
+            if (this.videoEl.requestFullscreen) this.videoEl.requestFullscreen().catch(() => {});
           });
         } else {
           const fn = document.exitFullscreen || document.webkitExitFullscreen;
@@ -1158,7 +1192,6 @@
         }
       }
     }
-    // Bootstrap
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         window.app = new TrafficApp();
