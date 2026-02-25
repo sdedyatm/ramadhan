@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>CCTV Traffic Pro Dashboard</title>
+  <title>ATM CCTV Traffic Pro</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
@@ -136,10 +136,6 @@
     </div>
   </header>
 
-  <div id="proxy-banner">
-
-  </div>
-
   <main class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
 
     <section class="p-4 md:p-6 flex flex-col items-center bg-slate-950 md:flex-1 justify-start md:justify-center border-b md:border-b-0 md:border-r border-slate-900 flex-shrink-0">
@@ -192,11 +188,10 @@
         <div id="loader" class="absolute inset-0 flex items-center justify-center bg-slate-900/90 hidden z-40">
           <div class="flex flex-col items-center gap-3">
             <div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <span class="text-[9px] font-mono tracking-[0.3em] text-blue-400">sedang menghubungkan</span>
+            <span class="text-[9px] font-mono tracking-[0.3em] text-blue-400">menghubungkan....</span>
           </div>
         </div>
       </div>
-
     </section>
 
     <aside class="w-full md:w-96 bg-slate-900/40 flex flex-col overflow-hidden border-l border-slate-900 min-h-0 flex-1 md:flex-none">
@@ -215,7 +210,7 @@
     const categories = [{
         id: 'kawasan',
         name: 'KAWASAN BIC',
-        icon: '🚛',
+        icon: '🛣️',
         subs: [{
             name: 'ISL',
             url: '#'
@@ -241,7 +236,7 @@
       {
         id: 'cikampek',
         name: 'CIKAMPEK',
-        icon: '🟠',
+        icon: '🛣️',
         subs: [{
             name: 'CIKOPO',
             url: 'https://jmlive.jasamarga.com/hls/5/ed6734ac-1cde-4afd-acf9-2658f8e7a254/index.m3u8'
@@ -297,7 +292,7 @@
       {
         id: 'japek',
         name: 'TOL JAPEK',
-        icon: '📍',
+        icon: '🛣️',
         subs: [{
             name: 'KM 10 Cikunir',
             url: 'https://cctv.jasamarga.com/hls/km10.m3u8'
@@ -557,59 +552,38 @@
       {
         id: 'jambi',
         name: 'JAMBI',
-        icon: '🔵',
+        icon: '🐅',
         subs: [{
-            name: 'Simpang Rimbo',
-            url: 'https://dishub.jambikota.go.id/rimbo.m3u8'
-          },
+            id: 'jambi-01',
+            name: 'LOKASI 1',
+            url: '#'
+          }, // ← ganti '#' dengan URL stream .m3u8
           {
-            name: 'Aur Duri',
-            url: 'https://dishub.jambikota.go.id/aurduri.m3u8'
-          },
+            id: 'jambi-02',
+            name: 'LOKASI 2',
+            url: '#'
+          }, // ← ganti '#' dengan URL stream .m3u8
           {
-            name: 'Muara Bulian',
-            url: 'https://dishub.jambikota.go.id/bulian.m3u8'
-          },
+            id: 'jambi-03',
+            name: 'LOKASI 3',
+            url: '#'
+          }, // ← ganti '#' dengan URL stream .m3u8
           {
-            name: 'Tugu Juang',
-            url: 'https://dishub.jambikota.go.id/juang.m3u8'
-          },
+            id: 'jambi-04',
+            name: 'LOKASI 4',
+            url: '#'
+          }, // ← ganti '#' dengan URL stream .m3u8
           {
-            name: 'Sipin',
-            url: 'https://dishub.jambikota.go.id/sipin.m3u8'
-          }
-        ]
-      },
-      {
-        id: 'padang',
-        name: 'PADANG',
-        icon: '🟢',
-        subs: [{
-            name: 'padang',
-            url: 'https://dishub.jambikota.go.id/bulian.m3u8'
-          },
-          {
-            name: 'SITINJAU',
-            url: 'https://dishub.jambikota.go.id/bulian.m3u8'
-          },
-          {
-            name: 'GUNUNG MEDAN',
-            url: 'https://dishub.jambikota.go.id/bulian.m3u8'
-          },
-          {
-            name: 'JAMBI',
-            url: 'https://dishub.jambikota.go.id/bulian.m3u8'
-          },
-          {
-            name: 'JEMBATAN',
-            url: 'https://dishub.jambikota.go.id/bulian.m3u8'
-          }
+            id: 'jambi-05',
+            name: 'LOKASI 5',
+            url: '#'
+          } // ← ganti '#' dengan URL stream .m3u8
         ]
       },
       {
         id: 'pekanbaru',
         name: 'PEKANBARU',
-        icon: '🟡',
+        icon: '🛢️',
         subs: [{
             name: 'Simpang Bingung',
             url: 'https://dishub.pekanbaru.go.id/bingung.m3u8'
@@ -635,7 +609,7 @@
       {
         id: 'medan',
         name: 'MEDAN',
-        icon: '🌎',
+        icon: '🏢',
         subs: [{
             name: 'Amplas',
             url: 'https://atcs.medan.id/hls/amplas.m3u8'
