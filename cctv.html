@@ -3,22 +3,26 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>CCTV Traffic Pro Dashboard</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- HLS.js versi terbaru yang lebih stabil -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+  <!-- HLS.js versi stabil yang direkomendasikan untuk mobile -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
 
   <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
     .video-wrapper {
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      /* Ikuti rasio video normal */
       max-height: 320px;
-      /* Kurangi tinggi dari sebelumnya */
       background: #000;
       border-radius: 16px;
       overflow: hidden;
@@ -26,13 +30,20 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    /* Supaya video benar-benar pas */
-    .video-wrapper video,
+    /* PERBAIKAN KRITIS: object-fit contain agar tidak ada masalah di Android */
+    .video-wrapper video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #000;
+      /* Mencegah video diputar di background tab di Android */
+      -webkit-playsinline: 1;
+    }
+
     .video-wrapper iframe {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      /* Atau gunakan contain jika tidak ingin terpotong */
       display: block;
     }
 
@@ -68,12 +79,45 @@
     #error-overlay {
       display: none;
     }
+
+    /* Tombol play manual untuk Android (autoplay sering diblokir) */
+    #play-overlay {
+      display: none;
+    }
+
+    /* Animasi pulse untuk status dot */
+    @keyframes pulse-green {
+
+      0%,
+      100% {
+        box-shadow: 0 0 8px #22c55e;
+      }
+
+      50% {
+        box-shadow: 0 0 16px #22c55e, 0 0 24px #22c55e;
+      }
+    }
+
+    #connection-dot {
+      animation: pulse-green 2s infinite;
+    }
+
+    /* Touch-friendly button sizes untuk mobile */
+    @media (max-width: 768px) {
+      .submenu-container button {
+        min-height: 48px;
+      }
+
+      .category-group>button {
+        min-height: 56px;
+      }
+    }
   </style>
 </head>
 
 <body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden font-sans">
 
-  <header class="p-4 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 flex justify-between items-center z-30">
+  <header class="p-4 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 flex justify-between items-center z-30 flex-shrink-0">
     <div class="flex items-center gap-3">
       <div class="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-900/20">
         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,37 +129,54 @@
         <p id="status-bar" class="text-[9px] text-slate-500 font-mono tracking-widest uppercase">Initializing System...</p>
       </div>
     </div>
-    <div id="connection-dot" class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
+    <div id="connection-dot" class="w-2 h-2 rounded-full bg-green-500"></div>
   </header>
 
-  <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+  <main class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
 
-    <section class="p-6 flex flex-col items-center bg-slate-950 md:flex-1 justify-center border-b md:border-b-0 md:border-r border-slate-900">
-      <div class="video-wrapper group" id="video-box">
+    <section class="p-4 md:p-6 flex flex-col items-center bg-slate-950 md:flex-1 justify-start md:justify-center border-b md:border-b-0 md:border-r border-slate-900 flex-shrink-0">
+      <div class="video-wrapper group w-full max-w-2xl" id="video-box">
         <div class="absolute top-3 right-3 z-30 opacity-40 hover:opacity-100 transition-opacity">
-          <img src="https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0" class="w-10 h-10 grayscale shadow-lg">
+          <img src="https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0" class="w-10 h-10 grayscale shadow-lg" alt="Logo">
         </div>
 
-        <!-- Video element: hapus crossorigin agar tidak memicu preflight CORS yang gagal -->
-        <video id="main-video" class="w-full h-full" playsinline autoplay muted></video>
+        <!--
+          PERBAIKAN KRITIS untuk Android Chrome:
+          1. Hapus crossorigin attribute (menyebabkan CORS preflight gagal)
+          2. Tambah playsinline + webkit-playsinline (WAJIB untuk iOS dan beberapa Android)
+          3. Tambah x5-playsinline untuk WeChat/browser Android tertentu
+          4. muted WAJIB agar autoplay bisa berjalan di mobile
+        -->
+        <video id="main-video" class="w-full h-full" playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" autoplay muted preload="none"></video>
+
+        <!-- Overlay tombol PLAY manual (ditampilkan saat autoplay diblokir di Android) -->
+        <div id="play-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/80 z-50 gap-4 cursor-pointer" onclick="app.manualPlay()">
+          <div class="w-20 h-20 rounded-full bg-blue-600/90 flex items-center justify-center shadow-2xl border-2 border-blue-400/40 hover:scale-110 transition-transform active:scale-95">
+            <svg class="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+          <p class="text-[11px] font-mono text-slate-400 uppercase tracking-widest">Tap untuk mulai streaming</p>
+        </div>
 
         <!-- Error Overlay -->
         <div id="error-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/95 z-50 gap-4">
           <div class="text-3xl">⚠️</div>
           <p class="text-[10px] font-mono text-red-400 uppercase tracking-widest">Stream Tidak Tersedia</p>
           <p id="error-detail" class="text-[9px] text-slate-500 text-center px-6">CORS atau stream offline. Coba channel lain.</p>
-          <button id="retry-btn" onclick="app.retryStream()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-colors">
+          <button id="retry-btn" onclick="app.retryStream()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-colors touch-action-manipulation">
             ↺ Coba Lagi
           </button>
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/70 to-transparent z-10">
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/70 to-transparent z-10 pointer-events-none">
           <h2 id="display-title" class="text-xs font-bold text-blue-400">STANDBY</h2>
-          <p id="display-sub" class="text-[12px] text-slate-400 mt-1 uppercase tracking-widest">Silahkan Pilih Ruas Jalan</p>
+          <p id="display-sub" class="text-[11px] text-slate-400 mt-1 uppercase tracking-widest truncate">Silahkan Pilih Ruas Jalan</p>
         </div>
 
-        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-          <button onclick="app.toggleFS()" class="pointer-events-auto p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full hover:scale-110 transition-transform shadow-2xl">
+        <!-- Fullscreen button — tetap tampil di mobile via touch -->
+        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity pointer-events-none z-20">
+          <button onclick="app.toggleFS()" class="pointer-events-auto p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full hover:scale-110 active:scale-95 transition-transform shadow-2xl">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-width="2" />
             </svg>
@@ -130,20 +191,17 @@
         </div>
       </div>
 
-      <!-- Info box CORS -->
-      <div class="mt-4 max-w-[400px] w-full p-3 bg-yellow-950/40 border border-yellow-800/30 rounded-xl">
-        <p class="text-[9px] text-yellow-600/80 font-mono leading-relaxed">
-          ⚠️ Jika layar kosong, coba channel lain atau muat ulang aplikasi nya.
-        </p>
+      <!-- Info box -->
+
       </div>
     </section>
 
-    <aside class="w-full md:w-96 bg-slate-900/40 flex flex-col overflow-hidden border-l border-slate-900">
-      <div class="p-4 bg-slate-900/80 border-b border-slate-800 backdrop-blur-sm">
-        <input type="text" id="cctv-search" placeholder="Cari ruas jalan..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-[14px] focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-600">
+    <aside class="w-full md:w-96 bg-slate-900/40 flex flex-col overflow-hidden border-l border-slate-900 min-h-0 flex-1 md:flex-none">
+      <div class="p-4 bg-slate-900/80 border-b border-slate-800 backdrop-blur-sm flex-shrink-0">
+        <input type="text" id="cctv-search" placeholder="Cari ruas jalan..." autocomplete="off" autocorrect="off" spellcheck="false" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-[14px] focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-600">
       </div>
 
-      <div id="menu-container" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3">
+      <div id="menu-container" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3 overscroll-contain">
       </div>
     </aside>
   </main>
@@ -575,38 +633,65 @@
         this.video = document.getElementById('main-video');
         this.loader = document.getElementById('loader');
         this.errorOverlay = document.getElementById('error-overlay');
+        this.playOverlay = document.getElementById('play-overlay');
         this.hls = null;
         this.currentUrl = null;
         this.currentCat = null;
         this.currentSub = null;
         this.fatalErrorCount = 0;
+        this.autoplayBlocked = false;
+        this.isAndroid = /Android/i.test(navigator.userAgent);
+        this.isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
         this.init();
       }
       init() {
         this.renderMenu();
         this.setupSearch();
-        this.initSW();
+        this.setupVideoEvents();
         document.getElementById('status-bar').innerText = 'CCTV MUDIK 2026';
+      }
+      setupVideoEvents() {
+        // Deteksi jika video berhenti (stall) — coba resume
+        this.video.addEventListener('stalled', () => {
+          console.log('Video stalled, attempting recovery...');
+          setTimeout(() => {
+            if (!this.video.paused && this.video.readyState < 3) {
+              this.video.load();
+              this.video.play().catch(() => {});
+            }
+          }, 3000);
+        });
+        // Jika video pause tidak disengaja (misalnya karena network), resume
+        this.video.addEventListener('pause', () => {
+          if (!this.autoplayBlocked && this.currentUrl && !this.video.ended) {
+            // Delay sedikit untuk membedakan pause disengaja vs tidak
+            setTimeout(() => {
+              if (this.video.paused && this.currentUrl && !this.autoplayBlocked) {
+                this.video.play().catch(() => {});
+              }
+            }, 500);
+          }
+        });
       }
       renderMenu() {
         const container = document.getElementById('menu-container');
         container.innerHTML = categories.map(cat => `
           <div class="category-group">
             <button onclick="app.toggleSub('${cat.id}')"
-                    class="w-full p-4 bg-slate-800/40 border border-slate-800 rounded-2xl flex items-center justify-between hover:bg-slate-800 hover:border-blue-500/30 transition-all group">
+                    class="w-full p-4 bg-slate-800/40 border border-slate-800 rounded-2xl flex items-center justify-between hover:bg-slate-800 hover:border-blue-500/30 active:bg-slate-700 transition-all group">
               <span class="font-bold text-[16px] tracking-widest flex items-center gap-3">
                 <span class="text-lg opacity-80 group-hover:scale-110 transition-transform">${cat.icon}</span>
                 ${cat.name}
               </span>
-              <svg class="w-4 h-4 text-slate-600 group-hover:text-blue-400 transition-transform duration-300" id="icon-${cat.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-slate-600 group-hover:text-blue-400 transition-transform duration-300 flex-shrink-0" id="icon-${cat.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
             <div id="sub-${cat.id}" class="submenu-container grid grid-cols-1 gap-1.5">
               ${cat.subs.map(sub => `
                 <button onclick="app.play('${cat.name}', '${sub.name}', '${sub.url}', this)"
-                        class="p-3 bg-slate-900/60 border border-slate-800/50 rounded-xl text-[15px] text-left hover:border-blue-500/50 hover:text-blue-400 transition-all font-mono uppercase pl-6 relative overflow-hidden group">
-                  <span class="absolute left-2 top-1/2 -translate-y-1/2 w-1 h-1 bg-slate-700 rounded-full group-hover:bg-blue-500"></span>
+                        class="p-3 bg-slate-900/60 border border-slate-800/50 rounded-xl text-[15px] text-left hover:border-blue-500/50 hover:text-blue-400 active:bg-slate-800 transition-all font-mono uppercase pl-6 relative overflow-hidden group">
+                  <span class="absolute left-2 top-1/2 -translate-y-1/2 w-1 h-1 bg-slate-700 rounded-full group-hover:bg-blue-500 transition-colors"></span>
                   ${sub.name}
                 </button>
               `).join('')}
@@ -628,14 +713,33 @@
       showLoader() {
         this.loader.classList.remove('hidden');
         this.errorOverlay.style.display = 'none';
+        this.playOverlay.style.display = 'none';
       }
       hideLoader() {
         this.loader.classList.add('hidden');
       }
       showError(msg) {
         this.hideLoader();
+        this.playOverlay.style.display = 'none';
         this.errorOverlay.style.display = 'flex';
         document.getElementById('error-detail').innerText = msg || 'Stream tidak dapat dimuat. CORS atau offline.';
+      }
+      showPlayButton() {
+        this.hideLoader();
+        this.errorOverlay.style.display = 'none';
+        this.playOverlay.style.display = 'flex';
+        this.autoplayBlocked = true;
+      }
+      manualPlay() {
+        this.playOverlay.style.display = 'none';
+        this.autoplayBlocked = false;
+        this.video.play().catch(err => {
+          console.warn('Manual play failed:', err);
+          // Jika masih gagal, coba reload HLS
+          if (this.currentUrl) {
+            this.retryStream();
+          }
+        });
       }
       destroyHls() {
         if (this.hls) {
@@ -645,8 +749,14 @@
         this.video.pause();
         this.video.removeAttribute('src');
         this.video.load();
+        this.autoplayBlocked = false;
       }
       async play(cat, sub, url, btn) {
+        // Jika URL adalah placeholder, abaikan
+        if (!url || url === '#') {
+          this.showError('Stream untuk channel ini belum tersedia.');
+          return;
+        }
         this.currentUrl = url;
         this.currentCat = cat;
         this.currentSub = sub;
@@ -654,6 +764,7 @@
         try {
           this.showLoader();
           this.errorOverlay.style.display = 'none';
+          this.playOverlay.style.display = 'none';
           document.querySelectorAll('.submenu-container button').forEach(b => b.classList.remove('active-btn'));
           btn.classList.add('active-btn');
           document.getElementById('display-title').innerText = `${cat} — ${sub}`;
@@ -662,7 +773,7 @@
           if (Hls.isSupported()) {
             this.loadWithHls(url);
           } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
-            // Safari native HLS
+            // Safari / iOS native HLS
             this.loadNative(url);
           } else {
             this.showError('Browser tidak mendukung HLS playback.');
@@ -672,98 +783,151 @@
         }
       }
       loadWithHls(url) {
+        /*
+         * KONFIGURASI HLS.JS YANG DIOPTIMALKAN UNTUK ANDROID CHROME:
+         *
+         * 1. enableWorker: false  → Web Worker kadang bermasalah di Android WebView/Chrome
+         * 2. lowLatencyMode: false → Mode low-latency lebih berat di mobile
+         * 3. maxBufferLength lebih kecil → Hemat RAM di Android
+         * 4. startFragPrefetch: false → Jangan prefetch agar tidak makan bandwidth lebih awal
+         * 5. testBandwidth: false → Skip bandwidth test di awal
+         * 6. Timeout lebih pendek → Fail fast di mobile
+         * 7. xhrSetup: withCredentials=false, tanpa custom headers → Cegah CORS preflight
+         */
         const hlsConfig = {
-          enableWorker: true,
+          // Worker: false lebih stabil di Android
+          enableWorker: !this.isMobile,
+          // Mode low-latency matikan untuk hemat resource
           lowLatencyMode: false,
-          backBufferLength: 30,
-          maxBufferLength: 30,
-          maxMaxBufferLength: 60,
-          maxBufferSize: 20 * 1000 * 1000,
+          // Buffer lebih kecil untuk Android (hemat RAM)
+          backBufferLength: this.isMobile ? 10 : 30,
+          maxBufferLength: this.isMobile ? 15 : 30,
+          maxMaxBufferLength: this.isMobile ? 30 : 60,
+          maxBufferSize: this.isMobile ? (10 * 1000 * 1000) : (20 * 1000 * 1000),
           maxBufferHole: 0.5,
-          // Perbaikan utama: jangan set crossOrigin agar tidak memicu preflight CORS
-          // xhrSetup di sini tidak mengeset header custom untuk menghindari preflight
+          // Jangan prefetch agar tidak makan resource sebelum diperlukan
+          startFragPrefetch: false,
+          // Skip bandwidth test awal
+          testBandwidth: false,
+          // KRITIS: Jangan set custom headers atau withCredentials=true
+          // karena akan memicu CORS preflight yang sering gagal di stream CCTV Indonesia
           xhrSetup: function(xhr, url) {
-            // Tidak set withCredentials true agar tidak ada preflight yang gagal
             xhr.withCredentials = false;
           },
-          // Retry settings
-          manifestLoadingTimeOut: 15000,
+          // Timeout settings — lebih pendek di mobile
+          manifestLoadingTimeOut: this.isMobile ? 10000 : 15000,
           manifestLoadingMaxRetry: 2,
           manifestLoadingRetryDelay: 1000,
-          levelLoadingTimeOut: 15000,
+          levelLoadingTimeOut: this.isMobile ? 10000 : 15000,
           levelLoadingMaxRetry: 2,
-          fragLoadingTimeOut: 20000,
+          fragLoadingTimeOut: this.isMobile ? 15000 : 20000,
           fragLoadingMaxRetry: 3,
           fragLoadingRetryDelay: 1000,
+          // Tidak perlu debug di production
+          debug: false,
         };
         const hls = new Hls(hlsConfig);
         this.hls = hls;
         hls.loadSource(url);
         hls.attachMedia(this.video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+          console.log('Manifest parsed, levels:', data.levels.length);
           this.hideLoader();
           this.errorOverlay.style.display = 'none';
-          this.video.play().catch(err => {
-            // Autoplay diblokir, tampilkan tombol play
-            console.warn('Autoplay blocked:', err);
-          });
+          // KRITIS: Di Android, autoplay sangat sering diblokir
+          // Kita HARUS memanggil play() setelah user interaction sebelumnya
+          const playPromise = this.video.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                // Berhasil autoplay
+                console.log('Autoplay berhasil');
+                this.playOverlay.style.display = 'none';
+              })
+              .catch(err => {
+                // Autoplay diblokir — tampilkan tombol play manual
+                console.warn('Autoplay diblokir (normal di Android):', err.name, err.message);
+                this.showPlayButton();
+              });
+          }
         });
         hls.on(Hls.Events.ERROR, (event, data) => {
-          console.warn('HLS Error:', data.type, data.details, data.fatal);
+          console.warn('HLS Error:', data.type, data.details, 'fatal:', data.fatal);
           if (data.fatal) {
             this.fatalErrorCount++;
             switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
                 if (this.fatalErrorCount <= 2) {
-                  console.log('Fatal network error, trying to recover...');
-                  hls.startLoad();
+                  console.log('Fatal network error, recovering...');
+                  setTimeout(() => hls.startLoad(), 1000);
                 } else {
-                  this.showError('Network Error: Stream tidak dapat diakses. Kemungkinan CORS atau stream offline.\nURL: ' + url.split('/').pop());
+                  this.showError(
+                    'Network Error: Stream tidak dapat diakses.\n' +
+                    'Kemungkinan: CORS diblokir, stream offline, atau jaringan bermasalah.\n' +
+                    'File: ' + url.split('/').pop()
+                  );
                   hls.destroy();
                 }
                 break;
               case Hls.ErrorTypes.MEDIA_ERROR:
                 if (this.fatalErrorCount <= 2) {
-                  console.log('Fatal media error, trying to recover...');
+                  console.log('Fatal media error, recovering...');
                   hls.recoverMediaError();
                 } else {
-                  this.showError('Media Error: Format stream tidak didukung.');
+                  this.showError('Media Error: Format video tidak didukung browser ini.');
                   hls.destroy();
                 }
                 break;
               default:
-                this.showError('Fatal Error: ' + data.details);
+                this.showError('Error: ' + data.details + '\nCoba channel lain.');
                 hls.destroy();
                 break;
+            }
+          } else {
+            // Non-fatal error: log saja, HLS.js akan handle sendiri
+            if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
+              console.log('Buffer stall, menunggu...');
             }
           }
         });
       }
       loadNative(url) {
-        // Untuk Safari yang support HLS secara native
+        // Untuk Safari iOS yang support HLS natively
         this.video.src = url;
+        this.video.load();
         this.video.addEventListener('loadedmetadata', () => {
           this.hideLoader();
-          this.video.play().catch(() => {});
+          const playPromise = this.video.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(err => {
+              console.warn('Native autoplay diblokir:', err);
+              this.showPlayButton();
+            });
+          }
         }, {
           once: true
         });
-        this.video.addEventListener('error', () => {
-          this.showError('Native playback error. Stream mungkin offline atau CORS diblokir.');
+        this.video.addEventListener('error', (e) => {
+          const code = this.video.error ? this.video.error.code : 'unknown';
+          this.showError('Native playback error (code: ' + code + '). Stream mungkin offline atau CORS diblokir.');
         }, {
           once: true
         });
-        // Timeout jika tidak ada respons
-        setTimeout(() => {
-          if (this.loader && !this.loader.classList.contains('hidden')) {
+        // Timeout
+        const timeoutId = setTimeout(() => {
+          if (!this.loader.classList.contains('hidden')) {
             this.showError('Timeout: Stream tidak merespons dalam 15 detik.');
           }
         }, 15000);
+        this.video.addEventListener('loadedmetadata', () => clearTimeout(timeoutId), {
+          once: true
+        });
       }
       retryStream() {
-        if (this.currentUrl) {
+        if (this.currentUrl && this.currentUrl !== '#') {
           this.showLoader();
           this.fatalErrorCount = 0;
+          this.autoplayBlocked = false;
           this.destroyHls();
           setTimeout(() => {
             if (Hls.isSupported()) {
@@ -771,13 +935,18 @@
             } else {
               this.loadNative(this.currentUrl);
             }
-          }, 500);
+          }, 800);
         }
       }
       setupSearch() {
-        document.getElementById('cctv-search').addEventListener('input', (e) => {
-          const term = e.target.value.toLowerCase();
+        const searchInput = document.getElementById('cctv-search');
+        searchInput.addEventListener('input', (e) => {
+          const term = e.target.value.toLowerCase().trim();
           document.querySelectorAll('.category-group').forEach(group => {
+            if (!term) {
+              group.style.display = 'block';
+              return;
+            }
             const text = group.innerText.toLowerCase();
             group.style.display = text.includes(term) ? 'block' : 'none';
           });
@@ -785,26 +954,27 @@
       }
       toggleFS() {
         const box = document.getElementById('video-box');
-        if (!document.fullscreenElement) {
-          box.requestFullscreen().catch(err => console.warn('Fullscreen error:', err));
-        } else {
-          document.exitFullscreen();
-        }
-      }
-      initSW() {
-        if ('serviceWorker' in navigator) {
-          try {
-            const sw = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
-            const b = new Blob([sw], {
-              type: 'application/javascript'
+        // Android Chrome: Gunakan video.requestFullscreen() bukan container-nya
+        // karena container div sering tidak support fullscreen di Android
+        const target = this.isMobile ? this.video : box;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          const reqFS = target.requestFullscreen || target.webkitRequestFullscreen || target.mozRequestFullScreen;
+          if (reqFS) {
+            reqFS.call(target).catch(err => {
+              console.warn('Fullscreen error:', err);
+              // Fallback: coba video langsung
+              if (this.video.requestFullscreen) {
+                this.video.requestFullscreen().catch(() => {});
+              }
             });
-            navigator.serviceWorker.register(URL.createObjectURL(b));
-          } catch (e) {
-            console.warn('ServiceWorker registration failed:', e);
           }
+        } else {
+          const exitFS = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
+          if (exitFS) exitFS.call(document);
         }
       }
     }
+    // Inisialisasi app
     const app = new TrafficApp();
   </script>
 </body>
