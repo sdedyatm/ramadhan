@@ -6,7 +6,7 @@
 
 "use strict";
 
-const CACHE_VERSION = "v1.3.4";
+const CACHE_VERSION = "v1.3.5";
 const STATIC_CACHE = `propwa-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `propwa-dynamic-${CACHE_VERSION}`;
 const OFFLINE_URL = "./offline-fallback.html";
