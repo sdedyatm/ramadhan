@@ -65,8 +65,10 @@
         margin 0.38s ease;
     }
 
+    /* PERUBAHAN UTAMA: Max-height ditingkatkan drastis ke 5000px 
+       agar bisa menampung ratusan tombol tanpa terpotong */
     .submenu-container.open {
-      max-height: 1000px;
+      max-height: 5000px;
       opacity: 1;
       margin-top: 0.5rem;
       margin-bottom: 0.5rem;
@@ -343,7 +345,7 @@
     const categories = [{
         id: 'kawasan',
         name: 'KAWASAN BIC',
-        icon: '🛣️',
+        icon: '❄️',
         subs: [{
             name: 'ISL',
             url: '#'
@@ -364,9 +366,9 @@
         ]
       },
       {
-        id: 'cikampek',
-        name: 'CIKAMPEK',
-        icon: '🛣️',
+        id: 'pantura',
+        name: 'PANTURA',
+        icon: '💫',
         subs: [{
             name: 'CIKOPO',
             url: 'https://jmlive.jasamarga.com/hls/5/0dcb5e68-67f5-4ffd-a27b-6c02c113d55a/index.m3u8'
@@ -394,144 +396,8 @@
           {
             name: 'Jl baru krw',
             url: 'https://its.binamarga.pu.go.id:8989/play/hls/CT-08/index.m3u8'
-          }
-        ]
-      },
-      {
-        id: 'bandung',
-        name: 'BANDUNG',
-        icon: '🏙️',
-        subs: [{
-            name: 'Pasteur',
-            url: 'https://cctv.jasamarga.com/hls/pasteur.m3u8'
           },
           {
-            name: 'Cipularang km 96',
-            url: 'https://jmlive.jasamarga.com/hls/7/a857b0b5-6fa7-47c7-b129-18290748c7fe/index.m3u8'
-          },
-          {
-            name: 'Cileunyi km 154',
-            url: 'https://jmlive.jasamarga.com/hls/6/43eaa44d-5bbf-4dd3-bffa-3d2981d4517a/index.m3u8'
-          },
-          {
-            name: 'Gedebage',
-            url: 'https://cctv.jasamarga.com/hls/gedebage.m3u8'
-          },
-          {
-            name: 'ss Buah Batu',
-            url: 'https://jmlive.jasamarga.com/hls/6/53a1c95b-8d71-45e8-874f-9d96d9be3c23/index.m3u8'
-          }
-        ]
-      },
-      {
-        id: 'japek',
-        name: 'TOL JAPEK',
-        icon: '🛣️',
-        subs: [{
-            name: 'KM 10 Cikunir',
-            url: 'https://cctv.jasamarga.com/hls/km10.m3u8'
-          },
-          {
-            name: 'KM 21 Tambun',
-            url: 'https://cctv.jasamarga.com/hls/km21.m3u8'
-          },
-          {
-            name: 'KM 31 Cikarang',
-            url: 'https://cctv.jasamarga.com/hls/km31.m3u8'
-          },
-          {
-            name: 'KM 47 Karawang',
-            url: 'https://cctv.jasamarga.com/hls/km47.m3u8'
-          },
-          {
-            name: 'Layang MBZ',
-            url: 'https://cctv.jasamarga.com/hls/mbz.m3u8'
-          }
-        ]
-      },
-      {
-        id: 'tangmer',
-        name: 'TOL TANGERANG MERAK',
-        icon: '🚚',
-        subs: [{
-            name: 'Bitung',
-            url: 'https://cctv.astratol.co.id/hls/bitung.m3u8'
-          },
-          {
-            name: 'Balaraja Barat',
-            url: 'https://cctv.mms-corp.id/balbar-exit/index.m3u8'
-          },
-          {
-            name: 'Exit Merak',
-            url: 'https://cctv.mms-corp.id/merak-exit/index.m3u8'
-          },
-          {
-            name: 'Serang Timur',
-            url: 'https://cctv.astratol.co.id/hls/serang.m3u8'
-          },
-          {
-            name: 'Cilegon Timur',
-            url: 'https://cctv.mms-corp.id/ciltim-entrance/index.m3u8'
-          }
-        ]
-      },
-      {
-        id: 'merak',
-        name: 'MERAK',
-        icon: '🚢',
-        subs: [{
-            name: 'Dermaga Eksekutif',
-            url: 'https://stream.asdp.id/hls/merak-eksekutif.m3u8'
-          },
-          {
-            name: 'Dermaga 1',
-            url: 'https://stream.asdp.id/hls/merak1.m3u8'
-          },
-          {
-            name: 'Dermaga 2',
-            url: 'https://stream.asdp.id/hls/merak2.m3u8'
-          },
-          {
-            name: 'Pintu Masuk Port',
-            url: 'https://stream.asdp.id/hls/gate-merak.m3u8'
-          },
-          {
-            name: 'Area Parkir',
-            url: 'https://stream.asdp.id/hls/parkir-merak.m3u8'
-          }
-        ]
-      },
-      {
-        id: 'bojonegara',
-        name: 'BOJONEGARA',
-        icon: '⚓',
-        subs: [{
-            name: 'Gate Utama',
-            url: 'https://cctv.pelindo.co.id/bojonegara1.m3u8'
-          },
-          {
-            name: 'Area Logistik',
-            url: 'https://cctv.pelindo.co.id/bojonegara2.m3u8'
-          },
-          {
-            name: 'Dermaga',
-            url: 'https://cctv.pelindo.co.id/bojonegara3.m3u8'
-          },
-          {
-            name: 'Jalur Akses',
-            url: 'https://cctv.pelindo.co.id/bojonegara4.m3u8'
-          },
-          {
-            name: 'Pergudangan',
-            url: 'https://cctv.pelindo.co.id/bojonegara5.m3u8'
-          }
-        ]
-      },
-      {
-        id: 'indramayu',
-        name: 'INDRAMAYU',
-        icon: '🌾',
-        subs: [{
             name: 'sasak Sewo',
             url: 'https://streamer.indramayukab.go.id/memfs/4bb80c7d-72d5-47d2-a10e-b4fde7862205.m3u8'
           },
@@ -543,90 +409,289 @@
             name: 'Eretan',
             url: 'https://streamer.indramayukab.go.id/memfs/a0f95576-2417-4863-a2e3-a1ee21865cfc.m3u8'
           },
-        ]
-      },
-      {
-        id: 'cirebon',
-        name: 'CIREBON',
-        icon: '🏯',
-        subs: [{
-            name: 'Plumbon',
-            url: 'https://cctv.jasamarga.com/hls/plumbon.m3u8'
+          {
+            name: 'Lohbener',
+            url: '#'
           },
           {
-            name: 'Kanci',
-            url: 'https://cctv.jasamarga.com/hls/kanci.m3u8'
+            name: 'Jatibarang',
+            url: '#'
           },
           {
-            name: 'Palimanan',
-            url: 'https://cctv.jasamarga.com/hls/palimanan.m3u8'
+            name: 'Karangampel',
+            url: '#'
+          },
+          {
+            name: 'Indramayu',
+            url: '#'
+          },
+          {
+            name: 'Balongan',
+            url: '#'
+          },
+          {
+            name: 'Arjawinangun',
+            url: '#'
           },
           {
             name: 'Plered',
-            url: 'https://dishub.cirebonkota.go.id/plered.m3u8'
+            url: '#'
           },
           {
-            name: 'Harjamukti',
-            url: 'https://dishub.cirebonkota.go.id/harjamukti.m3u8'
+            name: 'Palimanan',
+            url: '#'
+          },
+          {
+            name: 'Mundu',
+            url: '#'
+          },
+          {
+            name: 'Kanci',
+            url: '#'
+          },
+          {
+            name: 'Gebang',
+            url: '#'
+          },
+          {
+            name: 'Losari',
+            url: '#'
+          },
+          {
+            name: 'Brebes',
+            url: '#'
+          },
+          {
+            name: 'Tegal',
+            url: '#'
+          },
+          {
+            name: 'Pemalang',
+            url: '#'
+          },
+          {
+            name: 'Pekalongan',
+            url: '#'
+          },
+          {
+            name: 'Semarang',
+            url: '#'
+          },
+          {
+            name: 'Demak',
+            url: '#'
+          },
+          {
+            name: 'Lasem',
+            url: '#'
+          },
+          {
+            name: 'Lamongan',
+            url: '#'
+          },
+          {
+            name: 'Surabaya',
+            url: '#'
           }
         ]
-      },
-      {
-        id: 'semarang',
-        name: 'SEMARANG',
-        icon: '🏛️',
+      }, {
+        id: 'selatan',
+        name: 'Jalur Selatan',
+        icon: '🟢',
         subs: [{
-            name: 'Simpang Lima',
-            url: 'https://cctv.semarangkota.go.id/simpang5.m3u8'
+            name: 'Purwakarta',
+            url: '#'
           },
           {
-            name: 'Kaligawe',
-            url: 'https://cctv.semarangkota.go.id/kaligawe.m3u8'
+            name: 'Cianjur',
+            url: '#'
           },
           {
-            name: 'Krapyak',
-            url: 'https://cctv.jasamarga.com/hls/krapyak.m3u8'
+            name: 'Padalarang',
+            url: '#'
           },
           {
-            name: 'Jatingaleh',
-            url: 'https://cctv.jasamarga.com/hls/jatingaleh.m3u8'
+            name: 'Bandung',
+            url: '#'
           },
           {
-            name: 'Banyumanik',
-            url: 'https://cctv.jasamarga.com/hls/banyumanik.m3u8'
+            name: 'Sumedang',
+            url: '#'
+          },
+          {
+            name: 'Majalengka',
+            url: '#'
+          },
+          {
+            name: 'Kuningan',
+            url: '#'
+          },
+          {
+            name: 'Bogor',
+            url: '#'
+          },
+          {
+            name: 'Ciawi',
+            url: '#'
+          },
+          {
+            name: 'Sukabumi',
+            url: '#'
+          },
+          {
+            name: 'Pelabuhan Ratu',
+            url: '#'
+          },
+          {
+            name: 'Bayah',
+            url: '#'
+          },
+          {
+            name: 'Malingping',
+            url: '#'
+          },
+          {
+            name: 'Cileunyi',
+            url: '#'
+          },
+          {
+            name: 'Nangreg',
+            url: '#'
+          },
+          {
+            name: 'Garut',
+            url: '#'
+          },
+          {
+            name: 'Tasik',
+            url: '#'
+          },
+          {
+            name: 'Banjar',
+            url: '#'
+          },
+          {
+            name: 'Pangandaran',
+            url: '#'
+          },
+          {
+            name: 'Kebumen',
+            url: '#'
+          },
+          {
+            name: 'Magelang',
+            url: '#'
           }
         ]
-      },
-      {
-        id: 'surabaya',
-        name: 'SURABAYA',
-        icon: '🦈',
+      }, {
+        id: 'tol',
+        name: 'Via Tol',
+        icon: '🔝',
         subs: [{
-            name: 'Bunder',
-            url: 'https://cctv.waskitabumiwira.com/LiveApp/streams/402167080005467010903661.m3u8'
+            name: 'Tol Merak',
+            url: '#'
           },
           {
-            name: 'Krian',
-            url: 'https://cctv.waskitabumiwira.com/LiveApp/streams/173701300195740936261885.m3u8'
+            name: 'Cilegon',
+            url: '#'
           },
           {
-            name: 'Dupak',
-            url: 'https://cctv.jasamarga.com/hls/dupak.m3u8'
+            name: 'Serang',
+            url: '#'
           },
           {
-            name: 'Suramadu',
-            url: 'https://dishub.surabaya.go.id/suramadu.m3u8'
+            name: 'Balaraja',
+            url: '#'
           },
           {
-            name: 'Perak',
-            url: 'https://dishub.surabaya.go.id/perak.m3u8'
+            name: 'Bitung',
+            url: '#'
+          },
+          {
+            name: 'Karawaci',
+            url: '#'
+          },
+          {
+            name: 'Kbn Jeruk',
+            url: '#'
+          },
+          {
+            name: 'Jor Rambutan',
+            url: '#'
+          },
+          {
+            name: 'GT Cikunir',
+            url: '#'
+          },
+          {
+            name: 'GT Cikampek',
+            url: '#'
+          },
+          {
+            name: 'Cikopo',
+            url: '#'
+          },
+          {
+            name: 'Cipali km 84',
+            url: '#'
+          },
+          {
+            name: 'Cipali km',
+            url: '#'
+          },
+          {
+            name: 'Cisumdawu',
+            url: '#'
+          },
+          {
+            name: 'Subang',
+            url: '#'
+          },
+          {
+            name: 'Kertajati',
+            url: '#'
+          },
+          {
+            name: 'Palimanan',
+            url: '#'
+          },
+          {
+            name: 'Kanci',
+            url: '#'
+          },
+          {
+            name: 'GT Pejagan',
+            url: '#'
+          },
+          {
+            name: 'Pemalang',
+            url: '#'
+          },
+          {
+            name: 'Batang',
+            url: '#'
+          },
+          {
+            name: 'Semarang',
+            url: '#'
+          },
+          {
+            name: 'Surabaya',
+            url: '#'
+          },
+          {
+            name: 'Malang',
+            url: '#'
+          },
+          {
+            name: 'Jogya',
+            url: '#'
           }
         ]
-      },
-      {
+      }, {
         id: 'lampung',
         name: 'LAMPUNG',
-        icon: '🐘',
+        icon: '🟣',
         subs: [{
             name: 'Bakauheni Port',
             url: 'https://stream.asdp.id/hls/bakauheni.m3u8'
@@ -648,11 +713,10 @@
             url: 'https://cctv.tol-lampung.com/v1/mesuji.m3u8'
           }
         ]
-      },
-      {
+      }, {
         id: 'palembang',
         name: 'PALEMBANG',
-        icon: '🌉',
+        icon: '🟠',
         subs: [{
             name: 'Ampera',
             url: 'https://dishub.palembang.go.id/ampera.m3u8'
@@ -674,11 +738,10 @@
             url: 'https://cctv.hutamakarya.com/indralaya.m3u8'
           }
         ]
-      },
-      {
+      }, {
         id: 'jambi',
         name: 'JAMBI',
-        icon: '🐅',
+        icon: '🔴',
         subs: [{
             name: 'Simpang Rimbo',
             url: 'https://dishub.jambikota.go.id/rimbo.m3u8'
@@ -700,11 +763,35 @@
             url: 'https://dishub.jambikota.go.id/sipin.m3u8'
           }
         ]
-      },
-      {
+      }, {
+        id: 'padang',
+        name: 'PADANG',
+        icon: '🟢',
+        subs: [{
+            name: 'Simpang Rimbo',
+            url: 'https://dishub.jambikota.go.id/rimbo.m3u8'
+          },
+          {
+            name: 'Aur Duri',
+            url: 'https://dishub.jambikota.go.id/aurduri.m3u8'
+          },
+          {
+            name: 'Muara Bulian',
+            url: 'https://dishub.jambikota.go.id/bulian.m3u8'
+          },
+          {
+            name: 'Tugu Juang',
+            url: 'https://dishub.jambikota.go.id/juang.m3u8'
+          },
+          {
+            name: 'Sipin',
+            url: 'https://dishub.jambikota.go.id/sipin.m3u8'
+          }
+        ]
+      }, {
         id: 'pekanbaru',
         name: 'PEKANBARU',
-        icon: '🛢️',
+        icon: '⚪',
         subs: [{
             name: 'Simpang Bingung',
             url: 'https://dishub.pekanbaru.go.id/bingung.m3u8'
@@ -726,11 +813,10 @@
             url: 'https://dishub.pekanbaru.go.id/arengka.m3u8'
           }
         ]
-      },
-      {
+      }, {
         id: 'medan',
         name: 'MEDAN',
-        icon: '🏢',
+        icon: '🔵',
         subs: [{
             name: 'Amplas',
             url: 'https://atcs.medan.id/hls/amplas.m3u8'
