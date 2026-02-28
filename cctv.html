@@ -1719,9 +1719,16 @@
               this.recordedChunks.push(event.data);
             }
           };
-          // Handle stop
+          // Handle stop - download file and reset state
           this.mediaRecorder.onstop = () => {
-            this._downloadSegment();
+            console.log('Recording stopped, chunks:', this.recordedChunks.length);
+            this._stopCanvasRendering();
+            if (this.recordedChunks.length > 0) {
+              this._downloadSegment();
+            } else {
+              this._showToast('Tidak ada data rekaman', 'error');
+            }
+            this._resetRecordingState();
           };
           // Handle errors
           this.mediaRecorder.onerror = (event) => {
@@ -1860,12 +1867,27 @@
             clearTimeout(this.segmentTimer);
             this.segmentTimer = null;
           }
-          // Stop canvas rendering
-          this._stopCanvasRendering();
-          // Stop the recorder
-          this.mediaRecorder.stop();
-          this._resetRecordingState();
-          this._showToast('■ Perekaman dihentikan', 'info');
+          // Show stopping message
+          this._showToast('■ Menghentikan perekaman...', 'info');
+          // Request any remaining data before stopping
+          try {
+            if (this.mediaRecorder.state === 'recording') {
+              this.mediaRecorder.requestData();
+            }
+          } catch (e) {
+            console.warn('Error requesting data:', e);
+          }
+          // Wait a bit for data to be collected, then stop
+          setTimeout(() => {
+            try {
+              if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                this.mediaRecorder.stop();
+              }
+            } catch (e) {
+              console.error('Error stopping recorder:', e);
+              this._resetRecordingState();
+            }
+          }, 200);
         }
       }
       _saveSegmentAndContinue() {
@@ -1887,7 +1909,14 @@
         }, 100);
       }
       _downloadSegment() {
-        if (this.recordedChunks.length === 0) return;
+        console.log('Download segment called, chunks:', this.recordedChunks.length);
+        if (this.recordedChunks.length === 0) {
+          console.warn('No recorded chunks to download');
+          return;
+        }
+        // Calculate total size
+        const totalSize = this.recordedChunks.reduce((acc, chunk) => acc + chunk.size, 0);
+        console.log('Total recording size:', (totalSize / 1024 / 1024).toFixed(2), 'MB');
         // Determine file extension based on MIME type
         const mimeType = this._getBestMimeType();
         let extension = 'webm';
@@ -1895,7 +1924,10 @@
         if (mimeType.includes('mp4')) {
           extension = 'mp4';
           actualMimeType = 'video/mp4';
+        } else if (mimeType.includes('h264')) {
+          extension = 'webm'; // H264 in WebM container
         }
+        // Create blob from chunks
         const blob = new Blob(this.recordedChunks, {
           type: actualMimeType
         });
@@ -1909,18 +1941,26 @@
           .replace(/_+/g, '_')
           .substring(0, 30);
         const filename = `${cleanLocation}_${dateStr}_${timeStr}.${extension}`;
-        // Download
+        console.log('Downloading file:', filename);
+        // Create download link and trigger download
         const a = document.createElement('a');
+        a.style.display = 'none';
         a.href = url;
         a.download = filename;
+        // Append to body, click, and remove
         document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        // Revoke URL
+        // Use setTimeout to ensure the link is in the DOM
         setTimeout(() => {
-          URL.revokeObjectURL(url);
-        }, 1000);
-        this._showToast(`✓ Disimpan: ${filename}`, 'success');
+          a.click();
+          // Show success message
+          this._showToast(`✓ Disimpan: ${filename}`, 'success');
+          // Clean up
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }, 1000);
+        }, 100);
+        // Clear chunks after download initiated
         this.recordedChunks = [];
       }
       _startTimerDisplay() {
@@ -1945,7 +1985,9 @@
       }
       _resetRecordingState() {
         this.isRecording = false;
+        // Stop canvas rendering if still running
         this._stopCanvasRendering();
+        // Clear timers
         if (this.recordingTimer) {
           clearInterval(this.recordingTimer);
           this.recordingTimer = null;
@@ -1954,8 +1996,10 @@
           clearTimeout(this.segmentTimer);
           this.segmentTimer = null;
         }
+        // Update UI
         this._updateRecordingUI(false);
         document.getElementById('rec-timer').textContent = '00:00:00';
+        console.log('Recording state reset');
       }
       // ═══════════════════════════════════════════════════════════════
       // VIDEO ENHANCEMENT
