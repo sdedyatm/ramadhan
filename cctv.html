@@ -7,7 +7,6 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <!-- KRITIS: Upgrade HTTP stream ke HTTPS secara otomatis di browser -->
   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   <title>CCTV Traffic Pro Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -19,8 +18,16 @@
       box-sizing: border-box;
     }
 
+    html {
+      /* SMOOTH SCROLL GLOBAL */
+      scroll-behavior: smooth;
+    }
+
     body {
       overscroll-behavior: none;
+      /* SMOOTH FONT RENDERING */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     /* VIDEO */
@@ -29,11 +36,14 @@
       width: 55%;
       aspect-ratio: 16/9;
       max-height: 320px;
-      background: #000;
-      border-radius: 16px;
+      background: linear-gradient(145deg, #0a0f1a 0%, #020617 100%);
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(71, 85, 105, 0.3);
     }
 
     #main-video {
@@ -44,98 +54,146 @@
       background: #000;
     }
 
-    /* SCROLLBAR */
-    .custom-scroll::-webkit-scrollbar {
-      width: 3px;
+    /* SCROLLBAR - MORE SMOOTH & ELEGANT */
+    .custom-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+      /* MOMENTUM SCROLL iOS */
+      -webkit-overflow-scrolling: touch;
+      /* SMOOTH SCROLL BEHAVIOR */
+      scroll-behavior: smooth;
     }
 
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: #1e293b;
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
       border-radius: 10px;
     }
 
-    /* SUBMENU ACCORDION */
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(59, 130, 246, 0.4) 0%, rgba(59, 130, 246, 0.2) 100%);
+      border-radius: 10px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(59, 130, 246, 0.6) 0%, rgba(59, 130, 246, 0.4) 100%);
+      background-clip: padding-box;
+    }
+
+    /* SUBMENU ACCORDION - SMOOTHER */
     .submenu-container {
       max-height: 0;
       overflow: hidden;
       opacity: 0;
-      /* Animasi lebih lambat & smooth — tidak terasa "loncat" */
-      transition: max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 0.28s ease,
-        margin 0.38s ease;
+      transition:
+        max-height 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        opacity 0.35s ease-out,
+        margin 0.4s ease-out,
+        transform 0.35s ease-out;
+      transform: translateY(-8px);
     }
 
-    /* PERUBAHAN UTAMA: Max-height ditingkatkan drastis ke 5000px 
-       agar bisa menampung ratusan tombol tanpa terpotong */
     .submenu-container.open {
-      max-height: 5000px;
+      max-height: 6000px;
       opacity: 1;
-      margin-top: 0.5rem;
+      margin-top: 0.75rem;
       margin-bottom: 0.5rem;
+      transform: translateY(0);
     }
 
-    /* TOMBOL KATEGORI */
+    /* TOMBOL KATEGORI - LEBIH TINGGI & PROFESIONAL */
     .category-btn {
       width: 100%;
-      padding: 14px 16px;
-      background: rgba(30, 41, 59, 0.45);
-      border: 1px solid rgba(71, 85, 105, 0.4);
-      border-radius: 14px;
+      padding: 18px 20px;
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.5) 100%);
+      border: 1px solid rgba(71, 85, 105, 0.35);
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
-      /*
-        touch-action:manipulation = hilangkan 300ms delay Android
-        TANPA perlu touchend + preventDefault
-        Ini lebih aman dan tidak menyebabkan double-fire
-      */
       touch-action: manipulation;
-      /* Transisi lebih pelan = terasa lebih solid, tidak "meletup" */
-      transition: background 0.22s ease, border-color 0.22s ease;
-      min-height: 58px;
+      min-height: 68px;
       text-align: left;
       -webkit-appearance: none;
       appearance: none;
       outline: none;
+      position: relative;
+      overflow: hidden;
+      /* SMOOTH TRANSITIONS */
+      transition:
+        background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        transform 0.2s ease;
+    }
+
+    /* GLOW EFFECT ON HOVER */
+    .category-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
     }
 
     .category-btn:hover {
-      background: rgba(30, 41, 59, 0.85);
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.75) 100%);
+      border-color: rgba(100, 116, 139, 0.5);
+      box-shadow:
+        0 8px 25px -5px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(59, 130, 246, 0.1);
+    }
+
+    .category-btn:hover::before {
+      opacity: 1;
     }
 
     .category-btn:active {
-      background: rgba(15, 23, 42, 0.9);
+      transform: scale(0.98);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.9) 0%, rgba(10, 15, 30, 0.85) 100%);
     }
 
     .category-btn.is-open {
-      border-color: rgba(59, 130, 246, 0.55);
-      background: rgba(30, 41, 59, 0.75);
+      border-color: rgba(59, 130, 246, 0.6);
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(59, 130, 246, 0.15) 100%);
+      box-shadow:
+        0 0 30px rgba(59, 130, 246, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     .cat-label {
-      font-size: 15px;
+      font-size: 15.5px;
       font-weight: 700;
-      letter-spacing: .07em;
+      letter-spacing: 0.05em;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       pointer-events: none;
+      color: #f1f5f9;
     }
 
     .cat-icon {
-      font-size: 18px;
+      font-size: 20px;
       pointer-events: none;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
     }
 
     .chevron-icon {
-      width: 15px;
-      height: 15px;
-      color: #ffff;
+      width: 18px;
+      height: 18px;
+      color: #94a3b8;
       flex-shrink: 0;
-      transition: transform 0.32s ease, color 0.22s ease;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
       pointer-events: none;
     }
 
@@ -144,63 +202,95 @@
       color: #60a5fa;
     }
 
-    /* TOMBOL SUB-MENU */
+    /* TOMBOL SUB-MENU - LEBIH TINGGI & PROFESIONAL */
     .sub-btn {
       width: 100%;
-      padding: 12px 12px 12px 22px;
-      background: rgba(15, 23, 42, 0.55);
-      border: 1px solid rgba(51, 65, 85, 0.4);
-      border-radius: 10px;
+      padding: 16px 16px 16px 28px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(10, 18, 35, 0.5) 100%);
+      border: 1px solid rgba(51, 65, 85, 0.35);
+      border-radius: 12px;
       text-align: left;
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
       touch-action: manipulation;
-      font-family: monospace;
-      font-size: 16px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 14px;
       text-transform: uppercase;
-      letter-spacing: .03em;
-      color: #ffff;
-      transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
-      min-height: 46px;
+      letter-spacing: 0.04em;
+      color: #e2e8f0;
+      min-height: 56px;
       position: relative;
       -webkit-appearance: none;
       appearance: none;
       outline: none;
+      overflow: hidden;
+      transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.15s ease;
     }
 
     .sub-btn::before {
       content: '';
       position: absolute;
-      left: 9px;
+      left: 10px;
       top: 50%;
       transform: translateY(-50%);
-      width: 4px;
-      height: 4px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: #334155;
-      transition: background 0.18s ease;
+      background: rgba(100, 116, 139, 0.6);
+      transition: background 0.25s ease, box-shadow 0.25s ease;
+      pointer-events: none;
+    }
+
+    .sub-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.25s ease;
       pointer-events: none;
     }
 
     .sub-btn:hover {
-      background: rgba(30, 41, 59, 0.75);
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(59, 130, 246, 0.12) 100%);
       border-color: rgba(59, 130, 246, 0.4);
       color: #93c5fd;
+      box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(59, 130, 246, 0.1);
     }
 
     .sub-btn:hover::before {
       background: #3b82f6;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+    }
+
+    .sub-btn:hover::after {
+      opacity: 1;
+    }
+
+    .sub-btn:active {
+      transform: scale(0.98);
     }
 
     .sub-btn.active-btn {
-      border-left: 3px solid #3b82f6;
-      background: rgba(59, 130, 246, 0.12);
+      border-left: 4px solid #3b82f6;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(30, 64, 175, 0.15) 100%);
       color: #60a5fa;
+      box-shadow:
+        0 0 25px rgba(59, 130, 246, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
     .sub-btn.active-btn::before {
       background: #3b82f6;
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
     }
 
     /* OVERLAYS */
@@ -211,7 +301,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 14px;
       z-index: 50;
     }
 
@@ -224,11 +314,11 @@
 
       0%,
       100% {
-        box-shadow: 0 0 6px #22c55e;
+        box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
       }
 
       50% {
-        box-shadow: 0 0 14px #22c55e, 0 0 20px #22c55e;
+        box-shadow: 0 0 20px rgba(34, 197, 94, 0.9), 0 0 30px rgba(34, 197, 94, 0.5);
       }
     }
 
@@ -246,51 +336,153 @@
     .spinner {
       animation: spin 0.85s linear infinite;
     }
+
+    /* HEADER IMPROVEMENT */
+    .header-container {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.95) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    /* SEARCH INPUT IMPROVEMENT */
+    .search-input {
+      background: linear-gradient(145deg, rgba(10, 15, 30, 0.8) 0%, rgba(5, 10, 20, 0.6) 100%);
+      border: 1px solid rgba(71, 85, 105, 0.3);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .search-input:focus {
+      border-color: rgba(59, 130, 246, 0.5);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+    }
+
+    /* SIDEBAR IMPROVEMENT */
+    .sidebar-container {
+      background: linear-gradient(180deg, rgba(10, 18, 35, 0.5) 0%, rgba(5, 12, 25, 0.4) 100%);
+    }
+
+    /* VIDEO SECTION */
+    .video-section {
+      background: linear-gradient(145deg, #020617 0%, #0a0f1a 50%, #020617 100%);
+    }
+
+    /* MENU CONTAINER */
+    #menu-container {
+      /* Extra smooth scrolling */
+      scroll-padding-top: 20px;
+      overscroll-behavior: contain;
+    }
+
+    /* CATEGORY GROUP SPACING */
+    .category-group {
+      margin-bottom: 0.5rem;
+    }
+
+    /* RESPONSIVE IMPROVEMENTS */
+    @media (max-width: 768px) {
+      .video-wrapper {
+        width: 100%;
+        max-height: 280px;
+        border-radius: 16px;
+      }
+
+      .category-btn {
+        padding: 16px 18px;
+        min-height: 64px;
+      }
+
+      .cat-label {
+        font-size: 14.5px;
+        gap: 10px;
+      }
+
+      .cat-icon {
+        font-size: 18px;
+      }
+
+      .sub-btn {
+        padding: 14px 14px 14px 24px;
+        min-height: 52px;
+        font-size: 13px;
+      }
+
+      #menu-container {
+        padding: 12px;
+      }
+
+      .submenu-container.open {
+        margin-top: 0.6rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .video-wrapper {
+        border-radius: 12px;
+        max-height: 240px;
+      }
+
+      .category-btn {
+        padding: 14px 16px;
+        min-height: 60px;
+        border-radius: 14px;
+      }
+
+      .cat-label {
+        font-size: 14px;
+      }
+
+      .sub-btn {
+        padding: 13px 12px 13px 22px;
+        min-height: 50px;
+        font-size: 12.5px;
+        border-radius: 10px;
+      }
+    }
+
+    /* LANDSCAPE MOBILE */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .video-wrapper {
+        max-height: 200px;
+      }
+    }
   </style>
 </head>
 
 <body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden font-sans">
 
   <!-- HEADER -->
-  <header class="px-4 py-3 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/60 flex justify-between items-center z-30 flex-shrink-0">
+  <header class="header-container px-4 py-3 border-b border-slate-800/50 flex justify-between items-center z-30 flex-shrink-0">
     <div class="flex items-center gap-3">
-      <div class="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-900/30">
+      <div class="p-2.5 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-lg shadow-blue-900/40">
         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-width="2" />
         </svg>
       </div>
       <div>
-        <h1 class="text-sm font-black tracking-tighter uppercase">CCTV<span class="text-blue-500">ATM</span></h1>
-        <p id="status-bar" class="text-[9px] text-slate-500 font-mono tracking-widest uppercase">Initializing...</p>
+        <h1 class="text-base font-black tracking-tight uppercase">CCTV<span class="text-blue-400">ATM</span></h1>
+        <p id="status-bar" class="text-[9px] text-slate-400 font-mono tracking-widest uppercase mt-0.5">Initializing...</p>
       </div>
     </div>
-    <div id="connection-dot" class="w-2 h-2 rounded-full bg-green-500"></div>
+    <div id="connection-dot" class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
   </header>
 
   <!-- MAIN -->
   <main class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
 
     <!-- VIDEO -->
-    <section class="p-4 md:p-6 flex flex-col items-center bg-slate-950 md:flex-1 justify-start md:justify-center border-b md:border-b-0 md:border-r border-slate-900 flex-shrink-0">
+    <section class="video-section p-4 md:p-6 flex flex-col items-center md:flex-1 justify-start md:justify-center border-b md:border-b-0 md:border-r border-slate-900/50 flex-shrink-0">
       <div class="video-wrapper group w-full max-w-2xl" id="video-box">
 
         <!-- Logo -->
-        <div class="absolute top-3 right-3 z-30 opacity-25 pointer-events-none">
+        <div class="absolute top-3 right-3 z-30 opacity-20 pointer-events-none">
           <img src="https://lh3.googleusercontent.com/pw/AP1GczM7DIcF6n6QmapKYKmLrjE1jfdzglHj5YotQm27QErAplykPvCq3qZDbhw3qfrzTenf75srCib_6DH_WMZ-9OioIbjLVf8zb9ehkfA6GeGPPTa8wYiNTO4BvdS0VnMemmusXQsUTJB_S1FvKaNr2p3BRA=w600-h600-s-no-gm?authuser=0" class="w-10 h-10 grayscale" alt="Logo">
         </div>
 
-        <!--
-          KRITIS ANDROID:
-          - playsinline: WAJIB — cegah fullscreen otomatis di Android/iOS
-          - muted: WAJIB — autoplay hanya diizinkan jika video muted
-          - preload="none": tidak load data sampai dipilih
-          - TIDAK ada crossorigin — menyebabkan CORS preflight gagal di stream CCTV lokal
-        -->
         <video id="main-video" playsinline webkit-playsinline muted preload="none"></video>
 
         <!-- Play Overlay -->
-        <div id="play-overlay" class="overlay bg-slate-900/85 backdrop-blur-sm">
-          <button id="play-btn" class="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center shadow-2xl border-2 border-blue-400/40 active:scale-95 transition-transform" style="touch-action:manipulation;cursor:pointer">
+        <div id="play-overlay" class="overlay bg-slate-900/90 backdrop-blur-md">
+          <button id="play-btn" class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center shadow-2xl shadow-blue-900/50 border-2 border-blue-400/30 active:scale-95 transition-all duration-200 hover:shadow-blue-500/40" style="touch-action:manipulation;cursor:pointer">
             <svg class="w-9 h-9 text-white ml-1 pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
@@ -299,30 +491,30 @@
         </div>
 
         <!-- Error Overlay -->
-        <div id="error-overlay" class="overlay bg-slate-900/95">
+        <div id="error-overlay" class="overlay bg-slate-900/95 backdrop-blur-md">
           <div class="text-3xl">⚠️</div>
           <p class="text-[10px] font-mono text-red-400 uppercase tracking-widest">Stream Tidak Tersedia</p>
-          <p id="error-detail" class="text-[9px] text-slate-500 text-center px-6 max-w-xs leading-relaxed"></p>
-          <button id="retry-btn" class="mt-1 px-5 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-[11px] font-mono uppercase tracking-widest transition-colors" style="touch-action:manipulation;cursor:pointer">
+          <p id="error-detail" class="text-[9px] text-slate-400 text-center px-6 max-w-xs leading-relaxed"></p>
+          <button id="retry-btn" class="mt-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-xl text-[11px] font-mono uppercase tracking-widest transition-all duration-200 shadow-lg shadow-blue-900/30" style="touch-action:manipulation;cursor:pointer">
             ↺ Coba Lagi
           </button>
         </div>
 
         <!-- Loader -->
-        <div id="loader" class="overlay bg-slate-900/90">
-          <div class="spinner w-9 h-9 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+        <div id="loader" class="overlay bg-slate-900/90 backdrop-blur-sm">
+          <div class="spinner w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full"></div>
           <span class="text-[9px] font-mono tracking-[0.3em] text-blue-400 uppercase">Memuat Stream...</span>
         </div>
 
         <!-- Info bar -->
-        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/60 to-transparent z-10 pointer-events-none">
-          <h2 id="display-title" class="text-xs font-bold text-blue-400 truncate">STANDBY</h2>
-          <p id="display-sub" class="text-[10px] text-slate-400 mt-0.5 uppercase tracking-widest truncate">Silahkan Pilih Ruas Jalan</p>
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/70 to-transparent z-10 pointer-events-none">
+          <h2 id="display-title" class="text-sm font-bold text-blue-400 truncate">STANDBY</h2>
+          <p id="display-sub" class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest truncate">Silahkan Pilih Ruas Jalan</p>
         </div>
 
         <!-- Fullscreen -->
-        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-          <button id="fs-btn" class="pointer-events-auto p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full active:scale-95 transition-transform shadow-2xl" style="touch-action:manipulation;cursor:pointer">
+        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20">
+          <button id="fs-btn" class="pointer-events-auto p-3.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full active:scale-95 transition-all duration-200 shadow-2xl hover:bg-white/20" style="touch-action:manipulation;cursor:pointer">
             <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-width="2" />
             </svg>
@@ -332,9 +524,9 @@
     </section>
 
     <!-- MENU -->
-    <aside class="w-full md:w-96 bg-slate-900/30 flex flex-col overflow-hidden border-l border-slate-900 min-h-0 flex-1 md:flex-none">
-      <div class="p-3 bg-slate-900/70 border-b border-slate-800/60 backdrop-blur-sm flex-shrink-0">
-        <input type="text" id="cctv-search" placeholder="Cari ruas jalan..." autocomplete="off" autocorrect="off" spellcheck="false" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-[14px] focus:ring-1 focus:ring-blue-500 outline-none placeholder:text-slate-600">
+    <aside class="sidebar-container w-full md:w-96 flex flex-col overflow-hidden border-l border-slate-900/50 min-h-0 flex-1 md:flex-none">
+      <div class="p-3 bg-slate-900/50 border-b border-slate-800/40 backdrop-blur-md flex-shrink-0">
+        <input type="text" id="cctv-search" placeholder="Cari ruas jalan..." autocomplete="off" autocorrect="off" spellcheck="false" class="search-input w-full border rounded-xl px-4 py-3.5 text-[14px] focus:ring-1 focus:ring-blue-500 outline-none placeholder:text-slate-500">
       </div>
       <div id="menu-container" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-2 overscroll-contain"></div>
     </aside>
@@ -419,11 +611,11 @@
           },
           {
             name: 'Karangampel',
-            url: '#'
+            url: 'https://streamer.indramayukab.go.id/memfs/4bb48c21-088d-43a5-82f1-2fa495f50408.m3u8'
           },
           {
             name: 'Indramayu',
-            url: '#'
+            url: 'https://streamer.indramayukab.go.id/memfs/8f10960b-3ffd-4dd9-bd2b-01cf7a0d1cc2.m3u8'
           },
           {
             name: 'Balongan',
@@ -434,8 +626,8 @@
             url: '#'
           },
           {
-            name: 'Plered',
-            url: '#'
+            name: 'samping trml cirebon',
+            url: 'https://cctv.cirebonkota.go.id/hls/atcs-simpang-terminal/index.m3u8'
           },
           {
             name: 'Palimanan',
@@ -589,19 +781,19 @@
         icon: '🔝',
         subs: [{
             name: 'Tol Merak',
-            url: '#'
+            url: 'https://cctv.mms-corp.id/km96-ambon/index.m3u8'
           },
           {
             name: 'Cilegon',
-            url: '#'
+            url: 'https://cctv.mms-corp.id/km29-bandung/index.m3u8'
           },
           {
             name: 'Serang',
-            url: '#'
+            url: 'https://cctv.mms-corp.id/sertim-entrance/stream.m3u8'
           },
           {
-            name: 'Balaraja',
-            url: '#'
+            name: 'Balaraja Barat',
+            url: 'https://cctv.mms-corp.id/balbar-entrance/index.m3u8'
           },
           {
             name: 'Bitung',
@@ -653,11 +845,11 @@
           },
           {
             name: 'Palimanan',
-            url: '#'
+            url: 'https://jmlive.jasamarga.com/hls/12/bf37d582-7308-45e3-b6d5-7376b3f92553/index.m3u8'
           },
           {
             name: 'Kanci',
-            url: '#'
+            url: 'https://jmlive.jasamarga.com/hls/12/4155887e-1ebf-4fd2-ad4f-ba0e519adf4c/index.m3u8?t=1772278313075?t=1772278313387?t=1772278313824?t=1772278314198'
           },
           {
             name: 'GT Pejagan',
@@ -853,7 +1045,6 @@
         this.autoplayBlocked = false;
         this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
         this.isAndroid = /Android/i.test(navigator.userAgent);
-        // Lock flags untuk debounce tombol
         this._toggleBusy = false;
         this._playBusy = false;
         this._init();
@@ -865,18 +1056,11 @@
         this._setupVideoWatchdog();
         document.getElementById('status-bar').textContent = 'CCTV MUDIK 2026';
       }
-      // ── STATIC BUTTONS ─────────────────────────────────────────
       _setupStaticBtns() {
-        /*
-         * Gunakan HANYA 'click' event pada semua tombol statis.
-         * touch-action:manipulation pada elemen tombol sudah menghapus
-         * 300ms tap delay di Android Chrome — tidak perlu touchend.
-         */
         document.getElementById('play-btn').addEventListener('click', () => this._manualPlay());
         document.getElementById('retry-btn').addEventListener('click', () => this._retry());
         document.getElementById('fs-btn').addEventListener('click', () => this._toggleFS());
       }
-      // ── RENDER MENU ────────────────────────────────────────────
       _renderMenu() {
         const container = document.getElementById('menu-container');
         container.innerHTML = categories.map(cat => `
@@ -890,7 +1074,7 @@
               <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <div id="sub-${cat.id}" class="submenu-container" style="display:grid;gap:5px">
+          <div id="sub-${cat.id}" class="submenu-container" style="display:grid;gap:6px">
             ${cat.subs.map(sub => `
               <button class="sub-btn"
                 data-action="play"
@@ -903,19 +1087,6 @@
           </div>
         </div>
       `).join('');
-        /*
-         * EVENT DELEGATION — Satu listener 'click' di container parent.
-         *
-         * MENGAPA HANYA 'click' (BUKAN touchend):
-         * 1. touch-action:manipulation pada .category-btn dan .sub-btn
-         *    sudah menghilangkan 300ms delay di Android Chrome secara native
-         * 2. Menambah touchend + click menyebabkan double-fire di Android
-         * 3. Pendekatan ini lebih bersih dan lebih kompatibel lintas browser
-         *
-         * MENGAPA EVENT DELEGATION:
-         * Menghindari masalah onclick inline yang scope-nya tidak reliable
-         * di beberapa Android Chrome version
-         */
         container.addEventListener('click', (e) => {
           const btn = e.target.closest('[data-action]');
           if (!btn) return;
@@ -927,46 +1098,36 @@
           }
         });
       }
-      // ── TOGGLE SUBMENU ─────────────────────────────────────────
       _toggleSub(id, btn) {
-        /*
-         * DEBOUNCE tombol kategori:
-         * Kunci selama 380ms (durasi animasi CSS) agar pengguna
-         * tidak bisa trigger toggle berkali-kali saat animasi berjalan.
-         * Ini membuat tombol terasa "solid" bukan "loncat-loncat".
-         */
         if (this._toggleBusy) return;
         this._toggleBusy = true;
         setTimeout(() => {
           this._toggleBusy = false;
-        }, 380);
+        }, 450);
         const panel = document.getElementById('sub-' + id);
         if (!panel) return;
         const isOpen = panel.classList.contains('open');
-        // Tutup semua submenu
         document.querySelectorAll('.submenu-container.open').forEach(p => p.classList.remove('open'));
         document.querySelectorAll('.category-btn.is-open').forEach(b => b.classList.remove('is-open'));
-        // Buka yang diklik (jika sebelumnya tertutup)
         if (!isOpen) {
           panel.classList.add('open');
           btn.classList.add('is-open');
           if (this.isMobile) {
-            setTimeout(() => btn.scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest'
-            }), 100);
+            setTimeout(() => {
+              btn.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+              });
+            }, 150);
           }
         }
       }
-      // ── PLAY STREAM ────────────────────────────────────────────
       _playSub(cat, sub, url, btn) {
         if (!url || url === '#') {
           this._showError('Stream channel ini belum tersedia.');
           return;
         }
-        // Cegah double-tap
         if (this._playBusy) return;
-        // Jika sudah playing stream yang sama, skip
         if (url === this.currentUrl) return;
         this._playBusy = true;
         setTimeout(() => {
@@ -984,65 +1145,27 @@
         if (Hls.isSupported()) {
           this._loadHls(url);
         } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
-          // Safari / iOS native HLS
           this._loadNative(url);
         } else {
           this._showError('Browser tidak mendukung HLS. Gunakan Chrome terbaru.');
         }
       }
-      // ── HLS LOADER ─────────────────────────────────────────────
       _loadHls(url) {
-        /*
-         * ============================================================
-         * KONFIGURASI HLS.JS UNTUK ANDROID CHROME
-         * ============================================================
-         *
-         * ROOT CAUSE kenapa laptop OK tapi Android tidak:
-         *
-         * 1. enableWorker: true di Android → Web Worker bisa crash di
-         *    beberapa versi Android WebView/Chrome → MATIKAN di mobile
-         *
-         * 2. Buffer besar di Android → OOM (Out of Memory) di RAM kecil
-         *    → Kecilkan maxBufferLength & maxBufferSize
-         *
-         * 3. Android lebih strict soal Mixed Content (HTTP di HTTPS page)
-         *    → CSP upgrade-insecure-requests di <head> mengatasinya
-         *
-         * 4. xhrSetup dengan custom headers → CORS preflight → GAGAL
-         *    di server CCTV lokal yang tidak handle OPTIONS request
-         *    → xhrSetup harus seminimal mungkin, hanya withCredentials=false
-         *
-         * 5. Timeout default terlalu pendek untuk jaringan mobile
-         *    → Naikkan semua timeout
-         *
-         * 6. nudgeOffset/nudgeMaxRetry penting untuk Android yang sering
-         *    stuck saat ada network hiccup
-         * ============================================================
-         */
         const cfg = {
-          // MATIKAN di mobile — Web Worker tidak stabil di Android WebView
           enableWorker: false,
-          // Matikan low-latency — stream CCTV bukan live low-latency
           lowLatencyMode: false,
-          // Buffer KECIL untuk Android — hemat RAM & mulai lebih cepat
           maxBufferLength: 10,
           maxMaxBufferLength: 25,
-          maxBufferSize: 10 * 1000 * 1000, // 10 MB
+          maxBufferSize: 10 * 1000 * 1000,
           backBufferLength: 5,
-          // Toleransi hole lebih besar untuk jaringan mobile yang tidak stabil
           maxBufferHole: 1.0,
-          // Nudge — dorong playback keluar dari posisi stuck
           nudgeOffset: 0.3,
           nudgeMaxRetry: 6,
-          // Jangan prefetch — hemat bandwidth mobile
           startFragPrefetch: false,
           testBandwidth: false,
-          // KRITIS: jangan tambah header custom → cegah CORS preflight
           xhrSetup(xhr) {
             xhr.withCredentials = false;
-            // Jangan set header apapun di sini
           },
-          // Timeout lebih toleran untuk Android
           manifestLoadingTimeOut: 14000,
           manifestLoadingMaxRetry: 3,
           manifestLoadingRetryDelay: 2000,
@@ -1052,9 +1175,7 @@
           fragLoadingTimeOut: 20000,
           fragLoadingMaxRetry: 4,
           fragLoadingRetryDelay: 2000,
-          // Mulai dari level terendah — lebih cepat start di mobile
           startLevel: -1,
-          // ABR lebih konservatif di mobile
           abrEwmaFastLive: 5,
           abrEwmaSlowLive: 12,
           abrBandWidthFactor: 0.75,
@@ -1070,12 +1191,11 @@
           this._tryPlay();
         });
         hls.on(Hls.Events.ERROR, (_, data) => {
-          if (!data.fatal) return; // biarkan hls.js handle non-fatal
+          if (!data.fatal) return;
           this.fatalCount++;
           console.warn('[HLS Fatal]', data.type, data.details, '#' + this.fatalCount);
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
             if (this.fatalCount <= 3) {
-              // Delay lebih panjang di Android untuk beri waktu network stabil
               const delay = this.isAndroid ? 2500 : 1200;
               setTimeout(() => {
                 if (this.hls) hls.startLoad();
@@ -1104,7 +1224,6 @@
           }
         });
       }
-      // ── NATIVE (Safari/iOS) ────────────────────────────────────
       _loadNative(url) {
         this.video.src = url;
         this.video.load();
@@ -1126,13 +1245,7 @@
           }
         }, 15000);
       }
-      // ── TRY PLAY ───────────────────────────────────────────────
       _tryPlay() {
-        /*
-         * Android Autoplay Policy:
-         * - Video MUTED → autoplay biasanya diizinkan jika ada user gesture sebelumnya
-         * - Jika gagal → tampilkan tombol play manual
-         */
         const p = this.video.play();
         if (p instanceof Promise) {
           p.then(() => {
@@ -1153,7 +1266,6 @@
           if (this.currentUrl) this._retry();
         });
       }
-      // ── WATCHDOG ───────────────────────────────────────────────
       _setupVideoWatchdog() {
         this.video.addEventListener('stalled', () => {
           if (!this.currentUrl) return;
@@ -1172,7 +1284,6 @@
           }, 1200);
         });
       }
-      // ── DESTROY ────────────────────────────────────────────────
       _destroyHls() {
         if (this.hls) {
           this.hls.destroy();
@@ -1182,7 +1293,6 @@
         this.video.removeAttribute('src');
         this.video.load();
       }
-      // ── UI ─────────────────────────────────────────────────────
       _showLoader() {
         this.loader.classList.add('show');
         this.errBox.classList.remove('show');
@@ -1197,7 +1307,6 @@
         this.errBox.classList.add('show');
         document.getElementById('error-detail').textContent = msg || 'Stream tidak tersedia.';
       }
-      // ── RETRY ──────────────────────────────────────────────────
       _retry() {
         if (!this.currentUrl || this.currentUrl === '#') return;
         const url = this.currentUrl;
@@ -1212,7 +1321,6 @@
           else this._loadNative(url);
         }, 800);
       }
-      // ── SEARCH ─────────────────────────────────────────────────
       _setupSearch() {
         document.getElementById('cctv-search').addEventListener('input', e => {
           const q = e.target.value.toLowerCase().trim();
@@ -1221,7 +1329,6 @@
           });
         });
       }
-      // ── FULLSCREEN ─────────────────────────────────────────────
       _toggleFS() {
         const target = this.isMobile ? this.video : document.getElementById('video-box');
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
@@ -1235,7 +1342,6 @@
         }
       }
     }
-    // Bootstrap
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         window.app = new TrafficApp();
