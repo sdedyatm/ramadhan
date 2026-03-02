@@ -498,6 +498,22 @@
         max-height: 240px;
       }
     }
+
+    .logo-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      transform: translateX(var(--logo-shift, 0px));
+    }
+
+    /* Ukuran logo fleksibel */
+    .logo-img {
+      width: clamp(30px, 8vw, 40px);
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+    }
   </style>
 </head>
 
@@ -514,6 +530,14 @@
       <div>
         <h1 class="text-base font-black tracking-tight uppercase">CCTV<span class="text-blue-400">ATM</span></h1>
         <p id="status-bar" class="text-[9px] text-slate-400 font-mono tracking-widest uppercase mt-0.5">Initializing...</p>
+      </div>
+    </div>
+
+    <div class="header-container">
+      <div class="logo-wrapper" style="--logo-shift: -260px;">
+        <img src="https://i.pinimg.com/736x/23/a3/72/23a37221a794d228fc8a115c4c033735.jpg" class="logo-img">
+        <img src="https://i.pinimg.com/736x/80/3f/cb/803fcb896f5773e64fdfdc321a699792.jpg" class="logo-img">
+        <img src="https://i.pinimg.com/1200x/fd/70/72/fd707264ea99dc81dd717626f325cd35.jpg" class="logo-img">
       </div>
     </div>
     <div id="connection-dot" class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
