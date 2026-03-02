@@ -6,7 +6,7 @@
 
 "use strict";
 
-const CACHE_VERSION = "v1.4.8";
+const CACHE_VERSION = "v1.4.9";
 const STATIC_CACHE = `propwa-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `propwa-dynamic-${CACHE_VERSION}`;
 const OFFLINE_URL = "./offline-fallback.html";
@@ -15,6 +15,7 @@ const OFFLINE_URL = "./offline-fallback.html";
 const STATIC_ASSETS = [
   "./",
   "./index.html",
+  "./warning.html",
   "./app.js",
   "./sw.js",
   "./manifest.json",
